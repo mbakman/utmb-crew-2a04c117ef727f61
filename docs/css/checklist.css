@@ -1,0 +1,612 @@
+/* checklist.css — crew checklist UI (drawer list + progress board).
+ *
+ * Read at 3am, one-handed, on a cold mountain, possibly through gloves:
+ *   - every interactive element is at least 44x44 CSS px
+ *   - body text is 16px+ (16px also stops iOS zooming when an input focuses)
+ *   - state is carried by colour AND shape AND text, never colour alone
+ *   - nothing is hover-only; :hover rules are additive and gated behind
+ *     @media (hover:hover), so a touch device loses nothing
+ * Palette variables come from app.css (:root). System fonts only.
+ */
+
+.ck,
+.ck-overview {
+  font-family: -apple-system, "Avenir Next", "Helvetica Neue", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ck button,
+.ck-overview button {
+  font-family: inherit;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DRAWER CHECKLIST
+   ═══════════════════════════════════════════════════════════════════════ */
+.ck {
+  margin: 4px 0 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── header ── */
+.ck-head { margin-bottom: 14px; }
+
+.ck-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ck-head-titles { min-width: 0; }
+
+.ck-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.ck-count {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.4px;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.ck-count.is-all { color: var(--food); }
+
+.ck-mode-btn {
+  flex-shrink: 0;
+  min-height: 44px;
+  min-width: 88px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid #3a3a3a;
+  background: #202020;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+}
+.ck-mode-btn.is-on {
+  background: #241b3d;
+  border-color: var(--accent);
+  color: #d9cdff;
+}
+.ck-mode-btn:active { background: #2d2d2d; }
+
+.ck-bar {
+  margin-top: 10px;
+  height: 8px;
+  border-radius: 99px;
+  background: #262626;
+  overflow: hidden;
+}
+.ck-bar > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  background: var(--water);
+  transition: width .2s ease;
+}
+.ck-bar > i.is-all { background: var(--food); }
+
+.ck-crit-note {
+  margin-top: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fca5a5;
+}
+
+.ck-draft-note {
+  margin-top: 6px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  font-weight: 600;
+  color: #d8b45a;
+}
+
+/* ── phase block ── */
+.ck-phase { margin-bottom: 18px; }
+
+.ck-phase-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ck-phase-titles { min-width: 0; }
+
+.ck-phase-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.2px;
+}
+
+/* Turkish label kept alongside the English heading — the crew reads Turkish. */
+.ck-phase-tr {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.ck-phase-count {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ck-phase-empty {
+  font-size: 14px;
+  color: var(--muted);
+  padding: 6px 2px 2px;
+}
+
+.ck-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── item ── */
+.ck-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #151515;
+  padding: 8px;
+  transition: background .12s ease, border-color .12s ease;
+}
+.ck-item:active { background: #1d1d1d; }
+
+.ck-item.is-critical {
+  border-color: #7f2b2b;
+  background: #1d1212;
+  box-shadow: inset 4px 0 0 var(--hotmeal);
+  padding-left: 12px;
+}
+
+.ck-item.is-draft {
+  border-style: dashed;
+  border-color: #6b5a1f;
+}
+
+.ck-item.is-done { background: #121812; border-color: #24422c; box-shadow: none; }
+.ck-item.is-done.is-critical { padding-left: 8px; }
+
+.ck-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* tick target — the primary thing a gloved thumb hits */
+.ck-tick {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  border: 2px solid #565656;
+  background: #0f0f0f;
+  color: #0f0f0f;
+  font-size: 25px;
+  font-weight: 900;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.ck-tick.is-on {
+  background: var(--food);
+  border-color: var(--food);
+  color: #06210f;
+}
+.ck-tick:active { border-color: #8b8b8b; }
+.ck-item.is-critical .ck-tick { border-color: var(--hotmeal); }
+.ck-item.is-critical .ck-tick.is-on { border-color: var(--food); }
+
+.ck-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-top: 3px;
+}
+
+/* Turkish item text, rendered verbatim. */
+.ck-text {
+  font-size: 16.5px;
+  line-height: 1.4;
+  color: var(--text);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.ck-item.is-critical .ck-text {
+  font-size: 17.5px;
+  font-weight: 700;
+  color: #fff;
+}
+.ck-item.is-done .ck-text {
+  color: #7f8b81;
+  text-decoration: line-through;
+  text-decoration-color: #4b5b52;
+  font-weight: 400;
+}
+
+.ck-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.ck-chip {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+.ck-chip-crit {
+  background: #3a1414;
+  color: #fecaca;
+  border: 1px solid #7f2b2b;
+}
+
+/* draft = generated, not written by the user: ask for a review.
+   Deliberately compact — the Turkish item text has to stay the loudest thing
+   on the row, even when every item in a checkpoint is a draft. */
+.ck-draft {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ck-draft-label {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #d8b45a;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.ck-item.is-done .ck-draft { opacity: .55; }
+
+/* ── per-item tools (edit mode only) ── */
+.ck-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #333;
+}
+
+.ck-tool {
+  min-width: 46px;
+  min-height: 44px;
+  padding: 0 8px;
+  border-radius: 10px;
+  border: 1px solid #3a3a3a;
+  background: #202020;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+}
+.ck-tool.ck-tool-wide { flex: 1 1 auto; min-width: 74px; }
+.ck-tool:active { background: #2d2d2d; }
+.ck-tool:disabled {
+  opacity: .32;
+  cursor: default;
+  color: var(--muted);
+}
+.ck-tool-crit { color: #fca5a5; font-size: 20px; }
+.ck-tool-crit.is-on {
+  background: #3a1414;
+  border-color: var(--hotmeal);
+  color: #fff;
+}
+.ck-tool-del { color: #fca5a5; border-color: #5c2626; }
+.ck-tool-del:active { background: #3a1414; }
+
+/* ── add item ── */
+.ck-add {
+  margin-top: 8px;
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px dashed #4a4a4a;
+  background: transparent;
+  color: #cfcfcf;
+  font-size: 15.5px;
+  font-weight: 700;
+}
+.ck-add:active { background: #1f1f1f; border-color: var(--accent); color: #fff; }
+
+/* ── inline editor ── */
+.ck-item.is-editing { border-color: var(--accent); background: #181528; }
+
+.ck-edit { display: block; }
+
+.ck-ta {
+  width: 100%;
+  /* 16px minimum: anything smaller makes iOS zoom the page on focus */
+  font-size: 16px;
+  font-family: inherit;
+  line-height: 1.4;
+  color: var(--text);
+  background: #0d0d0d;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 10px;
+  resize: vertical;
+  min-height: 52px;
+}
+.ck-ta:focus { outline: 2px solid rgba(167, 139, 250, .45); outline-offset: 1px; }
+
+.ck-edit-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+/* ── buttons ── */
+.ck-btn {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 11px;
+  border: 1px solid #3a3a3a;
+  background: #202020;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+}
+.ck-btn:active { background: #2d2d2d; }
+.ck-btn:disabled { opacity: .35; cursor: default; }
+.ck-btn-block { width: 100%; }
+.ck-btn-primary {
+  background: #1c3b26;
+  border-color: #2f7d4c;
+  color: #b7f7cd;
+  flex: 1 1 auto;
+}
+.ck-btn-primary:active { background: #245030; }
+.ck-btn-ghost { background: transparent; color: #d4d4d4; }
+.ck-btn-ghost:active { background: #232323; }
+.ck-btn-danger {
+  background: #3a1414;
+  border-color: var(--hotmeal);
+  color: #ffdcdc;
+  flex: 1 1 auto;
+}
+.ck-btn-danger:active { background: #4d1a1a; }
+.ck-btn-mini {
+  min-height: 44px;
+  padding: 0 12px;
+  font-size: 14px;
+  background: #2a2410;
+  border-color: #6b5a1f;
+  color: #fde68a;
+}
+.ck-btn-mini.ck-btn-ghost { background: transparent; color: #d4d4d4; border-color: #4a4a4a; }
+.ck-btn-crit { color: #fca5a5; border-color: #5c2626; }
+.ck-btn-crit.is-on { background: #3a1414; border-color: var(--hotmeal); color: #fff; }
+
+/* ── destructive confirmation (never silently destroy a note) ── */
+.ck-item.is-confirm {
+  border-color: var(--hotmeal);
+  background: #1f1010;
+  box-shadow: none;
+  padding: 10px;
+}
+
+.ck-confirm { display: block; }
+
+.ck-confirm-q {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffdcdc;
+}
+
+.ck-confirm-txt {
+  margin-top: 6px;
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: #e5c9c9;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.ck-confirm-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ck-confirm-btns .ck-btn { flex: 1 1 0; }
+
+/* ── footer ── */
+.ck-foot {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.ck-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.ck-empty .ck-hint { margin: 8px 0 12px; font-size: 14px; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PROGRESS BOARD (#checklistMount, full width under the map/profile)
+   ═══════════════════════════════════════════════════════════════════════ */
+.ck-overview {
+  padding: 14px 16px 18px;
+  border-top: 1px solid #222;
+  background: #121212;
+}
+
+.ck-ov-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ck-ov-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+
+.ck-ov-sum {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ck-ov-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.ck-ov-card {
+  display: block;
+  width: 100%;
+  min-height: 96px;
+  text-align: left;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+}
+.ck-ov-card:active { background: #232323; }
+.ck-ov-card.is-all { border-color: #2f7d4c; }
+
+.ck-ov-top {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+
+.ck-ov-cp {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--supporter);
+  letter-spacing: .3px;
+}
+
+.ck-ov-name {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ck-ov-meta {
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.ck-ov-count {
+  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.ck-ov-card.is-all .ck-ov-count { color: var(--food); }
+
+.ck-ov-bar {
+  margin-top: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: #262626;
+  overflow: hidden;
+}
+.ck-ov-bar > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  background: var(--water);
+}
+.ck-ov-bar > i.is-all { background: var(--food); }
+
+.ck-ov-crit {
+  margin-top: 7px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #fca5a5;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PHONE — bigger everything. This is the screen that matters at 3am.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .ck-text { font-size: 17.5px; }
+  .ck-item.is-critical .ck-text { font-size: 18.5px; }
+  .ck-tick { width: 50px; height: 50px; font-size: 27px; }
+  .ck-count { font-size: 24px; }
+  .ck-phase-title { font-size: 17px; }
+  .ck-tool { min-height: 46px; }
+  .ck-btn { min-height: 46px; }
+  .ck-add { min-height: 50px; }
+  .ck-ov-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+}
+
+/* Pointer devices only — never the sole signal for anything. */
+@media (hover: hover) and (pointer: fine) {
+  .ck-item:hover { border-color: #3a3a3a; }
+  .ck-tick:hover { border-color: #8b8b8b; }
+  .ck-tool:hover:not(:disabled) { background: #2a2a2a; }
+  .ck-btn:hover:not(:disabled) { background: #2a2a2a; }
+  .ck-btn-primary:hover:not(:disabled) { background: #245030; }
+  .ck-btn-danger:hover:not(:disabled) { background: #4d1a1a; }
+  .ck-add:hover { border-color: var(--accent); color: #fff; }
+  .ck-ov-card:hover { border-color: #3a3a3a; background: #1f1f1f; }
+  .ck-mode-btn:hover { background: #2a2a2a; }
+}
+
+/* Respect a user who has asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .ck-bar > i { transition: none; }
+  .ck-item { transition: none; }
+}

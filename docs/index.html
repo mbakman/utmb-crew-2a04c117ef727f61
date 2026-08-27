@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f0f0f">
+<meta name="description" content="UTMB 2026 course map, elevation profile, checkpoint notes and crew plan for Suha.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="UTMB 2026">
+<title>UTMB 2026 Course — Suha</title>
+
+<link rel="manifest" href="manifest.webmanifest">
+
+<!-- Stylesheets. app.css is the core; the other two are owned by the
+     checklist and share modules. All three are linked here so no later
+     change has to touch this file. -->
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/checklist.css">
+<link rel="stylesheet" href="css/share.css">
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>UTMB 2026 <span>Course Plan</span></h1>
+      <div class="stats">
+        <div class="stat"><b id="statKm"></b> km</div>
+        <div class="stat">D+ <b id="statGain"></b> m</div>
+        <div class="stat">D− <b id="statLoss"></b> m</div>
+        <div class="stat">Chamonix → Chamonix</div>
+      </div>
+    </div>
+    <div class="hbtns">
+      <!-- mount point: share.js -->
+      <span id="shareMount"></span>
+      <button class="hbtn" id="saveBtn" onclick="UTMB.saveState()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="dot water"></span> Water only</div>
+  <div class="legend-item"><span class="dot food"></span> Food + drink</div>
+  <div class="legend-item"><span class="dot hotmeal"></span> Hot meal</div>
+  <div class="legend-item"><svg class="legend-ring" width="15" height="15" viewBox="0 0 15 15"><circle cx="7.5" cy="7.5" r="6" fill="none" stroke="var(--supporter)" stroke-width="2.4"/></svg> Supporter / crew access point</div>
+</div>
+
+<div class="boot-error" id="bootError" style="display:none"></div>
+
+<div class="layout">
+  <div class="panel map-panel">
+    <div class="panel-title">Course Map — scroll/pinch or use +/− to zoom, drag to pan</div>
+    <div class="map-wrap" id="mapWrap">
+      <svg id="mapSvg"></svg>
+      <div class="map-controls">
+        <button class="map-btn" onclick="UTMB.map.zoomBtn(1/1.4)">+</button>
+        <button class="map-btn" onclick="UTMB.map.zoomBtn(1.4)">−</button>
+        <button class="map-btn" onclick="UTMB.map.resetView()" style="font-size:13px">⤢</button>
+      </div>
+      <div class="map-attrib">© OpenTopoMap (CC-BY-SA), © OpenStreetMap contributors</div>
+    </div>
+  </div>
+  <div class="panel profile-panel">
+    <div class="panel-title profile-title-row">
+      <span>Elevation Profile — click a section between checkpoints</span>
+      <button class="training-toggle" id="trainingToggleBtn" onclick="UTMB.profile.toggleTrainingMode()">🏃 Training Status</button>
+    </div>
+    <div class="profile-wrap" id="profileWrap">
+      <svg id="profSvg" viewBox="0 0 900 738" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="altGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#60a5fa" stop-opacity=".35"/>
+            <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="map-controls">
+        <button class="map-btn" onclick="UTMB.profile.zoomProfile(1/1.4)">+</button>
+        <button class="map-btn" onclick="UTMB.profile.zoomProfile(1.4)">−</button>
+        <button class="map-btn" onclick="UTMB.profile.resetProfZoom()" style="font-size:13px">⤢</button>
+      </div>
+      <div class="sec-tooltip" id="secTooltip" style="display:none"></div>
+    </div>
+    <div class="prof-scrollbar-track" id="profScrollTrack">
+      <div class="prof-scrollbar-thumb" id="profScrollThumb"></div>
+    </div>
+    <div class="section-notes-wrap" id="sectionNotesWrap" style="display:none">
+      <div class="notes-label" id="sectionNotesLabel">Notes for this section</div>
+      <textarea class="notes-ta" id="sectionNotesTa" placeholder="Terrain, pacing, gear — anything you want to remember about this stretch…"></textarea>
+      <div class="notes-hint">Autosaves on this device. Click "Save" up top to commit everything now.</div>
+    </div>
+  </div>
+</div>
+
+<!-- mount points below the main layout: filled in by checklist.js and
+     transport.js. Empty sections render nothing. -->
+<section class="mount" id="checklistMount"></section>
+<section class="mount" id="transportMount"></section>
+
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div>
+      <h2 id="dName"></h2>
+      <div class="sub" id="dSub"></div>
+    </div>
+    <button class="drawer-close" onclick="UTMB.drawer.close()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="badge-row" id="dBadges"></div>
+    <div class="desc" id="dDesc"></div>
+    <!-- mount point: transport.js (shuttles/passes for this checkpoint) -->
+    <div class="mount" id="drawerTransportMount"></div>
+    <!-- mount point: checklist.js (crew checklist for this checkpoint) -->
+    <div class="mount" id="drawerChecklistMount"></div>
+    <div class="notes-label">Notes for your supporters</div>
+    <textarea class="notes-ta" id="dNotes" placeholder="What you want your crew to prepare / expect at this checkpoint — gear swaps, food, pacing, mood, anything…"></textarea>
+    <div class="notes-hint">Autosaves on this device. Click "Save" up top to commit everything now.</div>
+    <!-- mount point: share.js -->
+    <div class="mount" id="drawerShareMount"></div>
+  </div>
+</div>
+
+<!-- Classic scripts, one shared global namespace (window.UTMB), loaded in
+     dependency order. store.js must stay first (it creates the namespace, the
+     event bus and UTMB.ready); main.js must stay last (it bootstraps).
+     Every file the app ships is already listed here — feature modules hook in
+     with UTMB.ready()/UTMB.on() instead of editing this page. -->
+<script src="js/store.js"></script>
+<script src="js/data.js"></script>
+<script src="js/map.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/drawer.js"></script>
+<script src="js/checklist.js"></script>
+<script src="js/share.js"></script>
+<script src="js/transport.js"></script>
+<script src="js/main.js"></script>
+
+<!-- Service worker (sw.js) — registered here so the offline agent only ever
+     has to edit sw.js. It is inert until that file gets its listeners. -->
+<script>
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+  var secure = window.isSecureContext ||
+    location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (!secure) return;
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js', { scope: './' }).catch(function (err) {
+      console.warn('[UTMB] service worker registration failed', err);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

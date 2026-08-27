@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UTMB Mont-Blanc 2026 — Crew Sheet — From Les Houches</title>
+<style>
+/* ============================================================
+   UTMB MONT-BLANC 2026 — CREW SHEET
+   2-page A4 landscape. Self-contained: no external assets,
+   no webfonts, no network. System fonts only.
+   Palette sampled from the official UTMB follower poster:
+     navy #020E48 / cream #F2F3E1 / mint #16E4C1
+     follower yellow #EEF521 / stripe orange #FF3900
+   Designed to survive greyscale printing: every colour pairing
+   below also separates on lightness, and UNVERIFIED items are
+   marked with a dashed rule + diagonal hatch + the literal word,
+   never with colour alone.
+   ============================================================ */
+
+@page { size: A4 landscape; margin: 0; }
+
+:root{
+  --navy:#020E48;
+  --cream:#F2F3E1;
+  --mint:#16E4C1;
+  --yellow:#EEF521;
+  --orange:#FF3900;
+  --ink:#020E48;
+  --ink-60:rgba(2,14,72,.60);
+  --ink-45:rgba(2,14,72,.45);
+  --ink-22:rgba(2,14,72,.22);
+  --ink-12:rgba(2,14,72,.12);
+  --fit:1;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+html{ background:#0B1533; }
+
+body{
+  font-family:-apple-system,"Avenir Next","Helvetica Neue",sans-serif;
+  color:var(--ink);
+  font-size:9px;
+  line-height:1.28;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
+}
+
+.page{
+  width:297mm;
+  height:210mm;
+  background:var(--cream);
+  padding:6mm 6.5mm 5mm;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  overflow:hidden;
+  page-break-after:always;
+  break-after:page;
+}
+.page:last-of-type{ page-break-after:auto; break-after:auto; }
+
+/* Screen preview: scale a full A4 landscape page to the viewport
+   width so the sheet is legible on a phone. zoom (not transform)
+   so layout flow stays correct. Print is unaffected. */
+@media screen{
+  body{ display:flex; flex-direction:column; align-items:center; }
+  .page{ zoom:var(--fit); }
+  .page + .page{ margin-top:4mm; }
+}
+@media print{
+  html{ background:var(--cream); }
+  .page + .page{ margin-top:0; }
+}
+
+/* ---------- shared type ---------- */
+.u{ text-transform:uppercase; }
+.tt{ text-transform:uppercase; letter-spacing:.055em; font-weight:800; }
+.mono-t{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+b,strong{ font-weight:800; }
+
+/* ---------- page header ---------- */
+.masthead{
+  background:var(--navy);
+  color:var(--cream);
+  display:flex;
+  align-items:stretch;
+  flex:0 0 auto;
+  position:relative;
+  overflow:hidden;
+}
+.masthead__id{
+  padding:1.7mm 2.6mm 1.6mm;
+  display:flex; flex-direction:column; justify-content:center;
+  min-width:86mm;
+  border-right:1.2px solid rgba(242,243,225,.30);
+}
+.masthead__kicker{
+  font-size:6.1px; letter-spacing:.28em; font-weight:800;
+  text-transform:uppercase; color:var(--mint); margin-bottom:.7mm;
+}
+.masthead__title{
+  font-size:17px; line-height:.97; font-weight:800;
+  letter-spacing:-.012em; text-transform:uppercase;
+}
+.masthead__title em{ font-style:normal; color:var(--mint); }
+.masthead__sub{
+  font-size:6.5px; letter-spacing:.13em; font-weight:700;
+  text-transform:uppercase; color:rgba(242,243,225,.72); margin-top:.8mm;
+}
+.masthead__facts{
+  flex:1 1 auto;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  align-items:stretch;
+}
+.mfact{
+  padding:1.7mm 2mm 1.6mm;
+  border-right:1.2px solid rgba(242,243,225,.18);
+  display:flex; flex-direction:column; justify-content:center;
+}
+.mfact:last-child{ border-right:0; }
+.mfact__k{
+  font-size:5.8px; letter-spacing:.20em; font-weight:800;
+  text-transform:uppercase; color:var(--mint); margin-bottom:.55mm;
+}
+.mfact__v{ font-size:8.4px; font-weight:800; line-height:1.16; }
+.mfact__n{ font-size:6.05px; color:rgba(242,243,225,.66); line-height:1.19; margin-top:.4mm; }
+.masthead__pg{
+  background:var(--mint); color:var(--navy);
+  display:flex; align-items:center; justify-content:center;
+  padding:0 2.2mm; font-size:10px; font-weight:800; letter-spacing:.04em;
+  flex:0 0 auto;
+}
+
+/* orange stripe rule — the poster's signature element */
+.stripe{
+  flex:0 0 auto; height:1.7mm; background:var(--orange);
+  background-image:repeating-linear-gradient(115deg,
+     rgba(2,14,72,.92) 0 1.1mm, rgba(2,14,72,0) 1.1mm 3.3mm);
+}
+
+/* ---------- hero finding ---------- */
+.hero{
+  flex:0 0 auto;
+  background:var(--mint);
+  border:1.6px solid var(--navy);
+  border-top:0;
+  display:flex; align-items:stretch;
+  margin-bottom:1.6mm;
+}
+.hero__flag{
+  background:var(--navy); color:var(--yellow);
+  writing-mode:vertical-rl; transform:rotate(180deg);
+  display:flex; align-items:center; justify-content:center;
+  padding:1.2mm .8mm; font-size:6px; letter-spacing:.22em; font-weight:800;
+  text-transform:uppercase; flex:0 0 auto;
+}
+.hero__body{ padding:1.2mm 2.4mm 1.3mm; flex:1 1 auto; }
+.hero__h{
+  font-size:12.2px; line-height:1.04; font-weight:800;
+  text-transform:uppercase; letter-spacing:-.008em;
+}
+.hero__h span{ background:var(--navy); color:var(--mint); padding:0 .9mm; display:inline-block; }
+.hero__p{ font-size:7.9px; line-height:1.27; margin-top:.9mm; max-width:none; }
+.hero__p b{ background:rgba(2,14,72,.13); padding:0 .5mm; }
+.hero__chain{
+  margin-top:.8mm; display:flex; flex-wrap:wrap; gap:.8mm; align-items:center;
+  font-size:6.8px; font-weight:800; text-transform:uppercase; letter-spacing:.045em;
+}
+.hero__chain i{ font-style:normal; background:var(--navy); color:var(--cream); padding:.5mm 1.2mm; }
+.hero__chain u{ text-decoration:none; opacity:.55; font-weight:800; }
+
+/* ---------- main columns ---------- */
+.cols{ flex:1 1 auto; display:flex; gap:1.8mm; min-height:0; }
+.col{ display:flex; flex-direction:column; gap:1.4mm; min-width:0; }
+.col--a{ flex:0 0 31.2%; }
+.col--b{ flex:0 0 31.2%; }
+.col--c{ flex:1 1 auto; }
+
+/* ---------- crew point card ---------- */
+.cp{
+  border:1.6px solid var(--navy);
+  background:var(--cream);
+  display:flex; flex-direction:column;
+  min-height:0;
+}
+.cp--fill{ flex:1 1 auto; }
+.cp__head{
+  background:var(--navy); color:var(--cream);
+  display:flex; align-items:center; gap:1.4mm; padding:.95mm 1.7mm .85mm;
+}
+.cp__badge{
+  background:var(--mint); color:var(--navy);
+  font-size:11.4px; font-weight:800; letter-spacing:-.02em;
+  padding:.4mm 1.3mm; flex:0 0 auto; line-height:1.06;
+}
+.cp__badge--soft{ background:var(--cream); }
+.cp__t{ flex:1 1 auto; min-width:0; }
+.cp__name{ font-size:11px; font-weight:800; text-transform:uppercase; line-height:1.02; letter-spacing:-.005em; }
+.cp__meta{ font-size:6.3px; letter-spacing:.09em; font-weight:700; text-transform:uppercase; color:rgba(242,243,225,.72); margin-top:.35mm; }
+.cp__cut{
+  flex:0 0 auto; text-align:right; border-left:1.2px solid rgba(242,243,225,.28); padding-left:1.8mm;
+}
+.cp__cut small{ display:block; font-size:5.7px; letter-spacing:.18em; font-weight:800; color:var(--yellow); text-transform:uppercase; }
+.cp__cut b{ display:block; font-size:10px; font-weight:800; line-height:1.05; margin-top:.3mm; }
+
+.cp__bar{
+  display:flex; align-items:center; gap:1.4mm; flex-wrap:wrap;
+  padding:.7mm 1.7mm; border-bottom:1.2px solid var(--ink-22);
+  background:rgba(2,14,72,.045);
+}
+.pill{
+  font-size:6.4px; letter-spacing:.13em; font-weight:800; text-transform:uppercase;
+  padding:.55mm 1.3mm; border:1.1px solid var(--navy); line-height:1.1;
+}
+.pill--fr{ background:var(--cream); }
+.pill--it{ background:var(--mint); }
+.pill--ch{ background:var(--yellow); }
+.pill--none{ background:var(--cream); border-style:dashed; }
+.dots{ display:flex; gap:.7mm; align-items:center; margin-left:auto; }
+.dots small{ font-size:5.9px; letter-spacing:.14em; font-weight:800; text-transform:uppercase; color:var(--ink-60); margin-right:.6mm; }
+.dot{ width:1.7mm; height:1.7mm; border:1.1px solid var(--navy); border-radius:50%; }
+.dot.on{ background:var(--navy); }
+
+.cp__lead{
+  padding:.85mm 1.7mm .75mm;
+  font-size:8px; line-height:1.19; font-weight:800; text-transform:uppercase;
+  letter-spacing:-.002em;
+  border-bottom:1.2px solid var(--ink-22);
+}
+.cp__lead.warm{ background:var(--yellow); }
+.cp__lead.cool{ background:var(--mint); }
+
+.cp__sect{
+  font-size:6.3px; letter-spacing:.22em; font-weight:800; text-transform:uppercase;
+  padding:.7mm 1.7mm .25mm; color:var(--ink-60);
+  display:flex; align-items:baseline; gap:1.2mm;
+}
+.cp__sect u{ text-decoration:none; letter-spacing:.06em; color:var(--ink-45); }
+
+/* ---------- legs ---------- */
+.legs{ padding:0 1.7mm .4mm; }
+.leg{
+  display:grid;
+  grid-template-columns:4mm 1fr;
+  gap:0 1.2mm;
+  padding:.6mm 0;
+  border-top:1.1px solid var(--ink-12);
+}
+.leg:first-child{ border-top:0; }
+.leg__n{
+  background:var(--navy); color:var(--cream);
+  font-size:7.1px; font-weight:800; text-align:center;
+  height:4mm; line-height:4mm;
+}
+.leg__n.walk{ background:var(--cream); color:var(--navy); border:1.2px solid var(--navy); line-height:3.6mm; }
+.leg__b{ min-width:0; }
+.leg__mode{
+  font-size:6px; letter-spacing:.17em; font-weight:800; text-transform:uppercase;
+  color:var(--ink-60);
+}
+.leg__mode i{ font-style:normal; color:var(--ink); }
+.leg__r{ font-size:8.15px; font-weight:800; line-height:1.13; margin-top:.25mm; }
+.leg__r em{ font-style:normal; opacity:.5; font-weight:800; padding:0 .3mm; }
+.leg__d{
+  font-size:7.05px; line-height:1.2; margin-top:.35mm; color:var(--ink);
+}
+.leg__d b{ font-weight:800; }
+.tag{
+  display:inline-block; font-size:6.3px; font-weight:800; letter-spacing:.09em;
+  text-transform:uppercase; padding:.3mm .9mm; margin:.3mm .7mm 0 0;
+  border:1.1px solid var(--navy); line-height:1.2; vertical-align:middle;
+}
+.tag--time{ background:var(--navy); color:var(--cream); }
+.tag--dur{ background:var(--mint); }
+.tag--warn{ background:var(--yellow); }
+.tag--plain{ background:transparent; }
+
+/* ---------- UNVERIFIED treatment ---------- */
+.unv{
+  border:1.4px dashed var(--navy);
+  background-color:var(--cream);
+  background-image:repeating-linear-gradient(45deg,
+     rgba(2,14,72,.10) 0 .7mm, rgba(2,14,72,0) .7mm 2.1mm);
+  padding:.6mm 1mm;
+  margin-top:.45mm;
+}
+.unv__k{
+  display:inline-block; background:var(--navy); color:var(--yellow);
+  font-size:5.6px; letter-spacing:.20em; font-weight:800; text-transform:uppercase;
+  padding:.3mm 1.1mm; margin-right:1.1mm; line-height:1.25; vertical-align:baseline;
+}
+.unv__t{ font-size:6.85px; line-height:1.2; }
+.unv--inline{ display:inline-block; margin-top:.5mm; padding:.5mm 1mm; }
+
+/* ---------- return block ---------- */
+.ret{ padding:0 1.7mm .8mm; }
+.ret__row{
+  font-size:7.05px; line-height:1.2; padding:.6mm 0;
+  border-top:1.1px solid var(--ink-12);
+}
+.ret__row:first-child{ border-top:0; }
+.ret__lbl{
+  font-size:5.9px; letter-spacing:.15em; font-weight:800; text-transform:uppercase;
+  display:inline-block; padding:.3mm 1mm; margin-right:1.2mm; line-height:1.25;
+  border:1.1px solid var(--navy); vertical-align:baseline;
+}
+.ret__lbl.best{ background:var(--mint); }
+.ret__lbl.bad{ background:var(--navy); color:var(--cream); }
+.chain{
+  display:flex; flex-wrap:wrap; align-items:baseline; column-gap:.5mm; row-gap:0;
+  font-size:6.9px; font-weight:800; line-height:1.34; margin-top:.4mm;
+}
+.chain em{ font-style:normal; opacity:.45; }
+.chain span{ white-space:nowrap; }
+
+/* ---------- bottom band ---------- */
+.band{ flex:0 0 auto; display:flex; gap:1.8mm; margin-top:1.6mm; }
+.panel{
+  border:1.6px solid var(--navy); background:var(--cream);
+  display:flex; flex-direction:column; min-width:0;
+}
+.panel__h{
+  background:var(--navy); color:var(--cream);
+  padding:.75mm 1.6mm .7mm; display:flex; align-items:baseline; gap:1.2mm;
+}
+.panel__h b{ font-size:8.8px; font-weight:800; text-transform:uppercase; letter-spacing:.02em; }
+.panel__h small{ font-size:5.9px; letter-spacing:.17em; font-weight:800; text-transform:uppercase; color:var(--mint); margin-left:auto; }
+.panel__h.alarm{ background:var(--orange); color:var(--cream); }
+.panel__h.alarm small{ color:var(--cream); }
+.panel__h.warm{ background:var(--yellow); color:var(--navy); }
+.panel__h.warm small{ color:var(--navy); }
+.panel__b{ padding:.85mm 1.6mm .85mm; flex:1 1 auto; }
+
+.risk__p{ font-size:7.35px; line-height:1.24; }
+.risk__p b{ font-weight:800; }
+.risk__grid{ display:flex; gap:1.4mm; margin-top:.8mm; }
+.risk__cell{ flex:1 1 0; border-top:1.6px solid var(--navy); padding-top:.65mm; min-width:0; }
+.risk__cell > b:first-child{ display:block; font-size:6.2px; letter-spacing:.13em; text-transform:uppercase; font-weight:800; margin-bottom:.4mm; }
+.risk__cell p{ font-size:6.9px; line-height:1.2; }
+
+.facts__row{
+  display:grid; grid-template-columns:16.5mm 1fr; gap:0 1.4mm;
+  padding:.5mm 0; border-top:1.1px solid var(--ink-12);
+}
+.facts__row:first-child{ border-top:0; padding-top:0; }
+.facts__k{
+  font-size:6.4px; letter-spacing:.08em; font-weight:800; text-transform:uppercase;
+  line-height:1.18;
+}
+.facts__k i{ display:block; font-style:normal; font-size:5.6px; letter-spacing:.14em; color:var(--ink-45); margin-top:.4mm; }
+.facts__v{ font-size:7px; line-height:1.2; min-width:0; }
+.facts__v b{ font-weight:800; }
+
+.chk{ list-style:none; }
+.chk li{
+  display:grid; grid-template-columns:2.9mm 1fr; gap:0 1.1mm;
+  padding:.35mm 0; border-top:1.1px solid var(--ink-12); align-items:start;
+}
+.chk li:first-child{ border-top:0; padding-top:0; }
+.chk__box{ width:2.9mm; height:2.9mm; border:1.4px solid var(--navy); margin-top:.25mm; }
+.chk__t{ font-size:6.95px; line-height:1.18; }
+.chk__t b{ font-weight:800; }
+.chk__t i{ font-style:normal; color:var(--ink-60); }
+.p1{ background:var(--yellow); }
+
+/* ---------- footer ---------- */
+.foot{
+  flex:0 0 auto; margin-top:1.3mm; border-top:1.6px solid var(--navy);
+  padding-top:.85mm; display:flex; gap:2.4mm; align-items:flex-start;
+}
+.foot__c{ font-size:6.25px; line-height:1.21; color:var(--ink-60); flex:1 1 0; min-width:0; }
+.foot__c > b:first-child{ color:var(--ink); font-weight:800; letter-spacing:.06em; text-transform:uppercase; font-size:6px; display:block; margin-bottom:.3mm; }
+
+/* ============================================================
+   PAGE 2 — shuttle grid
+   ============================================================ */
+.zband{ display:flex; gap:1.8mm; margin-top:1.6mm; min-height:0; }
+.zband--grow{ flex:1 1 auto; }
+.zrail{
+  flex:0 0 5.6mm; background:var(--navy); color:var(--cream);
+  display:flex; align-items:center; justify-content:center; padding:1.2mm 0;
+}
+.zrail span{
+  writing-mode:vertical-rl; transform:rotate(180deg);
+  font-size:7.7px; letter-spacing:.17em; font-weight:800; text-transform:uppercase;
+  text-align:center; line-height:1.25;
+}
+.zrail em{ font-style:normal; color:var(--mint); }
+.zrail--it span em{ color:var(--mint); }
+.zrail--ch span em{ color:var(--yellow); }
+.zgrid{ flex:1 1 auto; display:grid; gap:1.8mm; min-width:0; }
+.zgrid--6{ grid-template-columns:repeat(6,1fr); }
+
+/* ---------- line card ---------- */
+.ln{
+  border:1.6px solid var(--navy); background:var(--cream);
+  display:flex; flex-direction:column; min-width:0;
+}
+.ln__h{
+  background:var(--navy); color:var(--cream);
+  padding:.95mm 1.25mm .85mm; display:flex; gap:1.1mm; align-items:flex-start;
+}
+.ln__n{
+  flex:0 0 auto; background:var(--mint); color:var(--navy);
+  font-size:9.4px; font-weight:800; line-height:1.06; padding:.35mm 1mm;
+  min-width:4.8mm; text-align:center;
+}
+.ln__n.alt{ background:var(--yellow); }
+.ln__nm{ font-size:8.2px; font-weight:800; text-transform:uppercase; line-height:1.05; letter-spacing:-.004em; min-width:0; }
+.ln__nm i{ font-style:normal; opacity:.62; font-weight:800; }
+.ln__dir{
+  font-size:5.65px; letter-spacing:.13em; font-weight:800; text-transform:uppercase;
+  padding:.75mm 1.25mm .65mm; border-bottom:1.1px solid var(--ink-22);
+  display:flex; align-items:center; gap:1.2mm; background:rgba(2,14,72,.045);
+}
+.ln__dir b{ background:var(--navy); color:var(--cream); padding:.3mm 1mm; letter-spacing:.13em; }
+.ln__dir b.one{ background:var(--cream); color:var(--navy); border:1.1px solid var(--navy); padding:.2mm .9mm; }
+.ln__dur{ margin-left:auto; background:var(--mint); border:1.1px solid var(--navy); padding:.2mm .9mm; letter-spacing:.08em; }
+.ln__stops{ padding:.85mm 1.25mm .7mm; flex:1 1 auto; }
+.stop{ display:flex; gap:1mm; align-items:baseline; padding:.32mm 0; }
+.stop__t{
+  flex:0 0 7.9mm; font-size:8px; font-weight:800; line-height:1.1;
+  font-variant-numeric:tabular-nums;
+}
+.stop__n{ font-size:6.95px; line-height:1.14; min-width:0; }
+.stop__n i{ font-style:normal; display:block; font-size:6.05px; color:var(--ink-60); letter-spacing:.05em; text-transform:uppercase; }
+.ln__freq{
+  border-top:1.2px solid var(--navy); padding:.75mm 1.25mm .85mm;
+  background:var(--yellow);
+}
+.ln__freq b{
+  display:block; font-size:7.6px; font-weight:800; text-transform:uppercase;
+  letter-spacing:.02em; line-height:1.14;
+}
+.ln__freq b u{ text-decoration:none; opacity:.5; padding:0 .3mm; }
+.ln__freq i{ font-style:normal; display:block; font-size:5.85px; letter-spacing:.13em; font-weight:800; text-transform:uppercase; color:var(--ink-60); margin-bottom:.35mm; }
+.ln__note{
+  font-size:6.2px; line-height:1.17; padding:.65mm 1.25mm .75mm;
+  border-top:1.1px solid var(--ink-22); color:var(--ink);
+}
+.ln__note b{ font-weight:800; }
+.ln__note sup{ font-size:5.4px; font-weight:800; vertical-align:super; }
+.ln--alt{ border-style:double; border-width:3.2px; }
+.ln--alt .ln__h{ background:var(--navy); }
+
+/* how-to-read panel on page 2 */
+.howto{ display:grid; grid-template-columns:1fr 1fr; gap:0 2.2mm; }
+.howto__i{ padding:.55mm 0; border-top:1.1px solid var(--ink-12); font-size:6.75px; line-height:1.19; }
+.howto__i:first-child,.howto__i:nth-child(2){ border-top:0; padding-top:0; }
+.howto__i > b:first-child{ font-weight:800; text-transform:uppercase; letter-spacing:.05em; font-size:6.3px; display:block; margin-bottom:.2mm; }
+
+/* footer, page 2 */
+.foot2{ flex:0 0 auto; margin-top:1.6mm; display:flex; gap:1.8mm; }
+.foot2 .panel__b{ padding:1mm 1.7mm; }
+.f2t{ font-size:6.7px; line-height:1.2; }
+.f2t b{ font-weight:800; }
+.f2t + .f2t{ margin-top:.65mm; padding-top:.65mm; border-top:1.1px solid var(--ink-12); }
+.prov{
+  font-size:6.1px; line-height:1.24; color:var(--ink-60);
+}
+.prov b{ color:var(--ink); font-weight:800; text-transform:uppercase; letter-spacing:.08em; font-size:5.9px; }
+.prov span{ word-break:break-all; }
+</style>
+</head>
+<body>
+<!-- ==================================================================
+     PAGE 1 — FROM LES HOUCHES
+     ================================================================== -->
+<section class="page" id="page-1">
+
+  <header class="masthead">
+    <div class="masthead__id">
+      <div class="masthead__kicker">HOKA UTMB Mont-Blanc 2026 &nbsp;/&nbsp; UTMB &nbsp;/&nbsp; 176.8 km &nbsp;/&nbsp; Suha</div>
+      <div class="masthead__title">Crew Sheet <em>&mdash;</em><br>From Les Houches</div>
+      <div class="masthead__sub">Four crew points &middot; how you actually get there</div>
+    </div>
+    <div class="masthead__facts">
+      <div class="mfact">
+        <div class="mfact__k">Race start</div>
+        <div class="mfact__v">FRI 28/08<br>17:45</div>
+        <div class="mfact__n">Chamonix</div>
+      </div>
+      <div class="mfact">
+        <div class="mfact__k">Crew base</div>
+        <div class="mfact__v">100 Rte de la Gare<br>LES HOUCHES</div>
+        <div class="mfact__n">Next to the station &mdash; not Chamonix</div>
+      </div>
+      <div class="mfact">
+        <div class="mfact__k">Finish cutoff</div>
+        <div class="mfact__v">SUN 30/08<br>16:30</div>
+        <div class="mfact__n">Chamonix</div>
+      </div>
+      <div class="mfact">
+        <div class="mfact__k">All times</div>
+        <div class="mfact__v">LOCAL, 24H</div>
+        <div class="mfact__n">FR / IT / CH are all UTC+2 &mdash; no clock changes</div>
+      </div>
+    </div>
+    <div class="masthead__pg">1<span style="opacity:.45">/</span>2</div>
+  </header>
+
+  <div class="stripe"></div>
+
+  <!-- ============ HERO: the single most useful finding ============ -->
+  <div class="hero">
+    <div class="hero__flag">Read this first</div>
+    <div class="hero__body">
+      <div class="hero__h">For Les Contamines go <span>down-valley via Saint-Gervais</span> &mdash; never via Chamonix</div>
+      <p class="hero__p">The Chamonix&nbsp;&gt;&nbsp;Contamines shuttle&rsquo;s <b>last outbound is 20:30 Friday</b> &mdash; finished before Suha&rsquo;s arrival window at km&nbsp;32.5 even opens, and it runs one way only. <b>Saint&nbsp;Gervais&nbsp;&lt;&gt;&nbsp;NDG runs every 20&nbsp;min until 01:00</b> &mdash; straight through that window, past the 00:00 cutoff, and on your side of the valley. Take the train down; Chamonix never enters the plan.</p>
+      <div class="hero__chain">
+        <i>Les Houches gare</i><u>&rarr;</u><i>train</i><u>&rarr;</u><i>Le Fayet</i><u>&rarr;</u><i>Saint Gervais</i><u>&rarr;</u><i>shuttle every 20 min</i><u>&rarr;</u><i>Contamines&nbsp;(UTMB)</i>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CREW POINT COLUMNS ============ -->
+  <div class="cols">
+
+    <!-- ---------------- U3 ---------------- -->
+    <div class="col col--a">
+      <article class="cp cp--fill">
+        <div class="cp__head">
+          <div class="cp__badge">U3</div>
+          <div class="cp__t">
+            <div class="cp__name">Les Contamines</div>
+            <div class="cp__meta">km 32.5 &middot; food &middot; assistance OK</div>
+          </div>
+          <div class="cp__cut"><small>Cutoff</small><b>SAT 00:00</b></div>
+        </div>
+        <div class="cp__bar">
+          <span class="pill pill--fr">France pass</span>
+          <span class="pill">Friday night</span>
+          <span class="dots"><small>Difficulty</small>
+            <i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i>
+          </span>
+        </div>
+        <div class="cp__lead cool">Go down-valley via Saint-Gervais. Do not go via Chamonix.</div>
+
+        <div class="cp__sect">Route out <u>&mdash; be in place by 21:00</u></div>
+        <div class="legs">
+          <div class="leg">
+            <div class="leg__n">1</div>
+            <div class="leg__b">
+              <div class="leg__mode">Train <i>&mdash; Mont-Blanc Express, down-valley</i></div>
+              <div class="leg__r">Les Houches <em>&rarr;</em> Le Fayet (Gare)</div>
+              <div class="leg__d">Two minutes on foot from the base to the platform &mdash; that is your advantage, use it. Free with the Guest Card. Aim to land by about 20:00.</div>
+              <div class="unv"><span class="unv__k">Unverified</span><span class="unv__t">Times at Les Houches. Photograph the board the day before.</span></div>
+            </div>
+          </div>
+          <div class="leg">
+            <div class="leg__n">2</div>
+            <div class="leg__b">
+              <div class="leg__mode">Shuttle <i>&mdash; line 2, Passy &lt;&gt; Saint Gervais</i></div>
+              <div class="leg__r">Le Fayet (Gare) <em>&rarr;</em> Saint Gervais</div>
+              <div class="leg__d"><span class="tag tag--time">every 20 min &rarr; 02:00</span><span class="tag tag--dur">15 min</span> The only UTMB line calling at Le Fayet station, and the latest-running line in France.</div>
+              <div class="unv"><span class="unv__k">Unverified</span><span class="unv__t">The poster prints <b>no stop named Saint Gervais</b> &mdash; they stop at Le Fayet (Gare), and the village is ~300 m above. Ask the driver whether it climbs to La Poste.</span></div>
+            </div>
+          </div>
+          <div class="leg">
+            <div class="leg__n">3</div>
+            <div class="leg__b">
+              <div class="leg__mode">Shuttle <i>&mdash; line 3, Saint Gervais &lt;&gt; NDG</i></div>
+              <div class="leg__r">Saint Gervais (La Poste) <em>&rarr;</em> Contamines (UTMB)</div>
+              <div class="leg__d"><span class="tag tag--time">every 20 min &rarr; 01:00</span><span class="tag tag--dur">20 min</span> First 16:30. <b>The reliable leg</b> &mdash; two-way, and it outlasts the cutoff. Contamines&nbsp;(UTMB) is the assistance point itself.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ret" style="padding-bottom:.4mm">
+          <div class="ret__row"><span class="ret__lbl">On the night</span>The arrival window is wide: km 32.5 could come up around <b>21:30</b>, and the cutoff is <b>00:00</b>. Be in place by 21:00 and be ready to wait. Contamines is closed to private cars.</div>
+        </div>
+
+        <div class="cp__sect">Getting back <u>&mdash; both options end unresolved</u></div>
+        <div class="ret">
+          <div class="ret__row"><span class="ret__lbl best">Option A</span>Contamines &rarr; NDG &rarr; Chamonix on line 5 (every 30&nbsp;min, last 01:00 from NDG, lands ~01:25). <b>Then nothing verified runs to Les Houches.</b></div>
+          <div class="ret__row"><span class="ret__lbl">Option B</span>Stay down-valley: line 3 to Saint Gervais (last 01:00), line 2 to Le Fayet (last 02:00) &mdash; then the train, <b>if one still runs.</b></div>
+        </div>
+      </article>
+    </div>
+
+    <!-- ---------------- U11 ---------------- -->
+    <div class="col col--b">
+      <article class="cp cp--fill">
+        <div class="cp__head">
+          <div class="cp__badge">U11</div>
+          <div class="cp__t">
+            <div class="cp__name">Champex-Lac</div>
+            <div class="cp__meta">km 130.5 &middot; hot meal &middot; assistance OK</div>
+          </div>
+          <div class="cp__cut"><small>Cutoff</small><b>SUN 02:30</b></div>
+        </div>
+        <div class="cp__bar">
+          <span class="pill pill--ch">Swiss pass</span>
+          <span class="pill">Carry ID</span>
+          <span class="dots"><small>Difficulty</small>
+            <i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i>
+          </span>
+        </div>
+        <div class="cp__lead warm">The hard one. Two legs, a night transfer at Orsi&egrave;res, and a 20:14 deadline.</div>
+
+        <div class="cp__sect">Route out <u>&mdash; leave Les Houches before 20:14 Sat</u></div>
+        <div class="legs">
+          <div class="leg">
+            <div class="leg__n">1</div>
+            <div class="leg__b">
+              <div class="leg__mode">Bus <i>&mdash; Chamonix Bus Line 1</i></div>
+              <div class="leg__r">Les Houches <em>&rarr;</em> Chamonix</div>
+              <div class="leg__d"><span class="tag tag--warn">BOARD BEFORE 20:14</span> Every 30 min from 05:40. <b>Hard deadline</b> &mdash; after 20:14 there is no verified way to Chamonix and the whole Swiss plan fails at leg&nbsp;1.</div>
+            </div>
+          </div>
+          <div class="leg">
+            <div class="leg__n">2</div>
+            <div class="leg__b">
+              <div class="leg__mode">Shuttle <i>&mdash; line 8, Chamonix &gt; Orsi&egrave;res</i></div>
+              <div class="leg__r">Chamonix (Maison Nordique) <em>&rarr;</em> Orsi&egrave;res</div>
+              <div class="leg__d"><span class="tag tag--time">every 45 min &rarr; 03:00 Sun</span><span class="tag tag--dur">80 min</span> First 05:30 Sat. Board at <b>Maison Nordique</b>, not Gr&eacute;pon Bus. Calls at Vallorcine and Trient en route.</div>
+            </div>
+          </div>
+          <div class="leg">
+            <div class="leg__n walk">&#8226;</div>
+            <div class="leg__b">
+              <div class="leg__mode">Transfer <i>&mdash; Orsi&egrave;res, in the dark</i></div>
+              <div class="leg__d">Both lines run every 30&ndash;45 min, so the wait should be short.<span class="unv unv--inline"><span class="unv__k">Unverified</span><span class="unv__t">No confirmed indoor waiting area. Dress for standing outside at 01:00.</span></span></div>
+            </div>
+          </div>
+          <div class="leg">
+            <div class="leg__n">3</div>
+            <div class="leg__b">
+              <div class="leg__mode">Shuttle <i>&mdash; line 9, Orsi&egrave;res &lt;&gt; Champex-Lac</i></div>
+              <div class="leg__r">Orsi&egrave;res <em>&rarr;</em> Champex Lac</div>
+              <div class="leg__d"><span class="tag tag--time">every 30 min &rarr; 04:00 Sun</span><span class="tag tag--dur">25 min</span> Runs 90 min past the cutoff &mdash; genuine margin on this leg.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cp__sect">Getting back <u>&mdash; out through Trient, not back through Chamonix</u></div>
+        <div class="ret">
+          <div class="ret__row">
+            <span class="ret__lbl best">Do this</span>Every leg below is printed <b>two-way</b>, and it ends at Vallorcine where your own free train line starts. Chamonix &mdash; and the 20:14 problem &mdash; never comes up.
+            <div class="chain">
+              <span>Champex</span><em>&rarr;</em><span>Orsi&egrave;res <u style="text-decoration:none;opacity:.55">25m</u></span><em>&rarr;</em><span>Trient <u style="text-decoration:none;opacity:.55">45m, last 04:00</u></span><em>&rarr;</em><span>Vallorcine <u style="text-decoration:none;opacity:.55">15m, last 09:00 Sun</u></span><em>&rarr;</em><span>train home</span>
+            </div>
+          </div>
+          <div class="ret__row"><span class="ret__lbl bad">Not this</span>Line 8 is printed <b>one way</b> and no Orsi&egrave;res return is published anywhere. <b>And never detour to La Fouly</b> &mdash; it dies at 23:00 while everything else runs to 04:00.</div>
+        </div>
+      </article>
+    </div>
+
+    <!-- ---------------- U7 + U13 ---------------- -->
+    <div class="col col--c">
+
+      <article class="cp cp--fill">
+        <div class="cp__head">
+          <div class="cp__badge">U7</div>
+          <div class="cp__t">
+            <div class="cp__name">Courmayeur</div>
+            <div class="cp__meta">km 83.4 &middot; hot meal &middot; life base &middot; drop bag</div>
+          </div>
+          <div class="cp__cut"><small>Cutoff</small><b>SAT 13:15</b></div>
+        </div>
+        <div class="cp__bar">
+          <span class="pill pill--it">Italy pass</span>
+          <span class="pill">Carry ID &mdash; tunnel crossing</span>
+          <span class="dots"><small>Difficulty</small>
+            <i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i>
+          </span>
+        </div>
+        <div class="cp__lead cool">The easy one. Daylight, frequent buses both ways.</div>
+
+        <div class="cp__sect">Route out <u>&mdash; two hops, then the same two back</u></div>
+        <div class="legs">
+          <div class="leg">
+            <div class="leg__n">1</div>
+            <div class="leg__b">
+              <div class="leg__mode">Bus <i>&mdash; Chamonix Bus Line 1</i></div>
+              <div class="leg__r">Les Houches <em>&rarr;</em> Chamonix</div>
+              <div class="leg__d"><span class="tag tag--time">every 30 min, 05:40&ndash;20:14</span> Nothing earlier &mdash; that would be a taxi.</div>
+            </div>
+          </div>
+          <div class="leg">
+            <div class="leg__n">2</div>
+            <div class="leg__b">
+              <div class="leg__mode">Shuttle <i>&mdash; line 6, Chamonix &lt;&gt; Courmayeur</i></div>
+              <div class="leg__r">Chamonix <em>&rarr;</em> Courmayeur (Centre Sportif)</div>
+              <div class="leg__d"><span class="tag tag--time">every 30 min, 00:30 &rarr; 20:30</span><span class="tag tag--dur">45 min</span> Two-way all day. Board at <b>Maison Nordique</b>, not Gr&eacute;pon Bus.</div>
+            </div>
+          </div>
+        </div>
+        <div class="ret">
+          <div class="ret__row"><span class="ret__lbl best">Back</span>Reverse it &mdash; but <b>be in Chamonix before 20:14</b> or Line 1 is finished. Easy with a 13:15 cutoff. Courmayeur is a life base with a hot meal and drop bags: plan a long stop.</div>
+        </div>
+      </article>
+
+      <article class="cp cp--fill">
+        <div class="cp__head">
+          <div class="cp__badge">U13</div>
+          <div class="cp__t">
+            <div class="cp__name">Vallorcine</div>
+            <div class="cp__meta">km 158.4 &middot; food &middot; last assistance before the finish</div>
+          </div>
+          <div class="cp__cut"><small>Cutoff</small><b>SUN 11:15</b></div>
+        </div>
+        <div class="cp__bar">
+          <span class="pill pill--none">No UTMB pass needed</span>
+          <span class="pill">Guest Card</span>
+          <span class="dots"><small>Difficulty</small>
+            <i class="dot on"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i>
+          </span>
+        </div>
+        <div class="cp__lead cool">The easiest one. One train, from your doorstep, free with the Guest Card.</div>
+
+        <div class="cp__sect">Route out and back <u>&mdash; daylight Sunday</u></div>
+        <div class="legs">
+          <div class="leg">
+            <div class="leg__n">1</div>
+            <div class="leg__b">
+              <div class="leg__mode">Train <i>&mdash; Mont-Blanc Express, up-valley</i></div>
+              <div class="leg__r">Les Houches <em>&rarr;</em> Vallorcine <em>&rarr;</em> and back</div>
+              <div class="leg__d">Both stations are inside the free Servoz&ndash;Vallorcine section, so the Guest Card covers the trip. No Chamonix, no UTMB pass, and daylight on Sunday &mdash; no night-return problem here.</div>
+              <div class="unv"><span class="unv__k">Unverified</span><span class="unv__t">Train times at Les Houches. Check the board.</span></div>
+            </div>
+          </div>
+          <div class="leg">
+            <div class="leg__n walk">&#8226;</div>
+            <div class="leg__b">
+              <div class="leg__mode">Fallback <i>&mdash; only if the train fails</i></div>
+              <div class="leg__d">Line 13, Chamonix&nbsp;&lt;&gt;&nbsp;Vallorcine to 12:30 Sun &mdash; needs Chamonix, costs a pass, zone disputed.</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+
+  <!-- ============ BOTTOM BAND ============ -->
+  <div class="band">
+
+    <section class="panel" style="flex:0 0 32%">
+      <div class="panel__h alarm">
+        <b>Night return to Les Houches is unsolved</b>
+        <small>Critical</small>
+      </div>
+      <div class="panel__b">
+        <p class="risk__p">After U3 on Friday night you are back in Chamonix around <b>01:00&ndash;01:25</b> and <b>there is no verified way home.</b> Line 1 finished at 20:14, the last train has long gone, and <b>no UTMB shuttle runs Chamonix&nbsp;&rarr;&nbsp;Les Houches at any hour</b> &mdash; verified against the official 20-line index. The same wall reappears Sunday if you route U11 back through Chamonix.</p>
+        <div class="risk__grid">
+          <div class="risk__cell">
+            <b>Do this before Friday</b>
+            <p>Get a local taxi number and save it <b>offline in every phone</b>. Agree now who calls it and what it costs &mdash; the only unconditional answer.</p>
+          </div>
+          <div class="risk__cell">
+            <b>Or dodge it entirely</b>
+            <p>Stay down-valley on the Saint-Gervais side &mdash; line 2 runs to 02:00 &mdash; and take the first morning train home.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" style="flex:1 1 auto">
+      <div class="panel__h">
+        <b>The three local-transport facts everything hangs on</b>
+        <small>Not UTMB shuttles &mdash; these are the local services</small>
+      </div>
+      <div class="panel__b">
+        <div class="facts__row">
+          <div class="facts__k">Chamonix Bus Line 1 <i>Verified</i></div>
+          <div class="facts__v">Les Houches &lt;&gt; Chamonix &lt;&gt; Les Praz/Fl&eacute;g&egrave;re. <b>Every 30 min, daily, 05:40&ndash;20:14.</b> Summer timetable 21 Jun&ndash;7 Sep covers race weekend. <b>20:14 drives every decision on this sheet.</b>
+            <span class="unv unv--inline"><span class="unv__k">Unverified</span><span class="unv__t">Whether Line 1 keeps normal hours on race weekend, and whether the Guest Card makes it free. The network map shows a road-closure icon at Les Houches.</span></span>
+          </div>
+        </div>
+        <div class="facts__row">
+          <div class="facts__k">Mont-Blanc Express <i>Verified</i></div>
+          <div class="facts__v">Calls at <b>Les Houches station</b>, next door to the base. <b>Servoz&nbsp;&rarr;&nbsp;Vallorcine is free with the Carte d&rsquo;H&ocirc;te (Guest Card)</b> from the accommodation, and Les Houches, Chamonix and Vallorcine all sit inside that section.
+            <span class="unv unv--inline"><span class="unv__k">Unverified</span><span class="unv__t">All times at Les Houches; last train from Le Fayet; first and last from Vallorcine; race-weekend working.</span></span>
+          </div>
+        </div>
+        <div class="facts__row">
+          <div class="facts__k">Chamo&rsquo;Nuit night bus <i>Biggest gap</i></div>
+          <div class="facts__v">A night service by this name exists and the fare is known: <b>&euro;4.50 by card / &euro;5.00 cash, paid on board.</b>
+            <span class="unv unv--inline"><span class="unv__k">Unverified</span><span class="unv__t"><b>Everything else.</b> Route, stops, hours, nights &mdash; and crucially <b>whether it serves Les Houches at all.</b> Build no return plan on it until someone confirms it in person.</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" style="flex:0 0 27.5%">
+      <div class="panel__h warm">
+        <b>Confirm tomorrow</b>
+        <small>In person</small>
+      </div>
+      <div class="panel__b">
+        <ul class="chk">
+          <li><span class="chk__box p1"></span><span class="chk__t"><b>A Guest Card for every crew member</b> &mdash; ask at check-in.</span></li>
+          <li><span class="chk__box p1"></span><span class="chk__t"><b>Chamo&rsquo;Nuit:</b> does it stop in Les Houches, which nights, first and last?</span></li>
+          <li><span class="chk__box p1"></span><span class="chk__t"><b>Last train from Le Fayet</b> up-valley to Les Houches.</span></li>
+          <li><span class="chk__box p1"></span><span class="chk__t"><b>Last train from Vallorcine</b> &mdash; and the first one Sunday.</span></li>
+          <li><span class="chk__box p1"></span><span class="chk__t"><b>A local taxi number, saved offline in every phone.</b></span></li>
+          <li><span class="chk__box"></span><span class="chk__t">Photograph the timetable board at Les Houches station.</span></li>
+          <li><span class="chk__box"></span><span class="chk__t">Does the Passy shuttle reach Saint Gervais village (La Poste)?</span></li>
+          <li><span class="chk__box"></span><span class="chk__t">Every QR code covers the zones needed &mdash; FR, IT <b>and</b> CH.</span></li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <div class="foot__c" style="flex:1.35 1 0"><b>U1 Les Houches, km 9.1 &mdash; your own village, Fri ~18:30&ndash;19:15</b>The course runs through the village about an hour in. Walk out and cheer &mdash; but it is a <b>water point and personal assistance is NOT permitted:</b> no food, kit or drinks. First legal assistance is U3. <span class="unv unv--inline" style="margin-top:.3mm"><span class="unv__k">Unverified</span><span class="unv__t">Estimated from a 17:45 start &mdash; not official. Watch LiveTrail.</span></span></div>
+    <div class="foot__c"><b>Passes are zone-based</b>Sold per race <i>and</i> per country. U3 needs FRANCE, U7 ITALY, U11 SWITZERLAND; U13 by train needs none. Booking closed 12/07/2026 &mdash; no on-site sales, no resale. Board with the emailed QR code; screenshot it offline, the valleys have no signal.</div>
+    <div class="foot__c"><b>No private cars &middot; two Chamonix hubs</b>Roads and parking are closed to cars at Les Contamines, Saint-Gervais, Courmayeur, La Fouly, Champex, Col de la Forclaz, Trient and Vallorcine. In Chamonix <b>Gr&eacute;pon Bus</b> serves the start and <b>Maison Nordique</b> serves runner-following &mdash; 10 min apart, and the wrong one costs an hour.</div>
+    <div class="foot__c"><b>Provenance</b>The routing here is <i>derived</i>, not published &mdash; no UTMB document is written for a crew based in Les Houches. Built from the official follower timetable, network map, course cutoffs and verified local facts, retrieved 2026-08-26. Every unconfirmed step is marked UNVERIFIED. Full timetable overleaf, with the source URL.</div>
+  </footer>
+
+</section>
+
+<!-- ==================================================================
+     PAGE 2 — ALL FOLLOWER SHUTTLES
+     ================================================================== -->
+<section class="page" id="page-2">
+
+  <header class="masthead">
+    <div class="masthead__id">
+      <div class="masthead__kicker">HOKA UTMB Mont-Blanc 2026 &nbsp;/&nbsp; UTMB Mobility</div>
+      <div class="masthead__title">All Follower <em>&mdash;</em><br>Shuttles</div>
+      <div class="masthead__sub">Accompagnants &middot; all 13 lines &middot; times exactly as printed</div>
+    </div>
+    <div class="masthead__facts">
+      <div class="mfact">
+        <div class="mfact__k">Zones</div>
+        <div class="mfact__v">FR &middot; IT &middot; CH</div>
+        <div class="mfact__n">A separate pass for each</div>
+      </div>
+      <div class="mfact">
+        <div class="mfact__k">Times shown</div>
+        <div class="mfact__v">FIRST DEPARTURE</div>
+        <div class="mfact__n">Then frequency, then closing time</div>
+      </div>
+      <div class="mfact">
+        <div class="mfact__k">Journey tag</div>
+        <div class="mfact__v">END TO END</div>
+        <div class="mfact__n">Timetable figure; map legend in brackets</div>
+      </div>
+      <div class="mfact">
+        <div class="mfact__k">Booking</div>
+        <div class="mfact__v">CLOSED 12/07</div>
+        <div class="mfact__n">No on-site sales &middot; QR scanned on board</div>
+      </div>
+    </div>
+    <div class="masthead__pg">2<span style="opacity:.45">/</span>2</div>
+  </header>
+
+  <div class="stripe"></div>
+
+  <!-- ================= FRANCE ================= -->
+  <div class="zband zband--grow">
+    <div class="zrail"><span>France <em>&mdash;</em> Fri 28/08</span></div>
+    <div class="zgrid zgrid--6">
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">1</div><div class="ln__nm">Chamonix <i>&gt;</i> Contamines</div></div>
+        <div class="ln__dir"><b class="one">One way</b><span class="ln__dur">50 min</span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">17:30</div><div class="stop__n">Chamonix<i>Gr&eacute;pon Bus</i></div></div>
+          <div class="stop"><div class="stop__t">18:00</div><div class="stop__n">Saint Gervais<i>Le Pont</i></div></div>
+          <div class="stop"><div class="stop__t">18:20</div><div class="stop__n">Contamines<i>NDG</i></div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 15 min <u>&rarr;</u> 20:30</b></div>
+        <div class="ln__note">Outbound only &mdash; the return is line 5. Boards at <b>Gr&eacute;pon Bus</b>. Its 20:30 finish is why it is the wrong line for U3.</div>
+      </article>
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">2</div><div class="ln__nm">Passy <i>&lt;&gt;</i> Saint Gervais</div></div>
+        <div class="ln__dir"><b>Two way</b><span class="ln__dur">15 min</span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">16:00</div><div class="stop__n">Passy<i>P+R</i></div></div>
+          <div class="stop"><div class="stop__t">16:05</div><div class="stop__n">Mountain Store</div></div>
+          <div class="stop"><div class="stop__t">16:15</div><div class="stop__n">Le Fayet<i>Gare</i></div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 20 min <u>&rarr;</u> 02:00 <u>(29/08)</u></b></div>
+        <div class="ln__note">The only line calling at <b>Le Fayet (Gare)</b>, the train station, and the latest-running line in France. <b>Note:</b> no stop actually named Saint Gervais is printed.</div>
+      </article>
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">3</div><div class="ln__nm">Saint Gervais <i>&lt;&gt;</i> NDG</div></div>
+        <div class="ln__dir"><b>Two way</b><span class="ln__dur">30 min <u style="text-decoration:none;opacity:.55">(25)</u></span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">16:30</div><div class="stop__n">Saint Gervais<i>La Poste</i></div></div>
+          <div class="stop"><div class="stop__t">16:50</div><div class="stop__n">Contamines<i>UTMB</i></div></div>
+          <div class="stop"><div class="stop__t">17:00</div><div class="stop__n">Notre Dame de la Gorge</div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 20 min <u>&rarr;</u> 01:00 <u>(29/08)</u></b></div>
+        <div class="ln__note"><b>The workhorse line for U3.</b> Two-way, every 20 min, running an hour past the Contamines cutoff.</div>
+      </article>
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">4</div><div class="ln__nm">Contamines <i>&lt;&gt;</i> NDG</div></div>
+        <div class="ln__dir"><b>Two way</b><span class="ln__dur">10 min</span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">17:30</div><div class="stop__n">Contamines<i>UTMB</i></div></div>
+          <div class="stop"><div class="stop__t">17:40</div><div class="stop__n">Notre Dame de la Gorge</div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 10 min <u>&rarr;</u> 23:59<sup>&#8225;</sup></b></div>
+        <div class="ln__note">A short local hop between the Contamines aid station and NDG. It dies an hour before line 3 &mdash; never make it the last move of the night.</div>
+      </article>
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">5</div><div class="ln__nm">NDG <i>&gt;</i> Chamonix</div></div>
+        <div class="ln__dir"><b class="one">One way</b><span class="ln__dur">55 min <u style="text-decoration:none;opacity:.55">(50)</u></span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">20:30</div><div class="stop__n">Notre Dame de la Gorge</div></div>
+          <div class="stop"><div class="stop__t">20:50</div><div class="stop__n">Saint Gervais<i>Le Pont</i></div></div>
+          <div class="stop"><div class="stop__t">21:25</div><div class="stop__n">Chamonix<i>Maison Nordique</i></div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 30 min <u>&rarr;</u> 01:00 <u>(29/08)</u></b></div>
+        <div class="ln__note">The return from the Contamines valley. The last one lands in Chamonix ~01:25, <b>with nothing onward to Les Houches.</b> It also calls at Saint Gervais.</div>
+      </article>
+
+      <article class="ln ln--alt">
+        <div class="ln__h"><div class="ln__n alt">H</div><div class="ln__nm">Houches <i>&gt;</i> Chamonix</div></div>
+        <div class="ln__dir"><b class="one">Single run</b><span class="ln__dur">35 min</span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">16:00</div><div class="stop__n">Houches<i>Prarion</i></div></div>
+          <div class="stop"><div class="stop__t">16:05</div><div class="stop__n">Houches<i>Mairie</i></div></div>
+          <div class="stop"><div class="stop__t">16:15</div><div class="stop__n">Les Bossons</div></div>
+          <div class="stop"><div class="stop__t">16:35</div><div class="stop__n">Chamonix<i>Gr&eacute;pon Bus</i></div></div>
+        </div>
+        <div class="ln__freq" style="background:var(--mint)"><i>Runner start shuttle &mdash; followers allowed</i><b>one bus, one time, 28/08</b></div>
+        <div class="ln__note">Not a follower line, but the poster legend marks it accessible to followers. <b>Your one guaranteed ride out of Les Houches all weekend.</b> Nothing brings you back.</div>
+      </article>
+
+    </div>
+  </div>
+
+  <!-- ================= ITALY + HOW TO READ ================= -->
+  <div class="zband">
+    <div class="zrail zrail--it"><span>Italy <em>&mdash;</em> Sat 29/08</span></div>
+    <div class="zgrid zgrid--6">
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">6</div><div class="ln__nm">Chamonix <i>&lt;&gt;</i> Courmayeur</div></div>
+        <div class="ln__dir"><b>Two way</b><span class="ln__dur">45 min</span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">00:30</div><div class="stop__n">Chamonix<i>Maison Nordique</i></div></div>
+          <div class="stop"><div class="stop__t">01:15</div><div class="stop__n">Courmayeur<i>Centre Sportif</i></div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 30 min <u>&rarr;</u> 20:30</b></div>
+        <div class="ln__note">Through the Mont-Blanc tunnel. Two-way and frequent all day &mdash; this is what makes U7 the easy crew point. <b>Italy pass &middot; carry ID.</b></div>
+      </article>
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">7</div><div class="ln__nm">Courmayeur <i>&lt;&gt;</i> Arnouvaz</div></div>
+        <div class="ln__dir"><b>Two way</b><span class="ln__dur">45 min</span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">07:30</div><div class="stop__n">Courmayeur<i>Centre Sportif</i></div></div>
+          <div class="stop"><div class="stop__t">08:15</div><div class="stop__n">Arnouvaz</div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 60 min <u>&rarr;</u> 18:30 <u>(30/08)</u></b></div>
+        <div class="ln__note">Out to the Arnouvaz aid station (U9, km 101.7). <b>Hourly &mdash; the sparsest line on the network</b>, so a missed bus costs a full hour. Spectating only.</div>
+      </article>
+
+      <section class="panel" style="grid-column:span 4">
+        <div class="panel__h">
+          <b>How to read this sheet</b>
+          <small>And what the poster does not tell you</small>
+        </div>
+        <div class="panel__b">
+          <div class="howto">
+            <div class="howto__i"><b>&ldquo;every N min &rarr; HH:MM&rdquo; &mdash; meaning UNVERIFIED</b>The source does not state whether that closing figure is the <b>last departure</b> or the <b>end of service</b>, and nobody has confirmed which. Treat it as the last moment you can rely on, be at the stop 20 min early, and never let the final connection of the night depend on it.</div>
+            <div class="howto__i"><b>&#8225; The 23:59 on line 4</b>The poster prints &ldquo;23:59M&rdquo;. That is a typographic error in the official artwork &mdash; the other cells read &ldquo;02:00AM&rdquo;, &ldquo;01:00AM&rdquo;, so an &ldquo;A&rdquo; has been dropped. It is 23:59.</div>
+            <div class="howto__i"><b>One way vs two way</b>Reproduced exactly as the poster prints each line. Lines 1, 5 and 8 are one-way. For line 8 a return must physically exist &mdash; it runs to 03:00 Sunday &mdash; but none is published, so do not plan on it.</div>
+            <div class="howto__i"><b>Times past midnight</b>A bracketed date means the time belongs to the following day: line 2&rsquo;s &ldquo;02:00 (29/08)&rdquo; is 2 a.m. on the Saturday.</div>
+            <div class="howto__i"><b>Two Chamonix hubs</b><b>Gr&eacute;pon Bus</b> serves the race start; <b>Maison Nordique</b> serves runner-following. They are ~10 min apart on foot and the wrong one costs an hour.</div>
+            <div class="howto__i"><b>Nothing returns to Les Houches</b>Verified against the official 20-line index: the only line touching Les Houches is <b>Houches &gt; Chamonix</b> &mdash; one way, one run, 16:00 Friday.</div>
+            <div class="howto__i"><b>On board</b>Boarding is by the QR code emailed at booking; all of one person&rsquo;s journeys sit under a single code. No under-3s, no pets; bikes and scooters at the driver&rsquo;s discretion.</div>
+            <div class="howto__i"><b>Timetables can change mid-event</b>Both official posters carry the same warning: times may vary during the event and <b>changes are notified by SMS</b>. Make sure the number on the booking is one you carry.</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ================= SWITZERLAND ================= -->
+  <div class="zband zband--grow">
+    <div class="zrail zrail--ch"><span>Switzerland <em>&mdash;</em> Sat 29/08</span></div>
+    <div class="zgrid zgrid--6">
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">8</div><div class="ln__nm">Chamonix <i>&gt;</i> Orsi&egrave;res</div></div>
+        <div class="ln__dir"><b class="one">One way</b><span class="ln__dur">80 min <u style="text-decoration:none;opacity:.55">(90)</u></span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">05:30</div><div class="stop__n">Chamonix<i>Maison Nordique</i></div></div>
+          <div class="stop"><div class="stop__t">05:55</div><div class="stop__n">Vallorcine<i>Gare</i></div></div>
+          <div class="stop"><div class="stop__t">06:10</div><div class="stop__n">Trient</div></div>
+          <div class="stop"><div class="stop__t">06:50</div><div class="stop__n">Orsi&egrave;res</div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 45 min <u>&rarr;</u> 03:00 <u>(30/08)</u></b></div>
+        <div class="ln__note">The trunk line into Switzerland and the gateway to U11. Calls at Vallorcine 25 min in, so you can join it there instead of Chamonix. <b>Printed one way.</b></div>
+      </article>
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">9</div><div class="ln__nm">Orsi&egrave;res <i>&lt;&gt;</i> Champex-Lac</div></div>
+        <div class="ln__dir"><b>Two way</b><span class="ln__dur">25 min <u style="text-decoration:none;opacity:.55">(30)</u></span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">07:00</div><div class="stop__n">Orsi&egrave;res</div></div>
+          <div class="stop"><div class="stop__t">07:25</div><div class="stop__n">Champex Lac</div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 30 min <u>&rarr;</u> 04:00 <u>(30/08)</u></b></div>
+        <div class="ln__note">The final leg to U11, two-way and running <b>90 min past Suha&rsquo;s 02:30 cutoff</b> &mdash; real margin. <b>Swiss pass required.</b></div>
+      </article>
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">10</div><div class="ln__nm">Orsi&egrave;res <i>&lt;&gt;</i> La Fouly</div></div>
+        <div class="ln__dir"><b>Two way</b><span class="ln__dur">25 min <u style="text-decoration:none;opacity:.55">(30)</u></span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">07:15</div><div class="stop__n">Orsi&egrave;res</div></div>
+          <div class="stop"><div class="stop__t">07:40</div><div class="stop__n">La Fouly</div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 30 min <u>&rarr;</u> 23:00</b></div>
+        <div class="ln__note"><b>A trap.</b> It dies at 23:00 while every other Swiss line runs to 04:00 &mdash; detour here and you can be stranded. U10 is spectating only. <b>Swiss pass.</b></div>
+      </article>
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">11</div><div class="ln__nm">Orsi&egrave;res <i>&lt;&gt;</i> Trient</div></div>
+        <div class="ln__dir"><b>Two way</b><span class="ln__dur">45 min</span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">08:45</div><div class="stop__n">Orsi&egrave;res</div></div>
+          <div class="stop"><div class="stop__t">09:30</div><div class="stop__n">Trient</div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 30 min <u>&rarr;</u> 04:00 <u>(30/08)</u></b></div>
+        <div class="ln__note"><b>Key return link.</b> Chained with line 12 it gives you a published two-way way out of Switzerland that does not depend on line 8. Also serves U12 Trient.</div>
+      </article>
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">12</div><div class="ln__nm">Trient <i>&lt;&gt;</i> Vallorcine</div></div>
+        <div class="ln__dir"><b>Two way</b><span class="ln__dur">15 min</span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">09:00</div><div class="stop__n">Trient</div></div>
+          <div class="stop"><div class="stop__t">09:15</div><div class="stop__n">Vallorcine</div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 30 min <u>&rarr;</u> 09:00 <u>(30/08)</u></b></div>
+        <div class="ln__note"><b>Your safety net.</b> Runs longer than any other line and drops you at Vallorcine, where the Mont-Blanc Express goes straight home. Border crossing &mdash; carry ID.</div>
+      </article>
+
+      <article class="ln">
+        <div class="ln__h"><div class="ln__n">13</div><div class="ln__nm">Chamonix <i>&lt;&gt;</i> Vallorcine</div></div>
+        <div class="ln__dir"><b>Two way</b><span class="ln__dur">30 min <u style="text-decoration:none;opacity:.55">(35&ndash;40)</u></span></div>
+        <div class="ln__stops">
+          <div class="stop"><div class="stop__t">05:00</div><div class="stop__n">Chamonix<i>Maison Nordique</i></div></div>
+          <div class="stop"><div class="stop__t">05:30</div><div class="stop__n">Vallorcine</div></div>
+        </div>
+        <div class="ln__freq"><i>Frequency</i><b>every 30 min <u>&rarr;</u> 12:30 <u>(30/08)</u></b></div>
+        <div class="ln__note">For a Les Houches crew the train beats this outright.<span class="unv unv--inline" style="margin-top:.3mm"><span class="unv__k">Unverified</span><span class="unv__t">Which pass it needs. Printed in the Switzerland column, but the map legend lists it under <b>both</b> France (35 min) and Switzerland (40 min).</span></span></div>
+      </article>
+
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <div class="foot2">
+    <section class="panel" style="flex:1 1 0">
+      <div class="panel__h warm"><b>Passes &amp; booking</b></div>
+      <div class="panel__b">
+        <p class="f2t"><b>Zone-based.</b> Passes are sold per race <b>and</b> per country. <b>Champex-Lac and La Fouly need the SWITZERLAND pass.</b> Courmayeur and Arnouvaz need ITALY. Everything on the France band needs FRANCE. Check every crew member&rsquo;s QR code covers the zone before leaving the flat &mdash; a wrong-zone pass is refused at the door of the bus.</p>
+        <p class="f2t"><b>Booking closed 12 July 2026.</b> No on-site sales and resale is not permitted &mdash; nothing further can be bought now. Board with the QR code emailed at booking; all of one person&rsquo;s journeys are grouped under a single code. Screenshot it offline.</p>
+      </div>
+    </section>
+    <section class="panel" style="flex:1 1 0">
+      <div class="panel__h alarm"><b>Road closures &mdash; no private cars</b></div>
+      <div class="panel__b">
+        <p class="f2t">Roads <b>and parking</b> are closed to private cars for the duration of the event at <b>Les Contamines, Saint-Gervais, Courmayeur, La Fouly, Champex, Col de la Forclaz, Trient and Vallorcine.</b> Access is only possible by UTMB Mobility shuttle &mdash; or, where it runs, by train.</p>
+        <p class="f2t">The network map also shows a road-closure icon at <b>Les Houches</b>, which is not in the guide&rsquo;s written list.<span class="unv unv--inline"><span class="unv__k">Unverified</span><span class="unv__t">Extent and timing of any Les Houches closure, and whether it affects Line 1&rsquo;s routing. Confirm locally.</span></span></p>
+      </div>
+    </section>
+    <section class="panel" style="flex:1 1 0">
+      <div class="panel__h"><b>Source</b><small>Retrieved 2026-08-26</small></div>
+      <div class="panel__b">
+        <p class="prov"><b>Primary:</b> UTMB_FR &mdash; &ldquo;Horaires des navettes &lt;&gt; Chamonix &mdash; ACCOMPAGNANTS&rdquo;.<br>
+        <span>https://res.cloudinary.com/utmb-world/image/upload/v1/montblanc/Transports/UTMB_FR/UTMB_final2_175df14f2a</span><br>
+        Retrieved <b>2026-08-26</b>; all 13 lines transcribed verbatim and re-checked against the local copy at 200%.</p>
+        <p class="prov" style="margin-top:.7mm">UTMB never published an English equivalent of the follower timetable &mdash; it exists in French only. <b>This sheet is the English rendering.</b> Supporting: EN_UTMB_1 (start &amp; post-race), EN_UTMB_3 (network map, journey times, zone legend), EN_UTMB_4 (line index), Transport Guide 2026 (passes, closures).</p>
+      </div>
+    </section>
+  </div>
+
+</section>
+
+<script>
+/* Screen-only: scale one A4 landscape page to the viewport width so the
+   sheet is legible on a phone. Uses zoom (layout-affecting) rather than
+   transform so the page flow stays correct. Print is untouched. */
+(function () {
+  var A4L_PX = 297 * 96 / 25.4; /* 297 mm at 96 dpi = 1122.52 px */
+  function fit() {
+    var z = window.innerWidth / A4L_PX;
+    document.documentElement.style.setProperty('--fit', z > 0 ? z : 1);
+  }
+  fit();
+  window.addEventListener('resize', fit);
+})();
+</script>
+</body>
+</html>

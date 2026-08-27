@@ -1,0 +1,102 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-08-27",
+  "source": "Turkish item text is verbatim from the per-checkpoint crew notes saved in course/utmb_course.html (SAVED_STATE.n). English sectionNotes are verbatim from SAVED_STATE.sn. Do not translate item text.",
+  "phaseOrder": ["before", "onArrival", "beforeLeaving"],
+  "phaseLabels": {
+    "before": { "tr": "Gelmeden once", "en": "Before he arrives" },
+    "onArrival": { "tr": "Gelince", "en": "On arrival" },
+    "beforeLeaving": { "tr": "Ayrilmadan once", "en": "Before he leaves" }
+  },
+  "crewCheckpoints": ["U3", "U7", "U11", "U13"],
+  "checkpoints": {
+    "U3": {
+      "name": "Les Contamines",
+      "km": 32.5,
+      "cutoff": "Sat 12:00 AM",
+      "support": "food",
+      "origin": "notes",
+      "before": [
+        { "id": "U3-before-1", "text": "Maurten Mix ile 1 sise su hazirlanacak.", "critical": false, "draft": false },
+        { "id": "U3-before-2", "text": "Iyice calkalanacak erimesi icin toz.", "critical": false, "draft": false },
+        { "id": "U3-before-3", "text": "Oturtacak yer bulunacak", "critical": false, "draft": false }
+      ],
+      "onArrival": [
+        { "id": "U3-onArrival-1", "text": "Suha oturulacak yere yonlendirilecek.", "critical": false, "draft": false }
+      ],
+      "beforeLeaving": [
+        { "id": "U3-beforeLeaving-1", "text": "Extra Jel verilecek.", "critical": false, "draft": false },
+        { "id": "U3-beforeLeaving-2", "text": "Su yenilenecek.", "critical": false, "draft": false },
+        { "id": "U3-beforeLeaving-3", "text": "Maurten mix verilecek.", "critical": false, "draft": false }
+      ]
+    },
+    "U7": {
+      "name": "Courmayeur",
+      "km": 83.4,
+      "cutoff": "Sat 1:15 PM",
+      "support": "hotmeal",
+      "origin": "notes",
+      "before": [
+        { "id": "U7-before-1", "text": "Oturtucak yer bulunacak.", "critical": false, "draft": false },
+        { "id": "U7-before-2", "text": "Maurten 320 mix 1 flaska koyulacak", "critical": false, "draft": false },
+        { "id": "U7-before-3", "text": "ustu su ile doldurulup iyice calkalanacak.", "critical": false, "draft": false }
+      ],
+      "onArrival": [
+        { "id": "U7-onArrival-1", "text": "ILK IS -> Saati ve nabız bandını sarj etmek icin kolumdan cikarin (BEN UNUTURUM, SIZ DIREKT BENI YONLENDIRIN YA DA KENDINIZ CIKARIN)", "critical": true, "draft": false },
+        { "id": "U7-onArrival-2", "text": "Kafa lambasi alinacak", "critical": false, "draft": false },
+        { "id": "U7-onArrival-3", "text": "sarj edilecek", "critical": false, "draft": false }
+      ],
+      "beforeLeaving": [
+        { "id": "U7-beforeLeaving-1", "text": "bir sonraki bulusmada geri verilecek", "critical": false, "draft": false }
+      ]
+    },
+    "U11": {
+      "name": "Champex-Lac",
+      "km": 130.5,
+      "cutoff": "Sun 2:30 AM",
+      "support": "hotmeal",
+      "origin": "starter",
+      "before": [
+        { "id": "U11-before-1", "text": "Oturtacak yer bulunacak", "critical": false, "draft": true },
+        { "id": "U11-before-2", "text": "Maurten mix ile su hazirlanacak", "critical": false, "draft": true },
+        { "id": "U11-before-3", "text": "Iyice calkalanacak erimesi icin toz.", "critical": false, "draft": true },
+        { "id": "U11-before-4", "text": "Kafa lambasi sarj edilmis olarak hazir olacak", "critical": false, "draft": true }
+      ],
+      "onArrival": [
+        { "id": "U11-onArrival-1", "text": "Suha oturulacak yere yonlendirilecek.", "critical": false, "draft": true },
+        { "id": "U11-onArrival-2", "text": "Kafa lambasi geri verilecek", "critical": false, "draft": true }
+      ],
+      "beforeLeaving": [
+        { "id": "U11-beforeLeaving-1", "text": "Extra Jel verilecek.", "critical": false, "draft": true },
+        { "id": "U11-beforeLeaving-2", "text": "Su yenilenecek.", "critical": false, "draft": true },
+        { "id": "U11-beforeLeaving-3", "text": "Maurten mix verilecek.", "critical": false, "draft": true }
+      ]
+    },
+    "U13": {
+      "name": "Vallorcine",
+      "km": 158.4,
+      "cutoff": "Sun 11:15 AM",
+      "support": "food",
+      "origin": "starter",
+      "before": [
+        { "id": "U13-before-1", "text": "Oturtacak yer bulunacak", "critical": false, "draft": true },
+        { "id": "U13-before-2", "text": "Maurten mix ile su hazirlanacak", "critical": false, "draft": true },
+        { "id": "U13-before-3", "text": "Iyice calkalanacak erimesi icin toz.", "critical": false, "draft": true }
+      ],
+      "onArrival": [
+        { "id": "U13-onArrival-1", "text": "Suha oturulacak yere yonlendirilecek.", "critical": false, "draft": true },
+        { "id": "U13-onArrival-2", "text": "Kafa lambasi alinacak", "critical": false, "draft": true }
+      ],
+      "beforeLeaving": [
+        { "id": "U13-beforeLeaving-1", "text": "Extra Jel verilecek.", "critical": false, "draft": true },
+        { "id": "U13-beforeLeaving-2", "text": "Su yenilenecek.", "critical": false, "draft": true },
+        { "id": "U13-beforeLeaving-3", "text": "Maurten mix verilecek.", "critical": false, "draft": true }
+      ]
+    }
+  },
+  "sectionNotes": {
+    "U4_U5": "normal climb till the first peak (Col de la Seigne - France Italy border). Then 1 k down then leave the TMB trail to the tiny trail climb to Pyramide Calcaire (2600m). A lot of stones and rocks (careful with poles). On the downhill BE VERY CAREFUL not to twist ankle because of rocks ",
+    "U11_U12": "after peak La Giete, technical down hill roots and rocks and steep around 20-25%. Especially the last part after Col de la Forclaz (water fountain). 1 km flat then very steep down hill 30+% before Trient",
+    "U12_U13": "before Vallorcine technical steep downhill with roots"
+  }
+}

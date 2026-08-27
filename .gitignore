@@ -1,0 +1,4 @@
+.DS_Store
+.workdir.tmp
+# verifier working crops — intermediate evidence, regenerable
+transport/dist/verify-*.png
