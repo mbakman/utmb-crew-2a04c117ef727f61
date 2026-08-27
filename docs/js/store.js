@@ -274,6 +274,31 @@ window.UTMB = window.UTMB || {};
     writeJSON: writeJSON
   };
 
+  /* ── cutoff display ───────────────────────────────────────────────────────
+   * The same barrier time reaches the screen from two files: course.json /
+   * checklists.json store it as a 12-hour string ("Sat 12:00 AM") and
+   * shuttles.json stores it structured ("Sat" + "00:00"). Both end up on one
+   * screen — the checklist board and the transport board sit next to each
+   * other, and the drawer shows a cutoff badge directly above the transport
+   * block — so they have to read the same way. "12:00 AM" is also the form
+   * that gets misread as midday, and U3's barrier really is midnight.
+   *
+   * Presentation only: nothing rewrites the JSON, and a string that does not
+   * match the 12-hour pattern is handed back untouched. */
+  var CUTOFF_12H = /^(.*?)(\d{1,2}):(\d{2})\s*([AaPp])\.?[Mm]\.?$/;
+
+  UTMB.fmtCutoff = function (raw) {
+    if (typeof raw !== 'string') return raw;
+    var m = CUTOFF_12H.exec(raw.replace(/^\s+|\s+$/g, ''));
+    if (!m) return raw;
+    var h = parseInt(m[2], 10);
+    if (!(h >= 1 && h <= 12)) return raw;
+    var pm = m[4].toLowerCase() === 'p';
+    if (h === 12) h = pm ? 12 : 0;
+    else if (pm) h += 12;
+    return (m[1] || '') + (h < 10 ? '0' : '') + h + ':' + m[3];
+  };
+
   /* Convenience aliases used across modules. */
   UTMB.markDirty = markDirty;
   UTMB.markClean = markClean;

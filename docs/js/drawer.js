@@ -38,6 +38,12 @@ window.UTMB = window.UTMB || {};
     return course ? course.cps.find(function (c) { return c.id === cpId; }) : null;
   }
 
+  /* store.js owns the 12h -> 24h cutoff formatter; fall back to the raw string
+   * if this file is ever loaded without it. */
+  function fmtCutoff(raw) {
+    return typeof UTMB.fmtCutoff === 'function' ? UTMB.fmtCutoff(raw) : raw;
+  }
+
   function init(opts) {
     course = opts.course;
     drawer = document.getElementById('drawer');
@@ -86,7 +92,9 @@ window.UTMB = window.UTMB || {};
     var badges = '';
     if (cp.support) badges += '<span class="badge badge-' + cp.support + '">' + SUPPORT_LABEL[cp.support] + '</span>';
     if (cp.supporter) badges += '<span class="badge badge-supporter">Supporter access</span>';
-    if (cp.cutoff) badges += '<span class="badge badge-cutoff">Cutoff ' + cp.cutoff + '</span>';
+    /* 24-hour, so this badge reads the same as the cutoff in the transport
+     * block a few lines below it. See UTMB.fmtCutoff in store.js. */
+    if (cp.cutoff) badges += '<span class="badge badge-cutoff">Cutoff ' + fmtCutoff(cp.cutoff) + '</span>';
     document.getElementById('dBadges').innerHTML = badges;
     document.getElementById('dDesc').textContent = cp.desc || '';
 

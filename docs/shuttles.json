@@ -322,7 +322,7 @@
    "journeyMinutesSource": "timetable",
    "journeyMinutesLegend": 50,
    "verified": true,
-   "note": "ONE WAY return leg from the Contamines valley to Chamonix. Taking the last one (01:00 from NDG) lands you at Chamonix Maison Nordique around 01:25 — with Chamonix Bus Line 1 finished since 20:14 and no UTMB line onward to Les Houches. See warning 'night-return-risk'. It also stops at Saint Gervais (Le Pont), which is the alternative bail-out if the crew would rather stay down-valley."
+   "note": "ONE WAY return leg from the Contamines valley to Chamonix. The printed run is 55 min end to end (NDG 20:30 -> Saint Gervais Le Pont 20:50 -> Chamonix Maison Nordique 21:25), so the LAST DEPARTURE of 01:00 from NDG lands you at Chamonix Maison Nordique around 01:55, and the 00:30 departure lands around 01:25 — the arrival window for the last two departures is 01:25-01:55. Note that 01:00 is a DEPARTURE time from NDG, not an arrival in Chamonix. By then Chamonix Bus Line 1 has been finished since 20:14 and no UTMB line runs onward to Les Houches. See warning 'night-return-risk'. It also stops at Saint Gervais (Le Pont), which is the alternative bail-out if the crew would rather stay down-valley."
   },
   {
    "n": 6,
@@ -1237,7 +1237,7 @@
        "to": "Chamonix (Maison Nordique)",
        "durationMinutes": 55,
        "verified": true,
-       "note": "Every 30 min, last 01:00 from NDG. The 01:00 departure lands in Chamonix about 01:25."
+       "note": "Every 30 min, last DEPARTURE 01:00 from NDG. The ride is 55 min end to end, so the 01:00 departure lands in Chamonix about 01:55 (the 00:30 one about 01:25)."
       },
       {
        "seq": 3,
@@ -1676,7 +1676,7 @@
    "id": "night-return-risk",
    "severity": "critical",
    "title": "NIGHT RETURN TO LES HOUCHES IS UNSOLVED",
-   "body": "After crewing U3 Les Contamines on Friday night, the crew gets back to Chamonix around 01:00–01:25 — and there is NO VERIFIED WAY HOME from there. Chamonix Bus Line 1 finished at 20:14. The last train has long gone (exact time unknown). Chamo'Nuit is completely unverified. No UTMB shuttle runs Chamonix -> Les Houches at any hour. The same wall appears again on Sunday morning after U11 Champex-Lac if the crew routes back through Chamonix. PLAN FOR THIS BEFORE FRIDAY: get a local taxi number, save it in every phone, and agree in advance who calls it and roughly what it will cost.",
+   "body": "After crewing U3 Les Contamines on Friday night, the crew gets back to Chamonix around 01:25–01:55 (the last two line-5 departures from NDG are 00:30 and 01:00, and the ride is 55 min end to end) — and there is NO VERIFIED WAY HOME from there. Chamonix Bus Line 1 finished at 20:14. The last train has almost certainly gone — UNVERIFIED, confirm the last train at the station. Chamo'Nuit is completely unverified. No UTMB shuttle runs Chamonix -> Les Houches at any hour. The same wall appears again on Sunday morning after U11 Champex-Lac if the crew routes back through Chamonix. PLAN FOR THIS BEFORE FRIDAY: get a local taxi number, save it in every phone, and agree in advance who calls it and roughly what it will cost.",
    "verified": true,
    "affects": [
     "U3",

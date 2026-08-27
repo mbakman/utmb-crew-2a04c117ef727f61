@@ -2,3 +2,9 @@
 .workdir.tmp
 # verifier working crops — intermediate evidence, regenerable
 transport/dist/verify-*.png
+# verifier working crops (adv-*/vv-*/smoke-*) — regenerable evidence, not deliverables.
+# The delivered sheet images (utmb-crew-sheet-EN*.pdf/png) ARE tracked.
+transport/dist/adv-*.png
+transport/dist/vv-*.png
+transport/dist/smoke-*.png
+transport/dist/adv-backup-EN*

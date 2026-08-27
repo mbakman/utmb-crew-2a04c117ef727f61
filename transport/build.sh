@@ -1,19 +1,28 @@
 #!/usr/bin/env bash
 #
-# build.sh — render the UTMB Les Houches crew sheet to print-ready PDF and PNG.
+# build.sh — render the UTMB Les Houches crew sheet to print-ready PDF and PNGs.
 #
-#   ./transport/build.sh            # render both outputs
+#   ./transport/build.sh            # render every output
 #   ./transport/build.sh pdf        # PDF only
-#   ./transport/build.sh png        # PNG only
-#   ./transport/build.sh --open     # render both, then open the PDF
+#   ./transport/build.sh png        # PNGs only (needs the PDF to exist)
+#   ./transport/build.sh --open     # render everything, then open the PDF
 #
 # Inputs :  transport/crew-sheet.html   (self-contained; no network, no assets)
-# Outputs:  transport/dist/utmb-crew-sheet-EN.pdf
-#           transport/dist/utmb-crew-sheet-EN.png
+# Outputs:  transport/dist/utmb-crew-sheet-EN.pdf      2 pages, A4 landscape
+#           transport/dist/utmb-crew-sheet-EN-p1.png   page 1 alone
+#           transport/dist/utmb-crew-sheet-EN-p2.png   page 2 alone
+#           transport/dist/utmb-crew-sheet-EN.png      both pages stacked
 #
-# Renders with headless Chrome. Nothing is ever deleted: Chrome overwrites the
-# two output files in place, and the scratch profile lives in a fresh mktemp -d
-# that the OS reclaims.
+# The PDF is rendered with headless Chrome. The PNGs are rasterised FROM THAT
+# PDF with pdftoppm, one image per page. That matters: the sheet is two A4
+# pages, and Chrome's --screenshot only ever captures the first viewport, so
+# the old single-screenshot route silently shipped page 1 and dropped all 13
+# shuttle line cards. Going through the PDF also sidesteps the in-page fit()
+# script, which scales each .page to the viewport height on screen.
+#
+# Nothing is ever deleted: every output file is overwritten in place by the
+# renderer, and the scratch Chrome profile lives in a fresh mktemp -d that the
+# OS reclaims.
 #
 set -euo pipefail
 
@@ -22,15 +31,19 @@ HERE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SRC="$HERE/crew-sheet.html"
 DIST="$HERE/dist"
 PDF="$DIST/utmb-crew-sheet-EN.pdf"
-PNG="$DIST/utmb-crew-sheet-EN.png"
+PNG="$DIST/utmb-crew-sheet-EN.png"          # both pages, stacked vertically
+PNG_P1="$DIST/utmb-crew-sheet-EN-p1.png"
+PNG_P2="$DIST/utmb-crew-sheet-EN-p2.png"
+PNG_PREFIX="$DIST/utmb-crew-sheet-EN"       # pdftoppm writes <prefix>-N.png
 
-# A4 landscape at 2x: 2400 x 1697 device-independent pixels.
-PNG_WINDOW="2400,1697"
-PNG_SCALE="2"
+# Raster resolution for the page PNGs. 300 dpi on A4 landscape gives
+# 3508 x 2481 px per page — the same pixel size as the official posters, and
+# comfortably legible for the 6-7 px body type on this sheet.
+PNG_DPI="${PNG_DPI:-300}"
 
-# Minimum plausible output sizes, in bytes. A Chrome render that silently
-# fails still produces a small well-formed file, so size is the cheapest
-# guard against shipping a blank sheet.
+# Minimum plausible output sizes, in bytes. A render that silently fails still
+# produces a small well-formed file, so size is the cheapest guard against
+# shipping a blank sheet.
 # Seconds to allow one Chrome render before giving up on it.
 CHROME_TIMEOUT="${CHROME_TIMEOUT:-90}"
 
@@ -148,17 +161,48 @@ render_pdf() {
   fi
 }
 
+dims() { # path
+  command -v sips >/dev/null 2>&1 || return 0
+  sips -g pixelWidth -g pixelHeight "$1" 2>/dev/null | sed -n 's/^ *pixel/    pixel/p'
+}
+
+# One PNG per PDF page. -singlefile makes pdftoppm write exactly <base>.png
+# with no page-number suffix, so the output names are deterministic.
 render_png() {
-  echo "==> PNG   $PNG"
-  run_chrome "$PNG" "${COMMON[@]}" \
-    --screenshot="$PNG" \
-    --window-size="$PNG_WINDOW" \
-    --force-device-scale-factor="$PNG_SCALE" \
-    "$URL"
-  check_size "$PNG" "$MIN_PNG_BYTES" "PNG"
-  if command -v sips >/dev/null 2>&1; then
-    echo "  ---- dimensions ----"
-    sips -g pixelWidth -g pixelHeight "$PNG" 2>/dev/null | sed -n 's/^ *pixel/  pixel/p'
+  command -v pdftoppm >/dev/null 2>&1 || {
+    echo "  FAIL  pdftoppm not found — cannot rasterise the pages. Install poppler." >&2
+    return 1
+  }
+  [ -f "$PDF" ] || { echo "  FAIL  $PDF does not exist — run 'build.sh pdf' first." >&2; return 1; }
+
+  local pages=2
+  if command -v pdfinfo >/dev/null 2>&1; then
+    pages="$(pdfinfo "$PDF" | awk '/^Pages:/{print $2}')"
+  fi
+  [ "$pages" -ge 2 ] 2>/dev/null || echo "  WARN  PDF reports ${pages:-?} page(s); expected 2." >&2
+
+  local n out
+  for n in 1 2; do
+    case "$n" in 1) out="${PNG_P1%.png}" ;; 2) out="${PNG_P2%.png}" ;; esac
+    echo "==> PNG   ${out}.png   (page $n @ ${PNG_DPI} dpi)"
+    pdftoppm -r "$PNG_DPI" -png -f "$n" -l "$n" -singlefile "$PDF" "$out"
+    check_size "${out}.png" "$MIN_PNG_BYTES" "PNG page $n"
+    dims "${out}.png"
+  done
+
+  # Combined two-page image, purely for convenience. Optional: it needs an
+  # ImageMagick binary, and its absence must not fail the build now that the
+  # per-page PNGs are the real deliverable.
+  local im=""
+  for c in magick convert; do command -v "$c" >/dev/null 2>&1 && { im="$c"; break; }; done
+  if [ -n "$im" ]; then
+    echo "==> PNG   $PNG   (both pages stacked)"
+    "$im" "$PNG_P1" "$PNG_P2" -append "$PNG"
+    check_size "$PNG" "$MIN_PNG_BYTES" "PNG combined"
+    dims "$PNG"
+  else
+    echo "  note: no ImageMagick binary — skipping the combined two-page PNG."
+    echo "        The per-page files $PNG_P1 and $PNG_P2 are the deliverable."
   fi
 }
 

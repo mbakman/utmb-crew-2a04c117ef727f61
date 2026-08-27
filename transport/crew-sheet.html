@@ -173,6 +173,19 @@ b,strong{ font-weight:800; }
 }
 .hero__chain i{ font-style:normal; background:var(--navy); color:var(--cream); padding:.5mm 1.2mm; }
 .hero__chain u{ text-decoration:none; opacity:.55; font-weight:800; }
+/* an unverified step inside the READ-THIS-FIRST chain: same dashed + hatch
+   + literal word treatment as .unv, sized for the chain. */
+.hero__chain i.unvstep{
+  background-color:var(--cream); color:var(--navy);
+  background-image:repeating-linear-gradient(45deg,
+     rgba(2,14,72,.10) 0 .7mm, rgba(2,14,72,0) .7mm 2.1mm);
+  border:1.4px dashed var(--navy); padding:.25mm 1.2mm;
+}
+.hero__chain i.unvstep b{
+  display:inline-block; background:var(--navy); color:var(--yellow);
+  font-size:5.6px; letter-spacing:.18em; font-weight:800;
+  padding:.2mm 1mm; margin-left:1mm; vertical-align:baseline;
+}
 
 /* ---------- main columns ---------- */
 .cols{ flex:1 1 auto; display:flex; gap:1.8mm; min-height:0; }
@@ -243,12 +256,12 @@ b,strong{ font-weight:800; }
 .cp__sect u{ text-decoration:none; letter-spacing:.06em; color:var(--ink-45); }
 
 /* ---------- legs ---------- */
-.legs{ padding:0 1.7mm .4mm; }
+.legs{ padding:0 1.7mm .25mm; }
 .leg{
   display:grid;
   grid-template-columns:4mm 1fr;
   gap:0 1.2mm;
-  padding:.6mm 0;
+  padding:.46mm 0;
   border-top:1.1px solid var(--ink-12);
 }
 .leg:first-child{ border-top:0; }
@@ -298,9 +311,9 @@ b,strong{ font-weight:800; }
 .unv--inline{ display:inline-block; margin-top:.5mm; padding:.5mm 1mm; }
 
 /* ---------- return block ---------- */
-.ret{ padding:0 1.7mm .8mm; }
+.ret{ padding:0 1.7mm .45mm; }
 .ret__row{
-  font-size:7.05px; line-height:1.2; padding:.6mm 0;
+  font-size:7.05px; line-height:1.2; padding:.46mm 0;
   border-top:1.1px solid var(--ink-12);
 }
 .ret__row:first-child{ border-top:0; }
@@ -513,7 +526,7 @@ b,strong{ font-weight:800; }
       <div class="hero__h">For Les Contamines go <span>down-valley via Saint-Gervais</span> &mdash; never via Chamonix</div>
       <p class="hero__p">The Chamonix&nbsp;&gt;&nbsp;Contamines shuttle&rsquo;s <b>last outbound is 20:30 Friday</b> &mdash; finished before Suha&rsquo;s arrival window at km&nbsp;32.5 even opens, and it runs one way only. <b>Saint&nbsp;Gervais&nbsp;&lt;&gt;&nbsp;NDG runs every 20&nbsp;min until 01:00</b> &mdash; straight through that window, past the 00:00 cutoff, and on your side of the valley. Take the train down; Chamonix never enters the plan.</p>
       <div class="hero__chain">
-        <i>Les Houches gare</i><u>&rarr;</u><i>train</i><u>&rarr;</u><i>Le Fayet</i><u>&rarr;</u><i>Saint Gervais</i><u>&rarr;</u><i>shuttle every 20 min</i><u>&rarr;</u><i>Contamines&nbsp;(UTMB)</i>
+        <i>Les Houches gare</i><u>&rarr;</u><i>train</i><u>&rarr;</u><i>Le Fayet</i><u>&rarr;</u><i class="unvstep">Saint Gervais <b>Unverified hop</b></i><u>&rarr;</u><i>shuttle every 20 min</i><u>&rarr;</u><i>Contamines&nbsp;(UTMB)</i>
       </div>
     </div>
   </div>
@@ -548,7 +561,7 @@ b,strong{ font-weight:800; }
             <div class="leg__b">
               <div class="leg__mode">Train <i>&mdash; Mont-Blanc Express, down-valley</i></div>
               <div class="leg__r">Les Houches <em>&rarr;</em> Le Fayet (Gare)</div>
-              <div class="leg__d">Two minutes on foot from the base to the platform &mdash; that is your advantage, use it. Free with the Guest Card. Aim to land by about 20:00.</div>
+              <div class="leg__d">Two minutes on foot from base to platform. Free with the Guest Card; land by ~20:00.</div>
               <div class="unv"><span class="unv__k">Unverified</span><span class="unv__t">Times at Les Houches. Photograph the board the day before.</span></div>
             </div>
           </div>
@@ -557,8 +570,8 @@ b,strong{ font-weight:800; }
             <div class="leg__b">
               <div class="leg__mode">Shuttle <i>&mdash; line 2, Passy &lt;&gt; Saint Gervais</i></div>
               <div class="leg__r">Le Fayet (Gare) <em>&rarr;</em> Saint Gervais</div>
-              <div class="leg__d"><span class="tag tag--time">every 20 min &rarr; 02:00</span><span class="tag tag--dur">15 min</span> The only UTMB line calling at Le Fayet station, and the latest-running line in France.</div>
-              <div class="unv"><span class="unv__k">Unverified</span><span class="unv__t">The poster prints <b>no stop named Saint Gervais</b> &mdash; they stop at Le Fayet (Gare), and the village is ~300 m above. Ask the driver whether it climbs to La Poste.</span></div>
+              <div class="leg__d"><span class="tag tag--time">every 20 min &rarr; 02:00</span> The only <b>follower</b> line calling at Le Fayet station, and the latest-running line in France.</div>
+              <div class="unv"><span class="unv__k">Unverified</span><span class="unv__t">The poster prints <b>no stop named Saint Gervais</b> &mdash; they stop at Le Fayet (Gare), 300 m below the village. Ask if it climbs to La Poste. <b>No published time for that hop:</b> the 15 min is Passy&rarr;Le Fayet.</span></div>
             </div>
           </div>
           <div class="leg">
@@ -572,13 +585,13 @@ b,strong{ font-weight:800; }
         </div>
 
         <div class="ret" style="padding-bottom:.4mm">
-          <div class="ret__row"><span class="ret__lbl">On the night</span>The arrival window is wide: km 32.5 could come up around <b>21:30</b>, and the cutoff is <b>00:00</b>. Be in place by 21:00 and be ready to wait. Contamines is closed to private cars.</div>
+          <div class="ret__row"><span class="ret__lbl">On the night</span>km 32.5 could come up around <b>21:30</b>; the cutoff is <b>00:00</b>. Be ready to wait.<span class="unv unv--inline"><span class="unv__k">Unverified</span><span class="unv__t">The <b>21:30</b> is estimated from a 17:45 start &mdash; not official. Watch LiveTrail.</span></span></div>
         </div>
 
         <div class="cp__sect">Getting back <u>&mdash; both options end unresolved</u></div>
         <div class="ret">
-          <div class="ret__row"><span class="ret__lbl best">Option A</span>Contamines &rarr; NDG &rarr; Chamonix on line 5 (every 30&nbsp;min, last 01:00 from NDG, lands ~01:25). <b>Then nothing verified runs to Les Houches.</b></div>
-          <div class="ret__row"><span class="ret__lbl">Option B</span>Stay down-valley: line 3 to Saint Gervais (last 01:00), line 2 to Le Fayet (last 02:00) &mdash; then the train, <b>if one still runs.</b></div>
+          <div class="ret__row"><span class="ret__lbl best">Option A</span>Contamines &rarr; NDG &rarr; Chamonix, line 5 (every 30&nbsp;min; <b>last departure 01:00 from NDG</b>, 55&nbsp;min, lands <b>~01:55</b>). <b>Nothing verified runs on to Les Houches.</b></div>
+          <div class="ret__row"><span class="ret__lbl">Option B</span>Stay down-valley: line 3 to Saint Gervais (01:00), line 2 to Le Fayet (02:00) &mdash; then the train, <b>if one runs.</b> Also follower-accessible: <b>post-race Chamonix&nbsp;&gt;&nbsp;Cluses</b>, Maison Nordique <b>23:59 Fri / 04:00 Sat</b> &rarr; Le Fayet <b>00:30 / 04:30</b>. <b>Never Les Houches.</b></div>
         </div>
       </article>
     </div>
@@ -747,7 +760,7 @@ b,strong{ font-weight:800; }
         <small>Critical</small>
       </div>
       <div class="panel__b">
-        <p class="risk__p">After U3 on Friday night you are back in Chamonix around <b>01:00&ndash;01:25</b> and <b>there is no verified way home.</b> Line 1 finished at 20:14, the last train has long gone, and <b>no UTMB shuttle runs Chamonix&nbsp;&rarr;&nbsp;Les Houches at any hour</b> &mdash; verified against the official 20-line index. The same wall reappears Sunday if you route U11 back through Chamonix.</p>
+        <p class="risk__p">After U3 on Friday night you are back in Chamonix around <b>01:25&ndash;01:55</b> &mdash; the last two line-5 departures from NDG are 00:30 and 01:00, and the ride is 55&nbsp;min &mdash; and <b>there is no verified way home.</b> Line 1 finished at 20:14, the last train has <b>almost certainly</b> gone &mdash; <b>UNVERIFIED, confirm at the station</b> &mdash; and <b>no UTMB shuttle runs Chamonix&nbsp;&rarr;&nbsp;Les Houches at any hour</b>, verified against the official 20-line index. The same wall reappears Sunday if you route U11 back through Chamonix.</p>
         <div class="risk__grid">
           <div class="risk__cell">
             <b>Do this before Friday</b>
@@ -795,6 +808,7 @@ b,strong{ font-weight:800; }
       </div>
       <div class="panel__b">
         <ul class="chk">
+          <li><span class="chk__box p1"></span><span class="chk__t"><b>LAST TRAIN CHAMONIX &rarr; LES HOUCHES</b> &mdash; the leg it all turns on.</span></li>
           <li><span class="chk__box p1"></span><span class="chk__t"><b>A Guest Card for every crew member</b> &mdash; ask at check-in.</span></li>
           <li><span class="chk__box p1"></span><span class="chk__t"><b>Chamo&rsquo;Nuit:</b> does it stop in Les Houches, which nights, first and last?</span></li>
           <li><span class="chk__box p1"></span><span class="chk__t"><b>Last train from Le Fayet</b> up-valley to Les Houches.</span></li>
@@ -811,8 +825,8 @@ b,strong{ font-weight:800; }
   <footer class="foot">
     <div class="foot__c" style="flex:1.35 1 0"><b>U1 Les Houches, km 9.1 &mdash; your own village, Fri ~18:30&ndash;19:15</b>The course runs through the village about an hour in. Walk out and cheer &mdash; but it is a <b>water point and personal assistance is NOT permitted:</b> no food, kit or drinks. First legal assistance is U3. <span class="unv unv--inline" style="margin-top:.3mm"><span class="unv__k">Unverified</span><span class="unv__t">Estimated from a 17:45 start &mdash; not official. Watch LiveTrail.</span></span></div>
     <div class="foot__c"><b>Passes are zone-based</b>Sold per race <i>and</i> per country. U3 needs FRANCE, U7 ITALY, U11 SWITZERLAND; U13 by train needs none. Booking closed 12/07/2026 &mdash; no on-site sales, no resale. Board with the emailed QR code; screenshot it offline, the valleys have no signal.</div>
-    <div class="foot__c"><b>No private cars &middot; two Chamonix hubs</b>Roads and parking are closed to cars at Les Contamines, Saint-Gervais, Courmayeur, La Fouly, Champex, Col de la Forclaz, Trient and Vallorcine. In Chamonix <b>Gr&eacute;pon Bus</b> serves the start and <b>Maison Nordique</b> serves runner-following &mdash; 10 min apart, and the wrong one costs an hour.</div>
-    <div class="foot__c"><b>Provenance</b>The routing here is <i>derived</i>, not published &mdash; no UTMB document is written for a crew based in Les Houches. Built from the official follower timetable, network map, course cutoffs and verified local facts, retrieved 2026-08-26. Every unconfirmed step is marked UNVERIFIED. Full timetable overleaf, with the source URL.</div>
+    <div class="foot__c"><b>No private cars &middot; two Chamonix hubs</b>Roads and parking are closed to cars at Les Contamines, Saint-Gervais, Courmayeur, La Fouly, Champex, Col de la Forclaz, Trient and Vallorcine. In Chamonix <b>Gr&eacute;pon Bus</b> serves the start and <b>Maison Nordique</b> serves runner-following &mdash; <b>except the St&nbsp;Gervais direction</b>, which the map legend (item 9) excludes; that is line 1, boarded at Gr&eacute;pon Bus. 10 min apart, the wrong one costs an hour.</div>
+    <div class="foot__c"><b>Provenance</b>The routing here is <i>derived</i>, not published &mdash; no UTMB document is written for a Les Houches crew. Built from the official follower timetable, network map, cutoffs and verified local facts, retrieved 2026-08-26. Every unconfirmed step is marked UNVERIFIED. <b>Duration badges here are the printed time for that hop</b>, not the whole line; end-to-end figures are overleaf, with the source URL.</div>
   </footer>
 
 </section>
@@ -881,7 +895,7 @@ b,strong{ font-weight:800; }
           <div class="stop"><div class="stop__t">16:15</div><div class="stop__n">Le Fayet<i>Gare</i></div></div>
         </div>
         <div class="ln__freq"><i>Frequency</i><b>every 20 min <u>&rarr;</u> 02:00 <u>(29/08)</u></b></div>
-        <div class="ln__note">The only line calling at <b>Le Fayet (Gare)</b>, the train station, and the latest-running line in France. <b>Note:</b> no stop actually named Saint Gervais is printed.</div>
+        <div class="ln__note">The only <b>follower</b> line calling at <b>Le Fayet (Gare)</b>, the train station, and the latest-running line in France. The runner start and post-race shuttles call there too &mdash; both legend-marked accessible to followers. <b>Note:</b> no stop actually named Saint Gervais is printed.</div>
       </article>
 
       <article class="ln">
@@ -916,7 +930,7 @@ b,strong{ font-weight:800; }
           <div class="stop"><div class="stop__t">21:25</div><div class="stop__n">Chamonix<i>Maison Nordique</i></div></div>
         </div>
         <div class="ln__freq"><i>Frequency</i><b>every 30 min <u>&rarr;</u> 01:00 <u>(29/08)</u></b></div>
-        <div class="ln__note">The return from the Contamines valley. The last one lands in Chamonix ~01:25, <b>with nothing onward to Les Houches.</b> It also calls at Saint Gervais.</div>
+        <div class="ln__note">The return from the Contamines valley. <b>55 min end to end</b>, so the last departure (01:00 from NDG) lands in Chamonix <b>~01:55</b>, <b>with nothing onward to Les Houches.</b> It also calls at Saint Gervais.</div>
       </article>
 
       <article class="ln ln--alt">
@@ -973,10 +987,10 @@ b,strong{ font-weight:800; }
             <div class="howto__i"><b>&#8225; The 23:59 on line 4</b>The poster prints &ldquo;23:59M&rdquo;. That is a typographic error in the official artwork &mdash; the other cells read &ldquo;02:00AM&rdquo;, &ldquo;01:00AM&rdquo;, so an &ldquo;A&rdquo; has been dropped. It is 23:59.</div>
             <div class="howto__i"><b>One way vs two way</b>Reproduced exactly as the poster prints each line. Lines 1, 5 and 8 are one-way. For line 8 a return must physically exist &mdash; it runs to 03:00 Sunday &mdash; but none is published, so do not plan on it.</div>
             <div class="howto__i"><b>Times past midnight</b>A bracketed date means the time belongs to the following day: line 2&rsquo;s &ldquo;02:00 (29/08)&rdquo; is 2 a.m. on the Saturday.</div>
-            <div class="howto__i"><b>Two Chamonix hubs</b><b>Gr&eacute;pon Bus</b> serves the race start; <b>Maison Nordique</b> serves runner-following. They are ~10 min apart on foot and the wrong one costs an hour.</div>
+            <div class="howto__i"><b>Two Chamonix hubs</b><b>Gr&eacute;pon Bus</b> serves the race start; <b>Maison Nordique</b> serves runner-following &mdash; <b>except the St Gervais direction.</b> The Chamonix map legend qualifies item 9 in as many words: &ldquo;Race tracking &ndash; except St Gervais direction UTMB&rdquo;. That exception is line 1, and the timetable duly boards it at Gr&eacute;pon Bus. They are ~10 min apart on foot and the wrong one costs an hour.</div>
             <div class="howto__i"><b>Nothing returns to Les Houches</b>Verified against the official 20-line index: the only line touching Les Houches is <b>Houches &gt; Chamonix</b> &mdash; one way, one run, 16:00 Friday.</div>
-            <div class="howto__i"><b>On board</b>Boarding is by the QR code emailed at booking; all of one person&rsquo;s journeys sit under a single code. No under-3s, no pets; bikes and scooters at the driver&rsquo;s discretion.</div>
-            <div class="howto__i"><b>Timetables can change mid-event</b>Both official posters carry the same warning: times may vary during the event and <b>changes are notified by SMS</b>. Make sure the number on the booking is one you carry.</div>
+            <div class="howto__i"><b>On board</b>Boarding is by the QR code emailed at booking; all of one person&rsquo;s journeys sit under a single code. <b>No children under 3</b> &mdash; both posters. On animals and wheels the two disagree: the FR follower timetable, the primary source here, <b>forbids pets, bikes and scooters outright</b> (&ldquo;il est interdit d&rsquo;emmener des animaux de compagnie, v&eacute;los et trottinettes&rdquo;); the EN Chamonix poster only <i>recommends</i> against them and leaves each driver free to refuse. <b>Plan on the FR rule.</b></div>
+            <div class="howto__i"><b>Timetables can change mid-event</b>Both posters warn that times may vary &mdash; but they name <b>different channels</b>. The FR follower timetable (primary) says any change is communicated <b>via the website</b> (&ldquo;via le site internet&rdquo;); the EN Chamonix poster says <b>by SMS</b>. Watch both: carry the number on the booking, <i>and</i> check the UTMB site before you leave.</div>
           </div>
         </div>
       </section>

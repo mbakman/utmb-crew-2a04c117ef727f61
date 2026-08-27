@@ -14,6 +14,12 @@
 
 <link rel="manifest" href="manifest.webmanifest">
 
+<!-- Declared explicitly so the browser stops probing /favicon.ico on every
+     load — that 404 is the only request this app ever makes that misses, and
+     offline it is a wasted round trip. Both files are precached by sw.js. -->
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
 <!-- Stylesheets. app.css is the core; the other two are owned by the
      checklist and share modules. All three are linked here so no later
      change has to touch this file. -->

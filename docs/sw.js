@@ -42,7 +42,11 @@
  * ------------------------------------------------------------------ */
 
 var CACHE_PREFIX = 'utmb-crew';
-var CACHE_VERSION = 'v2';
+/* v3: index.html gained explicit icon <link>s, and store.js / drawer.js /
+ * checklist.js now render cutoffs in 24-hour time. The app is already live and
+ * this worker serves cache-first, so a phone that installed v2 keeps serving v2
+ * until this string changes — bumping it is what makes an update reach anyone. */
+var CACHE_VERSION = 'v3';
 var CACHE_NAME = CACHE_PREFIX + '-' + CACHE_VERSION;
 
 /* Everything is resolved against the directory this worker lives in, so the
@@ -100,7 +104,12 @@ var OPTIONAL_ASSETS = [
   'icons/apple-touch-icon.png',
   'icons/icon-192.png',
   'icons/icon-512.png',
-  'icons/icon-512-maskable.png'
+  'icons/icon-512-maskable.png',
+
+  /* Not used by the app — only crawlers ever ask for it. Listed so this
+   * manifest still accounts for every file in docs/ except sw.js itself, which
+   * is the check the deploy checklist above is verified against. */
+  'robots.txt'
 ];
 
 var INDEX_URL = abs('index.html');

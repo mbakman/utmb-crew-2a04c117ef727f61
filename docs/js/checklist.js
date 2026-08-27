@@ -114,6 +114,13 @@ window.UTMB = window.UTMB || {};
 
   function toast(msg) { if (typeof UTMB.toast === 'function') UTMB.toast(msg); }
 
+  /* store.js owns the 12h -> 24h cutoff formatter; fall back to the raw string
+   * if this file is ever loaded without it. Display only — the stored value and
+   * everything getContent() hands to share.js are untouched. */
+  function fmtCutoff(raw) {
+    return typeof UTMB.fmtCutoff === 'function' ? UTMB.fmtCutoff(raw) : raw;
+  }
+
   function mintId(cpId, phase) {
     idSeq += 1;
     return (cpId || 'cp') + '-' + (phase || 'item') + '-u' + Date.now().toString(36) +
@@ -1016,7 +1023,9 @@ window.UTMB = window.UTMB || {};
 
       var metaBits = [];
       if (typeof m.km === 'number') metaBits.push(m.km + ' km');
-      if (m.cutoff) metaBits.push('cutoff ' + m.cutoff);
+      /* 24-hour, matching the transport board directly below this one.
+       * See UTMB.fmtCutoff in store.js. */
+      if (m.cutoff) metaBits.push('cutoff ' + fmtCutoff(m.cutoff));
       card.appendChild(h('div', 'ck-ov-meta', metaBits.join(' · ')));
 
       card.appendChild(h('div', 'ck-ov-count', pr.done + '/' + pr.total + ' done'));
