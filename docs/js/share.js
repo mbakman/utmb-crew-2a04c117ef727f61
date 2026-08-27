@@ -28,6 +28,11 @@
  * separately by checklist.js and is left untouched, so anything already ticked
  * off stays ticked as long as its id survives.
  *
+ * Receiving is also never EARLY. main.js calls UTMB.share.receivePending() as
+ * the last step of bootstrap, and receivePending() itself waits for
+ * UTMB.checklist.isReady() before decoding anything: a diff taken before this
+ * phone has loaded its own checklist reports every item in the link as new.
+ *
  * Fallback for anything that mangles long URLs: export/import a .json file via
  * navigator.share() or a download, plus a paste-a-link box.
  *
@@ -2090,6 +2095,59 @@ window.UTMB = window.UTMB || {};
     clearHash();
   })();
 
+  /* ── the receive gate ─────────────────────────────────────────────────────
+   * An incoming link is only meaningful next to what this phone already has.
+   * If we diff before checklist.js has folded checklists.json in, `local` is
+   * empty and every single item in the link is reported as ADDED — the crew
+   * are shown "31 items added" for a checklist byte-identical to their own,
+   * and there is no way for them to tell that from a real update.
+   *
+   * So: never decode a link until the checklist module says its content is
+   * loaded. If that never happens the page itself is broken, and saying so is
+   * far better than showing a diff that is a lie — the link stays in their
+   * messages either way. */
+  var RECEIVE_POLL_MS = 100;
+  var RECEIVE_MAX_WAIT_MS = 15000;
+
+  function contentReady() {
+    var api = UTMB.checklist;
+    /* No checklist module on this page at all: the storage slot is all the
+     * content there is, and readContent() gets it synchronously. */
+    if (!isPlainObject(api)) return true;
+    if (typeof api.isReady === 'function') return !!api.isReady();
+    /* An older checklist.js with no readiness signal — fall back to the
+     * bootstrap context, which is set at the same point in the boot. */
+    return !!ctxOf();
+  }
+
+  function whenContentReady(fn) {
+    if (contentReady()) { fn(true); return; }
+    var waited = 0;
+    (function attempt() {
+      if (contentReady()) { fn(true); return; }
+      waited += RECEIVE_POLL_MS;
+      if (waited >= RECEIVE_MAX_WAIT_MS) { fn(false); return; }
+      setTimeout(attempt, RECEIVE_POLL_MS);
+    })();
+  }
+
+  function deliverToken(token, origin) {
+    whenContentReady(function (ready) {
+      if (!ready) {
+        console.error('[UTMB share] refusing to apply an incoming link: this page never finished ' +
+          'loading its own checklist, so the comparison would report every item as new.');
+        toast('A crew update arrived, but this phone has not finished loading its own checklist. ' +
+          'Reload the page and open the link again.');
+        return;
+      }
+      try {
+        handleIncomingToken(token, origin);
+      } catch (err) {
+        reportError(err);
+      }
+    });
+  }
+
   function clearHash() {
     if (typeof window === 'undefined' || !window.location) return;
     try {
@@ -2103,15 +2161,15 @@ window.UTMB = window.UTMB || {};
     try { window.location.hash = ''; } catch (err) { /* nothing else to try */ }
   }
 
-  function consumePendingToken() {
-    if (!pendingToken) return;
+  /* Called by main.js as the LAST step of bootstrap, once the checklist has its
+   * content. Safe to call more than once and safe to call early — the gate
+   * above holds it until there is something honest to diff against. */
+  function receivePending() {
+    if (!pendingToken) return false;
     var token = pendingToken;
     pendingToken = null;
-    try {
-      handleIncomingToken(token, 'link');
-    } catch (err) {
-      reportError(err);
-    }
+    deliverToken(token, 'link');
+    return true;
   }
 
   function onHashChange() {
@@ -2120,11 +2178,7 @@ window.UTMB = window.UTMB || {};
     if (h.indexOf(HASH_PREFIX) !== 0) return;
     var token = h.slice(HASH_PREFIX.length);
     clearHash();
-    try {
-      handleIncomingToken(token, 'link');
-    } catch (err) {
-      reportError(err);
-    }
+    deliverToken(token, 'link');
   }
 
   function mountHeaderButton() {
@@ -2206,18 +2260,22 @@ window.UTMB = window.UTMB || {};
     if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
       window.addEventListener('hashchange', onHashChange);
     }
-
-    /* Let the map paint before a review sheet slides over it. */
-    setTimeout(consumePendingToken, 260);
   }
 
   if (typeof UTMB.ready === 'function') UTMB.ready(init);
 
   if (typeof document !== 'undefined') {
-    /* Safety net: if course.json fails to load, main.js never calls _markReady
-     * and UTMB.ready() never fires — but a crew member who just tapped a shared
-     * link still needs the review sheet. Come up on our own after a moment. */
-    var armSafetyNet = function () { setTimeout(init, 2500); };
+    /* Safety net: if main.js is missing, or its bootstrap dies somewhere it
+     * cannot recover from, UTMB.ready() never fires — but a crew member who
+     * just tapped a shared link still needs the review sheet. Come up on our
+     * own after a moment. receivePending() is still gated on the checklist
+     * having content, so this cannot resurrect the empty-diff bug. */
+    var armSafetyNet = function () {
+      setTimeout(function () {
+        init();
+        receivePending();
+      }, 2500);
+    };
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', armSafetyNet);
     } else {
@@ -2235,6 +2293,10 @@ window.UTMB = window.UTMB || {};
     ShareError: ShareError,
 
     init: init,
+    /* main.js calls this last, after checklist.js has its content. */
+    receivePending: receivePending,
+    hasPending: function () { return !!pendingToken; },
+    contentReady: contentReady,
     open: function (cpId) { renderShareSheet(cpId || null); },
     close: closeSheet,
 

@@ -23,6 +23,12 @@ window.UTMB = window.UTMB || {};
    *   'state:dirty'    true|false
    *   'state:save'     {n, p, pl, sn, ts}
    *   'training:mode'  true|false
+   *
+   * Feature-module events (see the module that owns each):
+   *   'checklist:ready'   {content, ticks}                     checklist.js
+   *   'checklist:change'  {reason, cpId, content, ticks}       checklist.js
+   *   'checklist:content' {content, removedIds, source}        share.js
+   *   'transport:ready'   {shuttles}                           transport.js
    * ───────────────────────────────────────────────────────────────────────── */
   var listeners = Object.create(null);
 

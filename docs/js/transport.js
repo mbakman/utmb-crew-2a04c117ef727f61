@@ -11,14 +11,19 @@
  * bus shelter at 01:00 has to be able to tell a timetable from a guess.
  *
  * Public surface
+ *   UTMB.transport.init(ctx)                    idempotent; main.js drives it
+ *   UTMB.transport.isReady()
  *   UTMB.transport.renderFor(cpId, containerEl) -> true if something was drawn
+ *   UTMB.transport.renderOverview()             the #transportMount board
  *   UTMB.transport.isCrewPoint(cpId)
  *   UTMB.transport.crewPointFor(cpId)
  *   UTMB.transport.lineFor(ref)
  *   UTMB.transport.data()
  *
- * Wiring: UTMB.ready() captures the parsed shuttles.json, then 'cp:open' /
- * 'cp:close' paint and clear #drawerTransportMount. index.html is untouched.
+ * Wiring: main.js calls init(ctx) with the parsed shuttles.json (and UTMB.ready()
+ * does the same if some other bootstrap runs the page). init() paints the crew
+ * board into #transportMount; 'cp:open' / 'cp:close' paint and clear
+ * #drawerTransportMount. index.html is untouched.
  *
  * Styles are injected from here (prefixed `tr-`) rather than added to app.css,
  * so this module owns its own presentation and cannot collide with the
@@ -776,6 +781,113 @@ window.UTMB = window.UTMB || {};
   }
 
   /* ─────────────────────────────────────────────────────────────────────────
+   * Crew transport board — #transportMount, full width under the map/profile.
+   *
+   * index.html reserves that mount for this module; without it the section
+   * stays empty and .mount:empty hides it, so the four crew points and the
+   * clock that actually binds them (the last service home) are only reachable
+   * by opening each checkpoint one at a time. Same card idiom as the checklist
+   * board next to it, and every unverified figure keeps its badge.
+   * ───────────────────────────────────────────────────────────────────────── */
+
+  function orderedCrewPoints() {
+    var pts = (shuttles.crewPoints || []).filter(function (c) { return c && c.cp; }).slice();
+    if (course && Array.isArray(course.cps)) {
+      var rank = Object.create(null);
+      course.cps.forEach(function (c, i) { rank[c.id] = i; });
+      pts.sort(function (a, b) {
+        var ra = rank[a.cp] === undefined ? 9999 : rank[a.cp];
+        var rb = rank[b.cp] === undefined ? 9999 : rank[b.cp];
+        return ra - rb;
+      });
+    }
+    return pts;
+  }
+
+  function overviewCardHtml(cpt) {
+    var returns = (cpt.returnOptions || []).slice().sort(function (a, b) {
+      return (a.preference || 99) - (b.preference || 99);
+    });
+    var best = returns[0] || null;
+    var assumedDate = cpt.cutoff && cpt.cutoff.date ? cpt.cutoff.date : null;
+    var b = best ? bindingLast(best, assumedDate) : null;
+
+    var loud = (cpt.warnings || []).map(function (id) { return idx.warnings[id]; })
+      .filter(function (w) { return w && (w.severity === 'critical' || w.severity === 'high'); });
+
+    var html = '<button type="button" class="tr-ov-card" data-cp="' + esc(cpt.cp) + '" ' +
+      'aria-label="Open the transport plan for ' + esc(cpt.name) + '">';
+
+    html += '<div class="tr-ov-top"><span class="tr-ov-cp">' + esc(cpt.cp) + '</span>' +
+      '<span class="tr-ov-name">' + esc(cpt.name) + '</span></div>';
+
+    html += '<div class="tr-ov-row">' +
+      (cpt.difficulty
+        ? '<span class="tr-diff tr-diff-' + esc(cpt.difficulty) + '">' + esc(cpt.difficulty.toUpperCase()) +
+          (cpt.difficultyRating ? ' · ' + esc(cpt.difficultyRating) + '/5' : '') + '</span>'
+        : '') +
+      (cpt.passRequired ? chip(zoneLabel(cpt.zone) + ' pass', 'pass') : chip('no pass', 'first')) +
+      '</div>';
+
+    var bits = [];
+    if (typeof cpt.km === 'number') bits.push('km ' + cpt.km);
+    if (cpt.cutoff && cpt.cutoff.time) {
+      bits.push('cutoff ' + (cpt.cutoff.dow ? cpt.cutoff.dow + ' ' : '') + cpt.cutoff.time);
+    }
+    if (bits.length) html += '<div class="tr-ov-meta">' + esc(bits.join(' · ')) + '</div>';
+
+    html += '<div class="tr-ov-last"><span class="tr-ov-k">Last way home</span>';
+    if (b) {
+      html += '<span class="tr-ov-v">' + esc(fmtWhen(b.time, b.date)) + '</span>' +
+        (b.assumed
+          ? ' ' + unverifiedBadge('DATE ASSUMED')
+          : (b.line.lastSemanticsVerified === false ? ' ' + unverifiedBadge('UNVERIFIED') : ''));
+    } else {
+      html += '<span class="tr-ov-v tr-ov-none">not published</span> ' + unverifiedBadge('UNVERIFIED');
+    }
+    html += '</div>';
+
+    if (loud.length) {
+      html += '<div class="tr-ov-warn">' + loud.length + ' serious warning' +
+        (loud.length === 1 ? '' : 's') + '</div>';
+    }
+
+    return html + '</button>';
+  }
+
+  function overviewHtml() {
+    var pts = orderedCrewPoints();
+    if (!pts.length) return '';
+    var origin = (shuttles.crewBase && shuttles.crewBase.village) || 'Les Houches';
+
+    var html = '<div class="tr-ov">';
+    html += '<div class="tr-ov-head"><div class="tr-ov-title">Crew transport</div>' +
+      '<div class="tr-ov-sum">' + pts.length + ' access points from ' + esc(origin) + '</div></div>';
+    html += '<div class="tr-ov-grid">' + pts.map(overviewCardHtml).join('') + '</div>';
+    html += '<div class="tr-ov-foot">Tap a checkpoint for the full route out, the passes it needs and the way back. ' +
+      'Times wearing an UNVERIFIED badge have not been confirmed against a published timetable.</div>';
+    html += sourceHtml();
+    return html + '</div>';
+  }
+
+  function renderOverview() {
+    var mount = document.getElementById('transportMount');
+    if (!mount) return false;
+    if (!shuttles || !idx) { mount.innerHTML = ''; return false; }
+
+    mount.innerHTML = overviewHtml();
+
+    var cards = mount.querySelectorAll('.tr-ov-card');
+    for (var i = 0; i < cards.length; i++) {
+      cards[i].addEventListener('click', function (ev) {
+        var id = ev.currentTarget.getAttribute('data-cp');
+        if (id && UTMB.drawer && typeof UTMB.drawer.open === 'function') UTMB.drawer.open(id);
+      });
+    }
+    return true;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────
    * Styles — injected here so this module owns its own presentation.
    * System fonts only; palette inherited from app.css :root.
    * ───────────────────────────────────────────────────────────────────────── */
@@ -910,7 +1022,30 @@ window.UTMB = window.UTMB || {};
     '  color:var(--muted);margin-top:10px}',
     '.tr-spec-l{margin:5px 0 0;padding-left:16px;font-size:11.5px;line-height:1.6;color:#c9c9c9}',
     '.tr-onground{font-size:12px;line-height:1.55;color:#c9c9c9}',
-    '.tr-src{margin-top:12px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:#6f6f6f}'
+    '.tr-src{margin-top:12px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:#6f6f6f}',
+    /* crew transport board (#transportMount) — mirrors the checklist board */
+    '.tr-ov{padding:14px 16px 18px;border-top:1px solid #222;background:#121212;',
+    '  font-family:-apple-system,"Avenir Next","Helvetica Neue",sans-serif}',
+    '.tr-ov-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}',
+    '.tr-ov-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}',
+    '.tr-ov-sum{font-size:13px;font-weight:700;color:var(--text)}',
+    '.tr-ov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}',
+    '.tr-ov-card{display:block;width:100%;text-align:left;padding:11px 12px;border-radius:12px;',
+    '  border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;',
+    '  font:inherit;-webkit-tap-highlight-color:transparent}',
+    '.tr-ov-card:active{background:#232323}',
+    '.tr-ov-top{display:flex;align-items:baseline;gap:7px;min-width:0}',
+    '.tr-ov-cp{flex-shrink:0;font-size:13px;font-weight:800;color:var(--supporter);letter-spacing:.3px}',
+    '.tr-ov-name{font-size:15.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+    '.tr-ov-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:7px}',
+    '.tr-ov-meta{font-size:11.5px;color:var(--muted);margin-top:6px}',
+    '.tr-ov-last{margin-top:8px;padding-top:8px;border-top:1px solid #232323;display:flex;',
+    '  flex-wrap:wrap;align-items:baseline;gap:6px}',
+    '.tr-ov-k{flex:1 1 100%;font-size:9.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--muted)}',
+    '.tr-ov-v{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.2px}',
+    '.tr-ov-none{color:#fca5a5}',
+    '.tr-ov-warn{margin-top:7px;font-size:11px;font-weight:700;color:#fca5a5}',
+    '.tr-ov-foot{margin-top:10px;font-size:11px;line-height:1.5;color:var(--muted)}'
   ].join('');
 
   function injectStyles() {
@@ -967,19 +1102,38 @@ window.UTMB = window.UTMB || {};
 
   injectStyles();
 
-  UTMB.ready(function (ctx) {
-    course = ctx && ctx.course ? ctx.course : null;
-    shuttles = ctx && ctx.shuttles ? ctx.shuttles : null;
+  var booted = false;
+
+  /* Bring the module up from a bootstrap context. main.js calls this after
+   * checklist.js and before share.js. Idempotent — a second call with a
+   * richer context re-indexes and repaints rather than doubling anything.
+   * Also on UTMB.ready() so the module still comes up by itself. */
+  function initFromContext(ctx) {
+    ctx = ctx || {};
+
+    /* Once shuttles.json is in hand, a later context cannot improve on it. */
+    if (booted && shuttles && !ctx.shuttles) return UTMB.transport;
+
+    course = ctx.course || course || null;
+    shuttles = ctx.shuttles || shuttles || null;
     idx = shuttles ? buildIndex(shuttles) : null;
 
     if (!shuttles) console.warn('[UTMB] transport: shuttles.json unavailable, drawer will say so');
 
     keepTextareaVisible(document.getElementById('dNotes'));
 
-    /* The drawer may already be open (deep link, re-render) — paint it now. */
+    /* The board under the map/profile. index.html reserves #transportMount for
+     * exactly this and nothing else fills it. */
+    renderOverview();
+
+    /* The drawer may already be open (re-render, restored state) — paint it now. */
     var openCp = UTMB.drawer && typeof UTMB.drawer.activeCp === 'function' ? UTMB.drawer.activeCp() : null;
     if (openCp) renderFor(openCp, document.getElementById('drawerTransportMount'));
-  });
+
+    booted = true;
+    UTMB.emit('transport:ready', { shuttles: shuttles });
+    return UTMB.transport;
+  }
 
   UTMB.on('cp:open', function (e) {
     renderFor(e && e.id, document.getElementById('drawerTransportMount'));
@@ -992,10 +1146,15 @@ window.UTMB = window.UTMB || {};
   });
 
   UTMB.transport = {
+    init: initFromContext,
+    isReady: function () { return booted; },
     renderFor: renderFor,
+    renderOverview: renderOverview,
     isCrewPoint: function (cpId) { return !!(idx && idx.crewPoints[cpId]); },
     crewPointFor: function (cpId) { return (idx && idx.crewPoints[cpId]) || null; },
     lineFor: lineFor,
     data: function () { return shuttles; }
   };
+
+  UTMB.ready(initFromContext);
 })(window.UTMB);

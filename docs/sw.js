@@ -1,6 +1,6 @@
 /* sw.js — offline service worker for the UTMB 2026 crew app.
  *
- * Registered by index.html (inline script at the bottom of the page, scope
+ * Registered by main.js (registerServiceWorker(), on window 'load', scope
  * "./"). Nothing outside this file needs to change to ship an update.
  *
  * Contract this worker implements
@@ -42,7 +42,7 @@
  * ------------------------------------------------------------------ */
 
 var CACHE_PREFIX = 'utmb-crew';
-var CACHE_VERSION = 'v1';
+var CACHE_VERSION = 'v2';
 var CACHE_NAME = CACHE_PREFIX + '-' + CACHE_VERSION;
 
 /* Everything is resolved against the directory this worker lives in, so the

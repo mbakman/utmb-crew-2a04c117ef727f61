@@ -48,6 +48,16 @@
  *                         ticks:set / ticks:reset. The same payload also goes out on the
  *                         UTMB bus as 'checklist:change'.
  *
+ * Lifecycle — main.js drives this, and it drives it BEFORE share.js:
+ *
+ *   init(ctx)             folds checklists.json + the stored edits in and paints.
+ *                         Idempotent. Also runs off UTMB.ready() if some other
+ *                         page bootstraps the module for us.
+ *   isReady()             false until init() has run. share.js will not diff an
+ *                         incoming link before this is true — diffing against an
+ *                         empty module reports every existing item as "added".
+ *                         'checklist:ready' goes out on the bus at the same moment.
+ *
  * Also available: checkpointIds(), getCheckpoint(cpId), setCheckpoint(cpId, phases),
  * items(cpId), progress(cpId) -> {done,total,criticalOpen,drafts}, phaseOrder(),
  * phaseLabels(), isTicked(id), setTick(id,on), toggleTick(id), resetTicks(cpId),
@@ -1050,8 +1060,28 @@ window.UTMB = window.UTMB || {};
     if (mount) mount.textContent = '';
   });
 
-  UTMB.ready(function (ctx) {
+  /* Bring the module up from a bootstrap context. main.js calls this FIRST of
+   * all the feature modules, because share.js diffs an incoming link against
+   * whatever this module holds — if it runs before the seed is in, every item
+   * in the link looks new. Idempotent: calling it again only adopts a context
+   * that is richer than the one already in hand.
+   *
+   * Also registered on UTMB.ready() below, so the module still comes up on its
+   * own if it is ever loaded into a page whose bootstrap does not know it. */
+  function initFromContext(ctx) {
     ctx = ctx || {};
+
+    if (booted) {
+      /* Already up. A later context can still supply the course (checkpoint
+       * names, km, ordering) if the first one did not. */
+      if (ctx.course && !course) {
+        course = ctx.course;
+        seedCache = Object.create(null);
+        renderAll();
+      }
+      return UTMB.checklist;
+    }
+
     course = ctx.course || null;
 
     var cl = ctx.checklists;
@@ -1082,12 +1112,20 @@ window.UTMB = window.UTMB || {};
     loadPersisted();
     booted = true;
     renderAll();
-  });
+    UTMB.emit('checklist:ready', { content: getContent(), ticks: getTicks() });
+    return UTMB.checklist;
+  }
 
   /* ═══════════════════════════════════════════════════════════════════════
    * public surface
    * ═══════════════════════════════════════════════════════════════════════ */
   UTMB.checklist = {
+    /* --- lifecycle --- */
+    init: initFromContext,
+    /* True once checklists.json (or its absence) has been folded in and the
+     * stored edits are loaded. share.js gates the receive path on this. */
+    isReady: function () { return booted; },
+
     /* --- what share.js consumes --- */
     getContent: getContent,
     setContent: setContent,
@@ -1127,4 +1165,8 @@ window.UTMB = window.UTMB || {};
 
     STORAGE: { content: 'utmb_checklist', ticks: 'utmb_checklist_ticks' }
   };
+
+  /* Registered after the public surface exists so initFromContext() can return
+   * it even if a context is already on hand when this file parses. */
+  UTMB.ready(initFromContext);
 })(window.UTMB);

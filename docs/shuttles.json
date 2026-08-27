@@ -1,944 +1,2113 @@
 {
-  "schemaVersion": "1.0.0",
-  "title": "UTMB Mont-Blanc 2026 — transport source of truth for Suha's crew",
-  "compiledAt": "2026-08-27",
-  "timezone": "Europe/Paris",
-  "readMe": {
-    "purpose": "Single source of truth for all transport data. Consumed by the printed crew sheet and the PWA. Times are local (Europe/Paris, CEST, UTC+2). Switzerland and Italy are also UTC+2 in August, so no clock changes anywhere on this network.",
-    "verificationContract": "Every fact that has NOT been confirmed against an official source carries an explicit machine-readable \"verified\": false. Renderers MUST visibly mark any value whose enclosing object has verified:false, and MUST NOT present it as a confirmed time. Objects without a verified flag inherit the flag of their nearest ancestor that has one.",
-    "timeFields": "Each departure has a plain \"time\" string in 24h HH:MM. Times after midnight belong to the date given by the containing object's \"dateEnd\" (or the leg's own \"date\"), never to \"date\".",
-    "lastFieldSemantics": "\"lastText\" / \"lastTime\" / \"lastDate\" reproduce the poster's \"every N min ---> HH:MM\" figure. Whether that figure is the LAST DEPARTURE or the END OF SERVICE is NOT verified — see warning \"last-time-ambiguous\". Treat it as the last moment you can rely on, and be at the stop well before it."
+ "schemaVersion": "1.0.0",
+ "title": "UTMB Mont-Blanc 2026 — transport source of truth for Suha's crew",
+ "compiledAt": "2026-08-27",
+ "timezone": "Europe/Paris",
+ "readMe": {
+  "purpose": "Single source of truth for all transport data. Consumed by the printed crew sheet and the PWA. Times are local (Europe/Paris, CEST, UTC+2). Switzerland and Italy are also UTC+2 in August, so no clock changes anywhere on this network.",
+  "verificationContract": "Every fact that has NOT been confirmed against an official source carries an explicit machine-readable \"verified\": false. Renderers MUST visibly mark any value whose enclosing object has verified:false, and MUST NOT present it as a confirmed time. Objects without a verified flag inherit the flag of their nearest ancestor that has one.",
+  "timeFields": "Each departure has a plain \"time\" string in 24h HH:MM. Times after midnight belong to the date given by the containing object's \"dateEnd\" (or the leg's own \"date\"), never to \"date\".",
+  "lastFieldSemantics": "\"lastText\" / \"lastTime\" / \"lastDate\" reproduce the poster's \"every N min ---> HH:MM\" figure. Whether that figure is the LAST DEPARTURE or the END OF SERVICE is NOT verified — see warning \"last-time-ambiguous\". Treat it as the last moment you can rely on, and be at the stop well before it."
+ },
+ "event": {
+  "name": "HOKA UTMB Mont-Blanc 2026",
+  "race": "UTMB",
+  "runner": "Suha",
+  "distanceKm": 176.8,
+  "start": {
+   "place": "Chamonix",
+   "date": "2026-08-28",
+   "time": "17:45"
   },
-
-  "event": {
-    "name": "HOKA UTMB Mont-Blanc 2026",
-    "race": "UTMB",
-    "runner": "Suha",
-    "distanceKm": 176.8,
-    "start": { "place": "Chamonix", "date": "2026-08-28", "time": "17:45" },
-    "finishCutoff": { "place": "Chamonix", "date": "2026-08-30", "time": "16:30" },
-    "days": [
-      { "date": "2026-08-28", "dow": "Fri", "label": "28/08", "zonesActive": ["france"] },
-      { "date": "2026-08-29", "dow": "Sat", "label": "29/08", "zonesActive": ["france", "italy", "switzerland"] },
-      { "date": "2026-08-30", "dow": "Sun", "label": "30/08", "zonesActive": ["switzerland", "france"] }
+  "finishCutoff": {
+   "place": "Chamonix",
+   "date": "2026-08-30",
+   "time": "16:30"
+  },
+  "days": [
+   {
+    "date": "2026-08-28",
+    "dow": "Fri",
+    "label": "28/08",
+    "zonesActive": [
+     "france"
     ]
-  },
-
-  "crewBase": {
-    "address": "100 Rte de la Gare, Les Houches",
-    "village": "Les Houches",
-    "country": "FR",
-    "note": "The crew is based in LES HOUCHES, not Chamonix. Every published UTMB shuttle sheet is written for people staying in Chamonix, so no official sheet answers this crew's questions directly. Les Houches sits one valley step down from Chamonix: reaching a Chamonix-departing shuttle costs an extra Chamonix Bus Line 1 hop (or a train hop), and Line 1 stops at 20:14.",
-    "nextTo": "Les Houches railway station (Mont-Blanc Express)",
-    "servedBy": ["line1", "train"],
-    "verified": true,
-    "coursePassage": {
-      "checkpoint": "U1",
-      "name": "Les Houches",
-      "km": 9.1,
-      "support": "water",
-      "assistanceAllowed": false,
-      "travelRequired": false,
-      "expectedWindow": { "date": "2026-08-28", "from": "18:30", "to": "19:15", "verified": false, "note": "Estimated from a 17:45 Chamonix start over 9.1 km with the first climb. NOT an official prediction — check LiveTrail on the night." },
-      "note": "The course passes the crew's own village at km 9.1, roughly an hour into the race. It is a WATER POINT ONLY and personal assistance is NOT permitted here. The crew can stand on the trail and cheer, but must not hand over food, kit or drinks. Zero travel required — walk out of the door.",
-      "verified": true
-    }
-  },
-
-  "zones": [
-    { "id": "france", "label": "France", "passRequired": "UTMB Mobility pass — France", "verified": true },
-    { "id": "italy", "label": "Italy", "passRequired": "UTMB Mobility pass — Italy", "verified": true },
-    { "id": "switzerland", "label": "Switzerland", "passRequired": "UTMB Mobility pass — Switzerland", "verified": true }
-  ],
-
-  "passes": {
-    "model": "zone-based",
-    "note": "UTMB Mobility supporter passes are sold per race AND per country zone. Following the runner across France, Italy and Switzerland can require more than one pass. Champex-Lac (U11) and La Fouly are in the SWISS zone and need the Switzerland pass.",
-    "bookingOpened": "2026-06-09",
-    "bookingClosed": "2026-07-12",
-    "onSiteSales": false,
-    "resalePermitted": false,
-    "boardingCredential": "QR code emailed on booking; scanned when boarding. All bookings for one person are grouped under a single QR code.",
-    "crewStatus": "Crew already hold their passes — booking closed 12 July 2026 and there are no on-site sales.",
-    "verified": true,
-    "source": "EN_GUIDE_DES_TRANSPORTS_2026.pdf, 'I am a supporter or spectator' (p.6) and 'How do I book my UTMB Mobility pass?' (p.7)"
-  },
-
-  "followerShuttles": [
-    {
-      "n": 1,
-      "id": "cham-contamines",
-      "name": "Chamonix > Contamines",
-      "zone": "france",
-      "passZone": "france",
-      "date": "2026-08-28",
-      "dateEnd": "2026-08-28",
-      "direction": "oneway",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Chamonix", "sublabel": "Grépon Bus", "time": "17:30" },
-        { "name": "Saint Gervais", "sublabel": "Le Pont", "time": "18:00" },
-        { "name": "Contamines", "sublabel": "NDG", "time": "18:20" }
-      ],
-      "frequencyText": "every 15 min",
-      "frequencyMinutes": 15,
-      "lastText": "20:30",
-      "lastTime": "20:30",
-      "lastDate": "2026-08-28",
-      "lastSourceText": "20:30",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 50,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": 50,
-      "verified": true,
-      "note": "ONE WAY only — this line takes you out to the Contamines valley and does not bring you back. The return is line ndg-cham. Note the Chamonix boarding point is GRÉPON BUS, not Maison Nordique, because this line runs in the Saint-Gervais direction. Its last outbound is 20:30, which is why it is the WRONG line for a U3 crew whose runner arrives after 21:30."
-    },
-    {
-      "n": 2,
-      "id": "passy-stgervais",
-      "name": "Passy <-> Saint Gervais",
-      "zone": "france",
-      "passZone": "france",
-      "date": "2026-08-28",
-      "dateEnd": "2026-08-29",
-      "direction": "both",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Passy", "sublabel": "P+R", "time": "16:00" },
-        { "name": "Mountain Store", "sublabel": null, "time": "16:05" },
-        { "name": "Le Fayet", "sublabel": "Gare", "time": "16:15" }
-      ],
-      "frequencyText": "every 20 min",
-      "frequencyMinutes": 20,
-      "lastText": "02:00 (29/08)",
-      "lastTime": "02:00",
-      "lastDate": "2026-08-29",
-      "lastSourceText": "02:00AM 29/08",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 15,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": null,
-      "verified": true,
-      "note": "The only UTMB line that calls at LE FAYET (GARE) — the mainline/Mont-Blanc Express station — and it runs 20 min later than any other France-zone line (02:00 vs 01:00). That makes it the natural train-to-shuttle connector for a crew coming down-valley from Les Houches. CAVEAT: the poster titles the line 'Passy <-> Saint Gervais' but lists NO stop called Saint Gervais; Le Fayet is part of the Saint-Gervais-les-Bains commune, so the title may simply mean Le Fayet. See warning 'lefayet-to-stgervais-gap'.",
-      "unverifiedClaims": [
-        { "claim": "This line reaches Saint Gervais village / La Poste, where line stgervais-ndg starts.", "verified": false, "note": "Not shown on the poster. The three printed stops stop at Le Fayet (Gare). Saint Gervais village sits roughly 300 m above Le Fayet. Confirm with UTMB Mobility or a driver before relying on it at night." }
-      ]
-    },
-    {
-      "n": 3,
-      "id": "stgervais-ndg",
-      "name": "Saint Gervais <-> NDG",
-      "zone": "france",
-      "passZone": "france",
-      "date": "2026-08-28",
-      "dateEnd": "2026-08-29",
-      "direction": "both",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Saint Gervais", "sublabel": "La Poste", "time": "16:30" },
-        { "name": "Contamines", "sublabel": "UTMB", "time": "16:50" },
-        { "name": "Notre Dame de la Gorge", "sublabel": null, "time": "17:00" }
-      ],
-      "frequencyText": "every 20 min",
-      "frequencyMinutes": 20,
-      "lastText": "01:00 (29/08)",
-      "lastTime": "01:00",
-      "lastDate": "2026-08-29",
-      "lastSourceText": "01:00AM 29/08",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 30,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": 25,
-      "verified": true,
-      "note": "THE workhorse line for U3 Les Contamines. Bidirectional, every 20 min, running until 01:00 — i.e. right through Suha's entire arrival window and past the 00:00 cutoff. This is the line the U3 plan is built on. Legend segments (St-Gervais->Contamines 15 + Contamines->NDG 10 = 25 min) disagree slightly with the printed timetable (20 + 10 = 30 min); the timetable figure is used."
-    },
-    {
-      "n": 4,
-      "id": "contamines-ndg",
-      "name": "Contamines <-> NDG",
-      "zone": "france",
-      "passZone": "france",
-      "date": "2026-08-28",
-      "dateEnd": "2026-08-28",
-      "direction": "both",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Contamines", "sublabel": "UTMB", "time": "17:30" },
-        { "name": "Notre Dame de la Gorge", "sublabel": null, "time": "17:40" }
-      ],
-      "frequencyText": "every 10 min",
-      "frequencyMinutes": 10,
-      "lastText": "23:59",
-      "lastTime": "23:59",
-      "lastDate": "2026-08-28",
-      "lastSourceText": "23:59M",
-      "lastSourceNote": "The source poster prints '23:59M'. The trailing 'M' is a typography error in the official artwork (the other cells read '02:00AM', '01:00AM' etc., so an 'A' has been dropped and the 'M' left behind). Rendered as 23:59.",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 10,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": 10,
-      "verified": true,
-      "note": "Short local hop, every 10 min. Useful only if the crew wants to move between the Contamines village aid station (U3) and Notre-Dame de la Gorge. Ends earlier (23:59) than line stgervais-ndg (01:00), so do not plan the last move of the night on it."
-    },
-    {
-      "n": 5,
-      "id": "ndg-cham",
-      "name": "NDG > Chamonix",
-      "zone": "france",
-      "passZone": "france",
-      "date": "2026-08-28",
-      "dateEnd": "2026-08-29",
-      "direction": "oneway",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Notre Dame de la Gorge", "sublabel": null, "time": "20:30" },
-        { "name": "Saint Gervais", "sublabel": "Le Pont", "time": "20:50" },
-        { "name": "Chamonix", "sublabel": "Maison Nordique", "time": "21:25" }
-      ],
-      "frequencyText": "every 30 min",
-      "frequencyMinutes": 30,
-      "lastText": "01:00 (29/08)",
-      "lastTime": "01:00",
-      "lastDate": "2026-08-29",
-      "lastSourceText": "01:00AM 29/08",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 55,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": 50,
-      "verified": true,
-      "note": "ONE WAY return leg from the Contamines valley to Chamonix. Taking the last one (01:00 from NDG) lands you at Chamonix Maison Nordique around 01:25 — with Chamonix Bus Line 1 finished since 20:14 and no UTMB line onward to Les Houches. See warning 'night-return-risk'. It also stops at Saint Gervais (Le Pont), which is the alternative bail-out if the crew would rather stay down-valley."
-    },
-    {
-      "n": 6,
-      "id": "cham-courmayeur",
-      "name": "Chamonix <-> Courmayeur",
-      "zone": "italy",
-      "passZone": "italy",
-      "date": "2026-08-29",
-      "dateEnd": "2026-08-29",
-      "direction": "both",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Chamonix", "sublabel": "Maison Nordique", "time": "00:30" },
-        { "name": "Courmayeur", "sublabel": "Centre Sportif", "time": "01:15" }
-      ],
-      "frequencyText": "every 30 min",
-      "frequencyMinutes": 30,
-      "lastText": "20:30",
-      "lastTime": "20:30",
-      "lastDate": "2026-08-29",
-      "lastSourceText": "20:30",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 45,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": 45,
-      "verified": true,
-      "note": "Through the Mont-Blanc tunnel. Bidirectional and frequent across the whole day, which makes U7 Courmayeur the easiest of the three big crew points. ITALY pass required. Carry ID/passport — it is an international crossing."
-    },
-    {
-      "n": 7,
-      "id": "courmayeur-arnouvaz",
-      "name": "Courmayeur <-> Arnouvaz",
-      "zone": "italy",
-      "passZone": "italy",
-      "date": "2026-08-29",
-      "dateEnd": "2026-08-30",
-      "direction": "both",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Courmayeur", "sublabel": "Centre Sportif", "time": "07:30" },
-        { "name": "Arnouvaz", "sublabel": null, "time": "08:15" }
-      ],
-      "frequencyText": "every 60 min",
-      "frequencyMinutes": 60,
-      "lastText": "18:30 (30/08)",
-      "lastTime": "18:30",
-      "lastDate": "2026-08-30",
-      "lastSourceText": "18:30 30/08",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 45,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": 45,
-      "verified": true,
-      "note": "Extension beyond Courmayeur to the Arnouvaz aid station (U9, km 101.7). Only HOURLY — the sparsest line on the network, so a missed bus costs a full hour. U9 is NOT an assistance point; this is for spectating only."
-    },
-    {
-      "n": 8,
-      "id": "cham-orsieres",
-      "name": "Chamonix > Orsieres",
-      "zone": "switzerland",
-      "passZone": "switzerland",
-      "date": "2026-08-29",
-      "dateEnd": "2026-08-30",
-      "direction": "oneway",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Chamonix", "sublabel": "Maison Nordique", "time": "05:30" },
-        { "name": "Vallorcine", "sublabel": "Gare", "time": "05:55" },
-        { "name": "Trient", "sublabel": null, "time": "06:10" },
-        { "name": "Orsières", "sublabel": null, "time": "06:50" }
-      ],
-      "frequencyText": "every 45 min",
-      "frequencyMinutes": 45,
-      "lastText": "03:00 (30/08)",
-      "lastTime": "03:00",
-      "lastDate": "2026-08-30",
-      "lastSourceText": "03:00AM 30/08",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 80,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": 90,
-      "verified": true,
-      "note": "The trunk line into Switzerland and the gateway to U11 Champex-Lac. Printed as ONE WAY (Chamonix > Orsières). It calls at Vallorcine (Gare) 25 min in, which means a crew already at Vallorcine can join it without going back to Chamonix. SWITZERLAND pass required. Carry ID/passport.",
-      "unverifiedClaims": [
-        { "claim": "A published Orsières > Chamonix return working exists on this line.", "verified": false, "note": "The poster prints this line one-way and the official Google-Maps line index lists only 'CHAMONIX > ORSIÈRES'. A return must physically exist for a service running until 03:00 Sunday, but its direction and timetable are NOT published on any sheet the crew holds. Do not assume you can ride this line back — plan the Orsières->Trient->Vallorcine chain instead (see crew point U11)." }
-      ]
-    },
-    {
-      "n": 9,
-      "id": "orsieres-champex",
-      "name": "Orsieres <-> Champex-Lac",
-      "zone": "switzerland",
-      "passZone": "switzerland",
-      "date": "2026-08-29",
-      "dateEnd": "2026-08-30",
-      "direction": "both",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Orsières", "sublabel": null, "time": "07:00" },
-        { "name": "Champex Lac", "sublabel": null, "time": "07:25" }
-      ],
-      "frequencyText": "every 30 min",
-      "frequencyMinutes": 30,
-      "lastText": "04:00 (30/08)",
-      "lastTime": "04:00",
-      "lastDate": "2026-08-30",
-      "lastSourceText": "04:00 30/08",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 25,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": 30,
-      "verified": true,
-      "note": "The final leg to U11 Champex-Lac. Bidirectional and running until 04:00 Sunday — 90 min past Suha's 02:30 cutoff, so there is genuine margin here. SWITZERLAND pass required."
-    },
-    {
-      "n": 10,
-      "id": "orsieres-lafouly",
-      "name": "Orsieres <-> La Fouly",
-      "zone": "switzerland",
-      "passZone": "switzerland",
-      "date": "2026-08-29",
-      "dateEnd": "2026-08-29",
-      "direction": "both",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Orsières", "sublabel": null, "time": "07:15" },
-        { "name": "La Fouly", "sublabel": null, "time": "07:40" }
-      ],
-      "frequencyText": "every 30 min",
-      "frequencyMinutes": 30,
-      "lastText": "23:00",
-      "lastTime": "23:00",
-      "lastDate": "2026-08-29",
-      "lastSourceText": "23:00",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 25,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": 30,
-      "verified": true,
-      "note": "Serves U10 La Fouly (km 116.2, cutoff Sat 22:30) — NOT an assistance point, spectating only. This line dies at 23:00, far earlier than the other Swiss lines, so it is a trap: if the crew detours to La Fouly they can be stranded there while the Champex line is still running. SWITZERLAND pass required."
-    },
-    {
-      "n": 11,
-      "id": "orsieres-trient",
-      "name": "Orsieres <-> Trient",
-      "zone": "switzerland",
-      "passZone": "switzerland",
-      "date": "2026-08-29",
-      "dateEnd": "2026-08-30",
-      "direction": "both",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Orsières", "sublabel": null, "time": "08:45" },
-        { "name": "Trient", "sublabel": null, "time": "09:30" }
-      ],
-      "frequencyText": "every 30 min",
-      "frequencyMinutes": 30,
-      "lastText": "04:00 (30/08)",
-      "lastTime": "04:00",
-      "lastDate": "2026-08-30",
-      "lastSourceText": "04:00AM 30/08",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 45,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": null,
-      "verified": true,
-      "note": "KEY RETURN LINK. Bidirectional and running until 04:00 Sunday. Chained with trient-vallorcine it gives the U11 crew a published way OUT of Switzerland that does not depend on the one-way cham-orsieres line having an unpublished return. Also serves U12 Trient (km 147.0) for spectating. SWITZERLAND pass required."
-    },
-    {
-      "n": 12,
-      "id": "trient-vallorcine",
-      "name": "Trient <-> Vallorcine",
-      "zone": "switzerland",
-      "passZone": "switzerland",
-      "date": "2026-08-29",
-      "dateEnd": "2026-08-30",
-      "direction": "both",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Trient", "sublabel": null, "time": "09:00" },
-        { "name": "Vallorcine", "sublabel": null, "time": "09:15" }
-      ],
-      "frequencyText": "every 30 min",
-      "frequencyMinutes": 30,
-      "lastText": "09:00 (30/08)",
-      "lastTime": "09:00",
-      "lastDate": "2026-08-30",
-      "lastSourceText": "09:00AM 30/08",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 15,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": 15,
-      "verified": true,
-      "note": "Shortest hop on the network and the border crossing back into France. Runs the LONGEST of any line — until 09:00 Sunday morning — which makes it the crew's safety net out of Switzerland. Drops you at Vallorcine, where the Mont-Blanc Express runs straight home to Les Houches. Crosses the Swiss/French border: carry ID/passport."
-    },
-    {
-      "n": 13,
-      "id": "cham-vallorcine",
-      "name": "Chamonix <-> Vallorcine",
-      "zone": "switzerland",
-      "passZone": "switzerland",
-      "date": "2026-08-29",
-      "dateEnd": "2026-08-30",
-      "direction": "both",
-      "audience": "followers",
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Chamonix", "sublabel": "Maison Nordique", "time": "05:00" },
-        { "name": "Vallorcine", "sublabel": null, "time": "05:30" }
-      ],
-      "frequencyText": "every 30 min",
-      "frequencyMinutes": 30,
-      "lastText": "12:30 (30/08)",
-      "lastTime": "12:30",
-      "lastDate": "2026-08-30",
-      "lastSourceText": "12:30 30/08",
-      "lastSemanticsVerified": false,
-      "journeyMinutes": 30,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": null,
-      "journeyMinutesLegendRange": [35, 40],
-      "verified": true,
-      "note": "Backup way to reach U13 Vallorcine. For a Les Houches crew the Mont-Blanc Express train is strictly better — direct, free with the Guest Card, and no Chamonix transfer. Runs until 12:30 Sunday, just past Suha's 11:15 Vallorcine cutoff.",
-      "zoneNote": {
-        "verified": false,
-        "note": "WHICH PASS THIS LINE NEEDS IS UNCLEAR. The follower poster prints it in the SWITZERLAND (29/08) column, but the network-map legend lists 'Chamonix <> Vallorcine' TWICE — once under ZONE FRANCE at 35 min and once under ZONE SUISSE at 40 min — and Vallorcine is physically in France. Recorded as switzerland to match the poster column. If the crew intends to use this line rather than the train, confirm the pass zone first."
-      }
-    }
-  ],
-
-  "startShuttles": [
-    {
-      "id": "houches-cham",
-      "name": "Houches > Chamonix",
-      "zone": "france",
-      "passZone": "france",
-      "date": "2026-08-28",
-      "dateEnd": "2026-08-28",
-      "direction": "oneway",
-      "singleRun": true,
-      "audience": "runners",
-      "followersAllowed": true,
-      "bookingRequired": true,
-      "stops": [
-        { "name": "Houches", "sublabel": "Prarion", "time": "16:00" },
-        { "name": "Houches", "sublabel": "Mairie", "time": "16:05" },
-        { "name": "Les Bossons", "sublabel": null, "time": "16:15" },
-        { "name": "Chamonix", "sublabel": "Grépon Bus", "time": "16:35" }
-      ],
-      "frequencyText": null,
-      "frequencyMinutes": null,
-      "lastText": null,
-      "lastTime": null,
-      "lastDate": null,
-      "lastSemanticsVerified": null,
-      "journeyMinutes": 35,
-      "journeyMinutesSource": "timetable",
-      "journeyMinutesLegend": null,
-      "verified": true,
-      "note": "SINGLE RUN — one bus, one time, no frequency column on the poster. This is a RUNNER start shuttle but the poster legend explicitly marks it 'RUNNER SHUTTLE - START - ACCESSIBLE TO FOLLOWERS', so the crew may ride it. It is the crew's one free, guaranteed Les Houches -> Chamonix move of the whole weekend, departing from their own village at 16:00 Friday and arriving Grépon Bus at 16:35 — 70 min before the 17:45 start. If they miss it, they are on Chamonix Bus Line 1. It runs OUT of Les Houches only; nothing in the UTMB network ever brings them back."
-    }
-  ],
-
-  "otherRunnerShuttles": {
-    "note": "Reference only — not part of the crew's plan, but recorded because this file is the single source of truth for transport. All are marked in the poster legend as accessible to followers. Verbatim from EN_UTMB_1_chamonix.jpg.",
-    "verified": true,
-    "start": [
-      { "id": "lefayet-cham", "name": "Le Fayet > Chamonix", "date": "2026-08-28", "singleRun": true, "stops": [ { "name": "Le Fayet", "sublabel": "Gare", "time": "15:30" }, { "name": "Chamonix", "sublabel": "Grépon Bus", "time": "15:55" } ] },
-      { "id": "vallorcine-cham", "name": "Vallorcine > Chamonix", "date": "2026-08-28", "singleRun": true, "stops": [ { "name": "Vallorcine", "sublabel": null, "time": "16:00" }, { "name": "Le Buet", "sublabel": null, "time": "16:05" }, { "name": "Argentière", "sublabel": "Gare", "time": "16:15" }, { "name": "Les Chosalets", "sublabel": null, "time": "16:20" }, { "name": "Arveyron", "sublabel": null, "time": "16:30" }, { "name": "Chamonix", "sublabel": "Grépon Bus", "time": "16:40" } ] },
-      { "id": "cluses-cham", "name": "Cluses > Chamonix", "date": "2026-08-28", "singleRun": true, "stops": [ { "name": "Cluses", "sublabel": "Gare", "time": "15:00" }, { "name": "Sallanches", "sublabel": "Gare", "time": "15:20" }, { "name": "Servoz", "sublabel": "Gare", "time": "15:50" }, { "name": "Chamonix", "sublabel": "Grépon Bus", "time": "16:10" } ] },
-      { "id": "contamines-cham-start", "name": "Contamines > Chamonix", "date": "2026-08-28", "singleRun": true, "stops": [ { "name": "Contamines", "sublabel": "Mairie", "time": "15:00" }, { "name": "Saint Gervais", "sublabel": "Le Pont", "time": "15:15" }, { "name": "Chamonix", "sublabel": "Grépon Bus", "time": "15:50" } ] }
-    ],
-    "postRace": [
-      { "id": "cham-cluses-2808", "name": "Chamonix > Cluses", "date": "2026-08-28", "singleRun": true, "dateEnd": "2026-08-29", "stops": [ { "name": "Chamonix", "sublabel": "Maison Nordique", "time": "23:59" }, { "name": "Le Fayet", "sublabel": "Gare", "time": "00:30" }, { "name": "Sallanches", "sublabel": "Gare", "time": "00:45" }, { "name": "Cluses", "sublabel": "Gare", "time": "01:10" } ], "note": "Runs down-valley from Chamonix at 23:59 Friday. It does NOT stop at Les Houches, so it does not solve the crew's night-return problem — but it does prove that a late Friday westbound movement exists if they end up in Chamonix and need to get to Le Fayet." },
-      { "id": "cham-cluses-2908", "name": "Chamonix > Cluses", "date": "2026-08-29", "singleRun": true, "runs": 2, "stops": [ { "name": "Chamonix", "sublabel": "Maison Nordique", "times": ["04:00", "23:59"] }, { "name": "Le Fayet", "sublabel": "Gare", "times": ["04:30", "00:30"] }, { "name": "Sallanches", "sublabel": "Gare", "times": ["04:45", "00:40"] }, { "name": "Cluses", "sublabel": "Gare", "times": ["05:10", "01:15"] } ] },
-      { "id": "cham-cluses-3008", "name": "Chamonix > Cluses", "date": "2026-08-30", "singleRun": true, "runs": 2, "stops": [ { "name": "Chamonix", "sublabel": "Maison Nordique", "times": ["04:00", "17:00"] }, { "name": "Le Fayet", "sublabel": "Gare", "times": ["04:30", "17:20"] }, { "name": "Sallanches", "sublabel": "Gare", "times": ["04:45", "17:40"] }, { "name": "Cluses", "sublabel": "Gare", "times": ["05:10", "18:00"] } ] },
-      { "id": "cham-contamines-post", "name": "Chamonix > Contamines", "date": "2026-08-29", "dateAlt": "2026-08-30", "singleRun": true, "runs": 2, "stops": [ { "name": "Chamonix", "sublabel": "Maison Nordique", "times": ["20:00", "17:00"] }, { "name": "Saint Gervais", "sublabel": "Le Pont", "times": ["20:30", "17:30"] }, { "name": "Contamines", "sublabel": "Mairie", "times": ["21:00", "18:00"] } ], "note": "First time column is 29/08, second is 30/08." },
-      { "id": "cham-orsieres-post", "name": "Chamonix > Orsieres", "date": "2026-08-29", "dateEnd": "2026-08-30", "stops": [ { "name": "Chamonix", "sublabel": "Maison Nordique", "time": "05:30" }, { "name": "Orsières", "sublabel": null, "time": "06:50" } ], "frequencyText": "every 60 min", "frequencyMinutes": 60, "lastText": "Sun 30/08", "lastSourceText": "SUN. 30:08", "lastSemanticsVerified": false },
-      { "id": "cham-trient-post", "name": "Chamonix > Trient", "date": "2026-08-29", "dateEnd": "2026-08-30", "stops": [ { "name": "Chamonix", "sublabel": "Maison Nordique", "time": "05:00" }, { "name": "Vallorcine", "sublabel": null, "time": "05:40" }, { "name": "Trient", "sublabel": null, "time": "06:00" } ], "frequencyText": "every 60 min", "frequencyMinutes": 60, "lastText": "09:00 (30/08)", "lastTime": "09:00", "lastDate": "2026-08-30", "lastSourceText": "09:00AM 30/08", "lastSemanticsVerified": false }
+   },
+   {
+    "date": "2026-08-29",
+    "dow": "Sat",
+    "label": "29/08",
+    "zonesActive": [
+     "france",
+     "italy",
+     "switzerland"
     ]
-  },
-
-  "localTransport": [
-    {
-      "id": "line1",
-      "name": "Chamonix Bus — Line 1",
-      "operator": "Chamonix Bus",
-      "type": "bus",
-      "servesCrewBase": true,
-      "verified": true,
-      "note": "VERIFIED and the crew's daily lifeline: Line 1 runs Les Houches <-> Chamonix <-> Les Praz / Flégère, every 30 minutes, daily, from 05:40 to 20:14, on the summer timetable that runs 21 June to 7 September — so it covers race weekend. The hard fact to plan around is the 20:14 finish: after that there is NO verified public link between Chamonix and Les Houches. Free with the Carte d'Hôte (Guest Card) in normal season.",
-      "facts": [
-        { "fact": "Route: Les Houches <-> Chamonix <-> Les Praz / Flégère", "verified": true },
-        { "fact": "Frequency: every 30 minutes, daily", "verified": true },
-        { "fact": "Service span: 05:40 to 20:14", "verified": true },
-        { "fact": "Summer timetable valid 21 June – 7 September, therefore covers 28–30 August 2026", "verified": true },
-        { "fact": "Line 1 runs its normal hours on UTMB race weekend (no special early/late working, no diversion)", "verified": false, "note": "NOT VERIFIED. The network map shows a road-closure icon at Les Houches, which could affect routing. Race weekend is the busiest of the year and operators sometimes add or cut journeys. Confirm at the Chamonix Bus office or on the timetable posted at the stop." },
-        { "fact": "Line 1 is free with the Carte d'Hôte (Guest Card)", "verified": false, "note": "Normally true across the Chamonix valley for card holders, but not confirmed for this specific weekend or for this accommodation's card. Carry the card; expect it to work; do not be surprised if asked to pay." }
-      ],
-      "crewImpact": "Anything that puts the crew in Chamonix after 20:14 leaves them with no verified way home. This single number drives every routing decision in this file."
-    },
-    {
-      "id": "train",
-      "name": "Mont-Blanc Express",
-      "operator": "SNCF / TMR",
-      "type": "train",
-      "servesCrewBase": true,
-      "verified": true,
-      "note": "VERIFIED to serve Les Houches station, which is next door to the crew base at 100 Rte de la Gare. The Servoz -> Vallorcine section is FREE with the Carte d'Hôte (Guest Card) issued by the accommodation — Les Houches, Chamonix and Vallorcine all sit inside that free section, which makes the train the cheapest and simplest tool the crew has. EXACT TIMES AT LES HOUCHES ARE NOT VERIFIED and must be checked at the station.",
-      "facts": [
-        { "fact": "The Mont-Blanc Express calls at Les Houches station", "verified": true },
-        { "fact": "The Servoz -> Vallorcine section is free with the Carte d'Hôte (Guest Card) issued by the accommodation", "verified": true },
-        { "fact": "Les Houches -> Vallorcine is inside the free section and requires no change of train", "verified": false, "note": "Les Houches and Vallorcine both lie within Servoz–Vallorcine so the free-travel claim should hold, and the line is a single through route, but 'no change' has not been confirmed against a printed timetable. Confirm at Les Houches station." },
-        { "fact": "Exact departure and arrival times at Les Houches station", "verified": false, "note": "BIG GAP. No timetable in the crew's possession. Photograph the board at Les Houches station the day before." },
-        { "fact": "Last train of the evening from Le Fayet, and from Vallorcine", "verified": false, "note": "CRITICAL and unknown. This is what decides whether a down-valley or Swiss-side return is survivable. On the confirm-tomorrow checklist." },
-        { "fact": "The train runs normal hours on UTMB race weekend", "verified": false, "note": "Not confirmed. Vallorcine's roads and car parks are closed for the event, which historically increases rail demand; special workings are possible either way." }
-      ],
-      "crewImpact": "The train is the answer for U13 Vallorcine and the first leg for U3. It is also the only mode that leaves from the crew's doorstep."
-    },
-    {
-      "id": "chamonuit",
-      "name": "Chamo'Nuit (night bus)",
-      "operator": "Chamonix Bus",
-      "type": "night-bus",
-      "servesCrewBase": null,
-      "verified": false,
-      "note": "UNVERIFIED — THIS IS THE BIGGEST GAP IN THE WHOLE PLAN. A night service called Chamo'Nuit is known to exist and its fare is known (4.50 EUR by card / 5.00 EUR cash, paid on board). NOTHING ELSE IS CONFIRMED: not the route, not the stops, not the operating hours, not the nights it runs, and CRUCIALLY NOT WHETHER IT SERVES LES HOUCHES AT ALL. Do not build any return plan on it until someone has confirmed it in person. If it does serve Les Houches on Friday night it solves the crew's worst problem; if it does not, the answer is a taxi.",
-      "facts": [
-        { "fact": "A night bus service called Chamo'Nuit exists", "verified": true },
-        { "fact": "Fare 4.50 EUR by card, 5.00 EUR cash, paid on board", "verified": true },
-        { "fact": "Route and list of stops", "verified": false, "note": "Completely unknown." },
-        { "fact": "Operating hours and which nights it runs", "verified": false, "note": "Completely unknown." },
-        { "fact": "Whether it serves Les Houches at all", "verified": false, "note": "Completely unknown, and it is the single most valuable thing the crew can find out tomorrow." },
-        { "fact": "Whether it runs at all on UTMB race weekend", "verified": false, "note": "Completely unknown." }
-      ],
-      "crewImpact": "If confirmed to serve Les Houches after midnight, it closes the night-return gap for U3. Until confirmed, treat the gap as open and budget for a taxi.",
-      "howToConfirm": "Chamonix Bus office or Les Houches tourist office, in person, tomorrow. Ask specifically: does Chamo'Nuit stop in Les Houches, on which nights, first and last departure from Chamonix."
-    }
-  ],
-
-  "chamonixHubs": {
-    "note": "Chamonix has TWO separate UTMB bus hubs and boarding the wrong one loses an hour. Verified from the Chamonix map on EN_UTMB_3_network_map.jpg.",
-    "verified": true,
-    "hubs": [
-      { "id": "grepon-bus", "name": "Grépon Bus", "mapRef": 11, "role": "UTMB Bus departures and arrivals for getting TO the race start line.", "usedBy": ["cham-contamines", "houches-cham"] },
-      { "id": "maison-nordique", "name": "Maison Nordique", "mapRef": 9, "role": "UTMB Bus departures and arrivals for race tracking (following the runner) — the official map annotates this as 'except St Gervais direction UTMB'.", "usedBy": ["ndg-cham", "cham-courmayeur", "cham-orsieres", "cham-vallorcine"] }
-    ],
-    "caveat": { "verified": false, "note": "The map's 'except St Gervais direction' note appears to apply to DEPARTURES only: the Chamonix > Contamines outbound (Saint-Gervais direction) leaves from Grépon Bus, yet the NDG > Chamonix return arrives at Maison Nordique. That reading is inferred from the timetables, not stated. If in doubt in Chamonix, check both — they are about 10 minutes apart on foot." }
-  },
-
-  "crewPoints": [
-    {
-      "cp": "U3",
-      "name": "Les Contamines",
-      "km": 32.5,
-      "cutoff": { "dow": "Sat", "date": "2026-08-29", "time": "00:00" },
-      "support": "food",
-      "assistanceAllowed": true,
-      "zone": "france",
-      "passRequired": "france",
-      "difficulty": "moderate",
-      "difficultyRating": 3,
-      "headline": "GO DOWN-VALLEY VIA SAINT-GERVAIS — do not go via Chamonix.",
-      "reasoning": "The Chamonix > Contamines line (cham-contamines) has its LAST OUTBOUND at 20:30 Friday, before Suha's realistic arrival window at km 32.5 even opens, and it is one-way. The Saint Gervais <-> NDG line (stgervais-ndg) runs every 20 minutes until 01:00 — straight through the whole arrival window and past the 00:00 cutoff — and it is on the crew's own side of the valley, reachable from Les Houches by train without ever touching Chamonix.",
-      "legs": [
-        { "seq": 1, "mode": "walk", "ref": null, "from": "Crew base, 100 Rte de la Gare, Les Houches", "to": "Les Houches railway station", "durationMinutes": 2, "verified": true, "note": "The base is next door to the station. This is the crew's structural advantage — use it." },
-        { "seq": 2, "mode": "train", "ref": "train", "from": "Les Houches", "to": "Le Fayet (Gare) / Saint-Gervais-les-Bains-Le Fayet", "durationMinutes": null, "verified": false, "note": "Mont-Blanc Express, down-valley. TIMES NOT VERIFIED — check the board at Les Houches station the day before and pick a departure that lands you at Le Fayet by about 20:00." },
-        { "seq": 3, "mode": "utmb-shuttle", "ref": "passy-stgervais", "from": "Le Fayet (Gare)", "to": "Saint Gervais", "durationMinutes": 15, "verified": false, "note": "CONNECTOR LEG, PARTLY UNVERIFIED. Line passy-stgervais is the only UTMB line calling at Le Fayet (Gare) and it runs every 20 min until 02:00 — later than every other France-zone line. But the poster lists no stop actually named 'Saint Gervais', so whether it climbs to Saint Gervais village (La Poste) is unconfirmed. If it does not, the crew needs a local link from Le Fayet up to the village. Ask the driver." },
-        { "seq": 4, "mode": "utmb-shuttle", "ref": "stgervais-ndg", "from": "Saint Gervais (La Poste)", "to": "Contamines (UTMB)", "durationMinutes": 20, "verified": true, "note": "Every 20 min, first 16:30, last 01:00. This is the reliable leg. Contamines (UTMB) is the assistance point itself." }
-      ],
-      "returnOptions": [
-        {
-          "id": "u3-return-chamonix",
-          "preference": 1,
-          "label": "Contamines -> Chamonix, then unresolved",
-          "legs": [
-            { "seq": 1, "mode": "utmb-shuttle", "ref": "stgervais-ndg", "from": "Contamines (UTMB)", "to": "Notre Dame de la Gorge", "verified": true, "note": "Or walk / take contamines-ndg (ends 23:59)." },
-            { "seq": 2, "mode": "utmb-shuttle", "ref": "ndg-cham", "from": "Notre Dame de la Gorge", "to": "Chamonix (Maison Nordique)", "durationMinutes": 55, "verified": true, "note": "Every 30 min, last 01:00 from NDG. The 01:00 departure lands in Chamonix about 01:25." },
-            { "seq": 3, "mode": "unresolved", "ref": null, "from": "Chamonix (Maison Nordique)", "to": "Les Houches", "verified": false, "note": "NO VERIFIED OPTION. Line 1 finished at 20:14. No UTMB line runs Chamonix -> Les Houches at any hour (confirmed by the official line index: the only Les Houches line is HOUCHES > CHAMONIX, one-way, 16:00 Friday). Chamo'Nuit is unverified. Fall back to a taxi." }
-          ]
-        },
-        {
-          "id": "u3-return-downvalley",
-          "preference": 2,
-          "label": "Stay down-valley: Contamines -> Saint Gervais -> Le Fayet",
-          "legs": [
-            { "seq": 1, "mode": "utmb-shuttle", "ref": "stgervais-ndg", "from": "Contamines (UTMB)", "to": "Saint Gervais (La Poste)", "durationMinutes": 20, "verified": true, "note": "Last 01:00." },
-            { "seq": 2, "mode": "utmb-shuttle", "ref": "passy-stgervais", "from": "Saint Gervais", "to": "Le Fayet (Gare)", "durationMinutes": 15, "verified": false, "note": "Runs until 02:00 — the latest anything runs in the France zone." },
-            { "seq": 3, "mode": "unresolved", "ref": "train", "from": "Le Fayet (Gare)", "to": "Les Houches", "verified": false, "note": "Depends entirely on the LAST TRAIN FROM LE FAYET, which is unknown and very likely long gone by 01:00. On the confirm-tomorrow checklist. If there is no train, this option ends in a taxi from Le Fayet." }
-          ]
-        }
-      ],
-      "warnings": ["night-return-risk", "last-time-ambiguous", "lefayet-to-stgervais-gap", "no-chamonix-to-houches-line"],
-      "notes": "Arrival window is wide: a strong runner could reach km 32.5 around 21:30, the cutoff is 00:00. Be in place by 21:00 and be prepared to wait. Les Contamines is closed to private cars — shuttle or train only."
-    },
-    {
-      "cp": "U7",
-      "name": "Courmayeur",
-      "km": 83.4,
-      "cutoff": { "dow": "Sat", "date": "2026-08-29", "time": "13:15" },
-      "support": "hotmeal",
-      "assistanceAllowed": true,
-      "zone": "italy",
-      "passRequired": "italy",
-      "difficulty": "easy",
-      "difficultyRating": 2,
-      "headline": "The easy one. Daylight, frequent buses both ways.",
-      "reasoning": "A Saturday-daytime crew point. Line 1 starts at 05:40 and the Chamonix <-> Courmayeur shuttle runs every 30 minutes in both directions from 00:30 to 20:30, so the crew can go and come back inside normal service hours with plenty of slack.",
-      "legs": [
-        { "seq": 1, "mode": "walk", "ref": null, "from": "Crew base, 100 Rte de la Gare, Les Houches", "to": "Les Houches Line 1 bus stop", "durationMinutes": 5, "verified": false, "note": "Line 1 serves Les Houches (verified); which stop is nearest the base is not confirmed. Walk it in daylight beforehand." },
-        { "seq": 2, "mode": "line1", "ref": "line1", "from": "Les Houches", "to": "Chamonix", "durationMinutes": null, "verified": true, "note": "Every 30 min from 05:40. Before 05:40 there is no bus — you would need a taxi." },
-        { "seq": 3, "mode": "utmb-shuttle", "ref": "cham-courmayeur", "from": "Chamonix (Maison Nordique)", "to": "Courmayeur (Centre Sportif)", "durationMinutes": 45, "verified": true, "note": "Every 30 min, 00:30 to 20:30. Board at MAISON NORDIQUE, not Grépon Bus." }
-      ],
-      "returnOptions": [
-        {
-          "id": "u7-return",
-          "preference": 1,
-          "label": "Reverse the outbound",
-          "legs": [
-            { "seq": 1, "mode": "utmb-shuttle", "ref": "cham-courmayeur", "from": "Courmayeur (Centre Sportif)", "to": "Chamonix (Maison Nordique)", "durationMinutes": 45, "verified": true, "note": "Bidirectional, every 30 min, last 20:30." },
-            { "seq": 2, "mode": "line1", "ref": "line1", "from": "Chamonix", "to": "Les Houches", "durationMinutes": null, "verified": true, "note": "MUST be back in Chamonix before 20:14 or Line 1 is finished. With a 13:15 cutoff this is easy — but do not linger in Courmayeur into the evening." }
-          ]
-        }
-      ],
-      "warnings": ["last-time-ambiguous", "line1-cutoff-2014", "border-id"],
-      "notes": "Italy pass required. Carry ID or passport — the shuttle runs through the Mont-Blanc tunnel. Courmayeur is a life base with a hot meal and drop bags, so plan for a longer stop with the runner. Courmayeur is closed to private cars."
-    },
-    {
-      "cp": "U11",
-      "name": "Champex-Lac",
-      "km": 130.5,
-      "cutoff": { "dow": "Sun", "date": "2026-08-30", "time": "02:30" },
-      "support": "hotmeal",
-      "assistanceAllowed": true,
-      "zone": "switzerland",
-      "passRequired": "switzerland",
-      "difficulty": "hard",
-      "difficultyRating": 5,
-      "headline": "THE HARD ONE. Two legs, a night transfer at Orsières, a Swiss pass, and a Saturday-evening departure deadline.",
-      "reasoning": "Champex-Lac is 90 minutes deep into Switzerland with a change at Orsières, and the crew must be there in the small hours of Sunday. The binding constraint is at the very start: the crew must leave Les Houches BEFORE Chamonix Bus Line 1 stops at 20:14 on Saturday, or they cannot reach Chamonix to catch the Swiss trunk line at all.",
-      "legs": [
-        { "seq": 1, "mode": "walk", "ref": null, "from": "Crew base, 100 Rte de la Gare, Les Houches", "to": "Les Houches Line 1 bus stop", "durationMinutes": 5, "verified": false, "note": "Or the railway station if using the train to Chamonix instead." },
-        { "seq": 2, "mode": "line1", "ref": "line1", "from": "Les Houches", "to": "Chamonix", "durationMinutes": null, "verified": true, "note": "HARD DEADLINE: board before 20:14 Saturday. After that Line 1 is done and there is no verified way to Chamonix. The train is the alternative but its evening times are unverified." },
-        { "seq": 3, "mode": "utmb-shuttle", "ref": "cham-orsieres", "from": "Chamonix (Maison Nordique)", "to": "Orsières", "durationMinutes": 80, "verified": true, "note": "Every 45 min, first 05:30 Sat, last 03:00 Sun. Calls at Vallorcine (Gare) and Trient en route. Board at MAISON NORDIQUE." },
-        { "seq": 4, "mode": "transfer", "ref": null, "from": "Orsières", "to": "Orsières", "durationMinutes": null, "verified": false, "note": "NIGHT TRANSFER in a small Swiss village. Both lines run every 30–45 min so the wait should be short, but there is no verified indoor waiting area. Dress for standing outside at altitude in the dark." },
-        { "seq": 5, "mode": "utmb-shuttle", "ref": "orsieres-champex", "from": "Orsières", "to": "Champex Lac", "durationMinutes": 25, "verified": true, "note": "Every 30 min, last 04:00 Sun — 90 min past Suha's cutoff, so there is real margin on this leg." }
-      ],
-      "returnOptions": [
-        {
-          "id": "u11-return-trient-vallorcine",
-          "preference": 1,
-          "label": "RECOMMENDED — out via Trient and Vallorcine, then the train home",
-          "note": "Every leg here is printed as BIDIRECTIONAL on the poster, unlike the one-way Chamonix > Orsières trunk line, and it ends at Vallorcine where the crew's own free train line starts. It also avoids Chamonix entirely, so the 20:14 Line 1 problem never arises.",
-          "legs": [
-            { "seq": 1, "mode": "utmb-shuttle", "ref": "orsieres-champex", "from": "Champex Lac", "to": "Orsières", "durationMinutes": 25, "verified": true, "note": "Last 04:00 Sun." },
-            { "seq": 2, "mode": "utmb-shuttle", "ref": "orsieres-trient", "from": "Orsières", "to": "Trient", "durationMinutes": 45, "verified": true, "note": "Every 30 min, last 04:00 Sun." },
-            { "seq": 3, "mode": "utmb-shuttle", "ref": "trient-vallorcine", "from": "Trient", "to": "Vallorcine", "durationMinutes": 15, "verified": true, "note": "Every 30 min, last 09:00 Sun — the longest-running line on the whole network. Crosses back into France." },
-            { "seq": 4, "mode": "train", "ref": "train", "from": "Vallorcine", "to": "Les Houches", "durationMinutes": null, "verified": false, "note": "Mont-Blanc Express, free with the Guest Card. FIRST TRAIN TIME UNKNOWN — expect a wait at Vallorcine until the first morning service. On the confirm-tomorrow checklist." }
-          ]
-        },
-        {
-          "id": "u11-return-orsieres-chamonix",
-          "preference": 2,
-          "label": "Back the way you came — NOT RELIABLE",
-          "legs": [
-            { "seq": 1, "mode": "utmb-shuttle", "ref": "orsieres-champex", "from": "Champex Lac", "to": "Orsières", "durationMinutes": 25, "verified": true },
-            { "seq": 2, "mode": "unresolved", "ref": "cham-orsieres", "from": "Orsières", "to": "Chamonix", "verified": false, "note": "Line cham-orsieres is printed ONE WAY and the official line index lists no Orsières > Chamonix working. A return bus must physically exist, but it is not published. Do not stake the night on it." },
-            { "seq": 3, "mode": "unresolved", "ref": null, "from": "Chamonix", "to": "Les Houches", "verified": false, "note": "Arriving Chamonix in the small hours of Sunday hits the same wall as U3: no Line 1, no UTMB line, Chamo'Nuit unverified. Taxi." }
-          ]
-        }
-      ],
-      "warnings": ["night-return-risk", "line1-cutoff-2014", "swiss-pass-required", "border-id", "oneway-orsieres", "last-time-ambiguous"],
-      "notes": "SWITZERLAND pass required — Champex-Lac is in the Swiss zone. Carry ID or passport. Champex is a life base with a hot meal. Champex and La Fouly are both closed to private cars. Do NOT detour to La Fouly on the way: line orsieres-lafouly dies at 23:00 while everything else runs to 04:00, and it is not an assistance point anyway."
-    },
-    {
-      "cp": "U13",
-      "name": "Vallorcine",
-      "km": 158.4,
-      "cutoff": { "dow": "Sun", "date": "2026-08-30", "time": "11:15" },
-      "support": "food",
-      "assistanceAllowed": true,
-      "zone": "france",
-      "passRequired": null,
-      "difficulty": "easy",
-      "difficultyRating": 1,
-      "headline": "THE EASIEST ONE. Direct train from the doorstep, free with the Guest Card, no Chamonix transfer, no UTMB shuttle needed.",
-      "reasoning": "Les Houches and Vallorcine are both on the Mont-Blanc Express, and both sit inside the Servoz–Vallorcine section that is free with the Carte d'Hôte. The crew walks to their own station, rides one train, and arrives. No pass, no QR code, no shuttle, no Chamonix. Sunday late morning, in daylight.",
-      "legs": [
-        { "seq": 1, "mode": "walk", "ref": null, "from": "Crew base, 100 Rte de la Gare, Les Houches", "to": "Les Houches railway station", "durationMinutes": 2, "verified": true },
-        { "seq": 2, "mode": "train", "ref": "train", "from": "Les Houches", "to": "Vallorcine", "durationMinutes": null, "verified": false, "note": "Mont-Blanc Express, up-valley. Free with the Guest Card. EXACT TIMES NOT VERIFIED — check the board at Les Houches station. Aim to arrive well before the 11:15 cutoff." }
-      ],
-      "returnOptions": [
-        {
-          "id": "u13-return",
-          "preference": 1,
-          "label": "Same train back",
-          "legs": [
-            { "seq": 1, "mode": "train", "ref": "train", "from": "Vallorcine", "to": "Les Houches", "durationMinutes": null, "verified": false, "note": "Free with the Guest Card. Daylight Sunday, so the night-return problem does not apply here." }
-          ]
-        }
-      ],
-      "alternatives": [
-        { "label": "UTMB shuttle via Chamonix", "ref": "cham-vallorcine", "verified": true, "note": "Line cham-vallorcine runs Chamonix <-> Vallorcine every 30 min until 12:30 Sunday. Strictly worse for this crew: it requires getting to Chamonix first, costs a pass, and the poster/legend disagree about whether it is a France-zone or Switzerland-zone line. Use only if the train fails." }
-      ],
-      "warnings": ["train-times-unverified"],
-      "notes": "Last full assistance point before the finish — the most emotionally important stop of the weekend, and the cheapest to reach. Vallorcine is closed to private cars, so the train is the right tool anyway. No UTMB pass is needed for the recommended route."
-    }
-  ],
-
-  "roadClosures": {
-    "summary": "Roads AND parking are closed to private cars in these villages for the duration of the event. Access is only possible by UTMB Mobility shuttle (or, where it runs, by train).",
-    "verified": true,
-    "source": "EN_GUIDE_DES_TRANSPORTS_2026.pdf, 'Road and parking closures' (p.10), verbatim.",
-    "sourceQuote": "During the event, a number of roads and parking areas will be closed to traffic, making it impossible to access Les Contamines, Saint-Gervais, Courmayeur, La Fouly, Champex, Col de la Forclaz, Trient and Vallorcine by private car. Parking will be prohibited in these areas and access will only be possible via UTMB Mobility shuttle services.",
-    "villages": [
-      { "name": "Les Contamines", "country": "FR", "verified": true },
-      { "name": "Saint-Gervais", "country": "FR", "verified": true },
-      { "name": "Courmayeur", "country": "IT", "verified": true },
-      { "name": "La Fouly", "country": "CH", "verified": true },
-      { "name": "Champex", "country": "CH", "verified": true },
-      { "name": "Col de la Forclaz", "country": "CH", "verified": true },
-      { "name": "Trient", "country": "CH", "verified": true },
-      { "name": "Vallorcine", "country": "FR", "verified": true }
-    ],
-    "additional": [
-      { "name": "Les Houches", "country": "FR", "verified": false, "note": "NOT in the official guide's written list, but the network map (EN_UTMB_3) shows a road-closure icon at Les Houches. Since this is the crew's own village, the extent and timing of any closure matters to them directly — and it may also affect Chamonix Bus Line 1's routing. Confirm locally." }
-    ],
-    "crewImpact": "The crew has no car option to any of their four crew points. Every plan in this file is shuttle, train or on foot by necessity, not by preference."
-  },
-
-  "warnings": [
-    {
-      "id": "night-return-risk",
-      "severity": "critical",
-      "title": "NIGHT RETURN TO LES HOUCHES IS UNSOLVED",
-      "body": "After crewing U3 Les Contamines on Friday night, the crew gets back to Chamonix around 01:00–01:25 — and there is NO VERIFIED WAY HOME from there. Chamonix Bus Line 1 finished at 20:14. The last train has long gone (exact time unknown). Chamo'Nuit is completely unverified. No UTMB shuttle runs Chamonix -> Les Houches at any hour. The same wall appears again on Sunday morning after U11 Champex-Lac if the crew routes back through Chamonix. PLAN FOR THIS BEFORE FRIDAY: get a local taxi number, save it in every phone, and agree in advance who calls it and roughly what it will cost.",
-      "verified": true,
-      "affects": ["U3", "U11"],
-      "affectsLines": ["ndg-cham", "line1"],
-      "mitigations": [
-        "Confirm whether Chamo'Nuit serves Les Houches, on which nights and until when.",
-        "Get a Chamonix / Les Houches taxi number and save it offline in every crew phone before Friday.",
-        "Consider the down-valley alternative: stay on the Saint-Gervais side (line passy-stgervais runs until 02:00) and take the first morning train home rather than crossing to Chamonix at all.",
-        "Agree a fallback meeting point and a 'we are stuck' message before splitting up."
-      ]
-    },
-    {
-      "id": "no-chamonix-to-houches-line",
-      "severity": "high",
-      "title": "No UTMB shuttle ever runs Chamonix -> Les Houches",
-      "body": "Verified negative. The official Google-Maps line index (EN_UTMB_4) lists all 20 UTMB lines for the Chamonix side, and the only one touching Les Houches is HOUCHES > CHAMONIX — one way, one single run, 16:00 Friday. The UTMB network takes people out of Les Houches once and never brings them back. Do not wait at Maison Nordique hoping for a bus.",
-      "verified": true,
-      "affects": ["U3", "U7", "U11"],
-      "affectsLines": ["houches-cham"]
-    },
-    {
-      "id": "line1-cutoff-2014",
-      "severity": "high",
-      "title": "Chamonix Bus Line 1 stops at 20:14",
-      "body": "Line 1 is the crew's only verified everyday link between Les Houches and Chamonix, and it runs 05:40 to 20:14, every 30 minutes. Anything that requires being in Chamonix after 20:14 needs a plan that does not involve Line 1. For U11 Champex-Lac this is a hard Saturday-evening departure deadline: board before 20:14 or the whole Swiss plan fails at the first leg.",
-      "verified": true,
-      "affects": ["U7", "U11"],
-      "affectsLines": ["line1"]
-    },
-    {
-      "id": "swiss-pass-required",
-      "severity": "high",
-      "title": "Passes are ZONE-BASED — Champex-Lac and La Fouly need the SWISS pass",
-      "body": "UTMB Mobility supporter passes are sold per race and per country zone (France / Italy / Switzerland). Following Suha across all three requires more than one pass. Champex-Lac (U11) and La Fouly sit in the SWITZERLAND zone. Courmayeur (U7) is ITALY. Les Contamines (U3) is FRANCE. Vallorcine (U13) on the recommended train route needs no UTMB pass at all. Check that every crew member's QR code actually covers the zone they are travelling into BEFORE leaving the flat — a wrong-zone pass is refused at the door of the bus.",
-      "verified": true,
-      "affects": ["U3", "U7", "U11"],
-      "note": "Line cham-vallorcine's zone is ambiguous — see its zoneNote."
-    },
-    {
-      "id": "booking-closed",
-      "severity": "medium",
-      "title": "Booking closed 12 July 2026 — no on-site sales",
-      "body": "UTMB Mobility pass sales and shuttle-time bookings ran 09/06/2026 to 12/07/2026 only. There are NO on-site sales and resale of passes is not permitted. The crew already hold their passes; nothing further can be bought now. Boarding is by QR code, emailed at booking and scanned on the bus — all of one person's journeys are grouped under a single QR code. Have it downloaded and screenshotted offline: mountain valleys have no signal.",
-      "verified": true,
-      "affects": ["U3", "U7", "U11"]
-    },
-    {
-      "id": "last-time-ambiguous",
-      "severity": "medium",
-      "title": "\"every N min ---> HH:MM\" — last departure or end of service? UNVERIFIED",
-      "body": "The poster's closing time for each line is printed without explanation. It could mean the last bus LEAVES the first stop at that time, or that the service ENDS at that time (in which case the last useful departure is earlier). Nobody has confirmed which. Treat every published closing time as the last moment you can rely on, arrive at the stop at least 20 minutes earlier, and never make the final connection of the night the one that depends on this.",
-      "verified": true,
-      "affects": ["U3", "U7", "U11", "U13"],
-      "note": "This flag is mirrored on every line as lastSemanticsVerified: false."
-    },
-    {
-      "id": "lefayet-to-stgervais-gap",
-      "severity": "medium",
-      "title": "Le Fayet station to Saint Gervais village — connection unconfirmed",
-      "body": "The U3 route relies on getting from the Mont-Blanc Express station at Le Fayet up to Saint Gervais (La Poste), where line stgervais-ndg starts. Line passy-stgervais is titled 'Passy <-> Saint Gervais' and calls at Le Fayet (Gare), running until 02:00 — but the poster lists no stop actually named Saint Gervais, and the village sits roughly 300 m above the station. Whether that shuttle closes the gap is UNVERIFIED. Confirm before Friday evening; if it does not, find the local link (bus or taxi) up to the village.",
-      "verified": true,
-      "affects": ["U3"],
-      "affectsLines": ["passy-stgervais", "stgervais-ndg"]
-    },
-    {
-      "id": "oneway-orsieres",
-      "severity": "medium",
-      "title": "Chamonix > Orsières is printed one-way — plan the return via Trient",
-      "body": "The follower poster prints line cham-orsieres as one-way and the official line index confirms no published Orsières > Chamonix working. A return bus must exist for a service running to 03:00 Sunday, but it is not documented. Use the bidirectional chain instead: Champex -> Orsières -> Trient -> Vallorcine -> train home. Every leg of that chain is printed as two-way and the Trient <-> Vallorcine link runs until 09:00 Sunday.",
-      "verified": true,
-      "affects": ["U11"],
-      "affectsLines": ["cham-orsieres", "orsieres-trient", "trient-vallorcine"]
-    },
-    {
-      "id": "train-times-unverified",
-      "severity": "medium",
-      "title": "Mont-Blanc Express times at Les Houches are unknown",
-      "body": "The train serves Les Houches and the Servoz–Vallorcine section is free with the Guest Card, both verified. The actual departure times are not. Three of the four crew plans start or end with this train. Photograph the timetable board at Les Houches station tomorrow, and specifically write down the LAST train from Le Fayet and the FIRST and LAST from Vallorcine.",
-      "verified": true,
-      "affects": ["U3", "U13", "U11"],
-      "affectsLines": ["train"]
-    },
-    {
-      "id": "border-id",
-      "severity": "low",
-      "title": "Carry ID or passport for Italy and Switzerland",
-      "body": "U7 Courmayeur is in Italy (through the Mont-Blanc tunnel) and U11 Champex-Lac is in Switzerland — which is outside the EU customs union. The Trient <-> Vallorcine shuttle also crosses the Swiss/French border. Spot checks happen. Everyone carries ID.",
-      "verified": true,
-      "affects": ["U7", "U11"]
-    },
-    {
-      "id": "timetables-may-change",
-      "severity": "low",
-      "title": "UTMB may change these timetables during the event",
-      "body": "Both official posters carry the same warning: 'these timetables could vary during the event due to the demands of the organisation (you will be notified of any changes by sms)'. Make sure the phone number on the UTMB booking is one the crew actually carries and can receive SMS on in the mountains.",
-      "verified": true,
-      "affects": ["U3", "U7", "U11", "U13"]
-    },
-    {
-      "id": "bus-rules",
-      "severity": "low",
-      "title": "UTMB bus rules: no under-3s, no pets, no bikes or scooters",
-      "body": "Children under 3 are not permitted on UTMB Mobility buses (exceptional derogations exist via the Point Info with proof of age). Pets and animals of any kind are not permitted regardless of size. Bikes and scooters are refused at the driver's discretion. The organisation also states the shuttle system is not recommended for young children given night waiting times and possible bad weather.",
-      "verified": true,
-      "affects": ["U3", "U7", "U11", "U13"]
-    },
-    {
-      "id": "no-assistance-les-houches",
-      "severity": "low",
-      "title": "Les Houches (km 9.1) is a water point — no crewing allowed",
-      "body": "The course passes the crew's own village about an hour into the race, but U1 Les Houches is a water point with NO personal assistance permitted. The crew can watch and cheer; they cannot hand over anything. The first legal assistance point is U3 Les Contamines.",
-      "verified": true,
-      "affects": []
-    }
-  ],
-
-  "journeyTimes": {
-    "note": "Verbatim from the network map legend on EN_UTMB_3_network_map.jpg. These are the organiser's own point-to-point figures and occasionally disagree with the printed timetables by a few minutes; where they do, each line's journeyMinutes uses the timetable and journeyMinutesLegend records the legend figure.",
-    "verified": true,
-    "unit": "minutes",
-    "entries": [
-      { "from": "Chamonix", "to": "Saint-Gervais", "minutes": 35, "zone": "france" },
-      { "from": "Saint-Gervais", "to": "Les Contamines", "minutes": 15, "zone": "france" },
-      { "from": "Les Contamines", "to": "Notre-Dame de la Gorge", "minutes": 10, "zone": "france" },
-      { "from": "Chamonix", "to": "Notre-Dame de la Gorge", "minutes": 50, "zone": "france" },
-      { "from": "Cluses", "to": "Chamonix", "minutes": 50, "zone": "france" },
-      { "from": "Chamonix", "to": "Vallorcine", "minutes": 35, "zone": "france", "note": "The legend lists Chamonix <> Vallorcine twice — 35 min under ZONE FRANCE and 40 min under ZONE SUISSE. Both are reproduced. Treat the real journey as 35–40 min." },
-      { "from": "Chamonix", "to": "Courmayeur", "minutes": 45, "zone": "italy" },
-      { "from": "Courmayeur", "to": "Arnouvaz", "minutes": 45, "zone": "italy" },
-      { "from": "Chamonix", "to": "Orsières", "minutes": 90, "sourceText": "1H30MIN", "zone": "switzerland" },
-      { "from": "Orsières", "to": "La Fouly", "minutes": 30, "zone": "switzerland" },
-      { "from": "Orsières", "to": "Champex-Lac", "minutes": 30, "zone": "switzerland" },
-      { "from": "Trient", "to": "Vallorcine", "minutes": 15, "zone": "switzerland" },
-      { "from": "Chamonix", "to": "Vallorcine", "minutes": 40, "zone": "switzerland", "note": "Second of the two duplicate legend entries — see the France-zone entry above." }
+   },
+   {
+    "date": "2026-08-30",
+    "dow": "Sun",
+    "label": "30/08",
+    "zonesActive": [
+     "switzerland",
+     "france"
     ]
-  },
-
-  "confirmTomorrowChecklist": [
-    { "id": "guest-cards", "priority": 1, "item": "A Carte d'Hôte (Guest Card) in the hand of EVERY crew member, not just one", "why": "It makes the Mont-Blanc Express free on Servoz–Vallorcine, which is the backbone of the U13 plan and the first leg of U3. Issued by the accommodation — ask at check-in.", "answer": null, "verified": false },
-    { "id": "chamonuit", "priority": 1, "item": "Chamo'Nuit: does it stop in LES HOUCHES, on which nights, and what are the first and last departures from Chamonix?", "why": "THE BIGGEST GAP. It is the only candidate solution to the Friday-night return from U3. Ask in person at the Chamonix Bus office or Les Houches tourist office. Fare is known: 4.50 EUR by card / 5.00 EUR cash, on board.", "answer": null, "verified": false },
-    { "id": "last-train-lefayet", "priority": 1, "item": "LAST train from Le Fayet up-valley to Les Houches", "why": "Decides whether the down-valley return from U3 (staying on the Saint-Gervais side) is survivable, or whether it ends in a taxi.", "answer": null, "verified": false },
-    { "id": "last-train-vallorcine", "priority": 1, "item": "LAST train from Vallorcine to Les Houches — and the FIRST one on Sunday morning", "why": "The first Sunday train sets how long the crew waits at Vallorcine after the U11 Champex return chain. The last train matters if they stay late at U13.", "answer": null, "verified": false },
-    { "id": "taxi-number", "priority": 1, "item": "A local taxi number, saved offline in every crew phone", "why": "It is the only unconditional answer to the night-return gap. Get it before Friday, not at 01:00 in a bus shelter.", "answer": null, "verified": false },
-    { "id": "line1-race-weekend", "priority": 2, "item": "Does Chamonix Bus Line 1 run its normal 05:40–20:14 on race weekend, and is it free with the Guest Card?", "why": "Two crew plans depend on Line 1. Race weekend is the busiest of the year and the network map shows a road-closure icon at Les Houches.", "answer": null, "verified": false },
-    { "id": "les-houches-train-times", "priority": 2, "item": "Photograph the full timetable board at Les Houches station", "why": "Three of four plans start or end on this train and no timetable is currently held. Two minutes of work removes the largest remaining unknown after Chamo'Nuit.", "answer": null, "verified": false },
-    { "id": "lefayet-stgervais-link", "priority": 2, "item": "Does the Passy <-> Saint Gervais shuttle actually reach Saint Gervais village (La Poste), or only Le Fayet (Gare)?", "why": "It is the join between the train and the Contamines shuttle in the U3 plan. If it only reaches Le Fayet, the crew needs another way up to the village.", "answer": null, "verified": false },
-    { "id": "pass-zones", "priority": 2, "item": "Check every crew member's QR code covers France, Italy AND Switzerland as needed", "why": "Passes are zone-based and cannot be bought now — booking closed 12 July and there are no on-site sales. A wrong-zone pass is refused at the bus door.", "answer": null, "verified": false },
-    { "id": "sms-number", "priority": 3, "item": "Confirm the phone number on the UTMB booking is one the crew carries", "why": "UTMB notifies timetable changes by SMS during the event.", "answer": null, "verified": false }
+   }
+  ]
+ },
+ "crewBase": {
+  "address": "Les Houches (next to the station)",
+  "village": "Les Houches",
+  "country": "FR",
+  "note": "The crew is based in LES HOUCHES, not Chamonix. Every published UTMB shuttle sheet is written for people staying in Chamonix, so no official sheet answers this crew's questions directly. Les Houches sits one valley step down from Chamonix: reaching a Chamonix-departing shuttle costs an extra Chamonix Bus Line 1 hop (or a train hop), and Line 1 stops at 20:14.",
+  "nextTo": "Les Houches railway station (Mont-Blanc Express)",
+  "servedBy": [
+   "line1",
+   "train"
   ],
-
-  "operatingNotes": {
-    "verified": true,
-    "source": "Footer text of UTMB_FR_accompagnants.png and EN_UTMB_1_chamonix.jpg",
-    "items": [
-      "Booking is required for all shuttles ('RÉSERVATION OBLIGATOIRE POUR TOUTES LES NAVETTES' / 'BOOKING REQUIRED FOR ALL SHUTTLES').",
-      "Timetables could vary during the event due to the demands of the organisation; changes are notified by SMS.",
-      "Helping, following or disturbing a runner is not allowed.",
-      "Given possible night waiting times and difficult weather, the shuttle system is not recommended for young children. Children under 3 are forbidden for safety reasons.",
-      "Pets, bikes and scooters are not recommended on organisation buses; each driver may refuse them.",
-      "Arrive early at the designated stop with the QR code received by email; it is scanned on boarding."
-    ]
-  },
-
-  "provenance": {
-    "primarySource": {
-      "name": "UTMB_FR — Horaires des navettes <> Chamonix — ACCOMPAGNANTS (followers)",
-      "url": "https://res.cloudinary.com/utmb-world/image/upload/v1/montblanc/Transports/UTMB_FR/UTMB_final2_175df14f2a",
-      "retrieved": "2026-08-26",
-      "language": "fr",
-      "localCopy": "reference/official/UTMB_FR_accompagnants.png",
-      "note": "All 13 follower lines in this file are transcribed verbatim from this poster and re-verified against the local copy at 200% zoom on 2026-08-27. UTMB NEVER PUBLISHED AN ENGLISH EQUIVALENT OF THIS SHEET — the English poster set runs EN_UTMB_1, EN_UTMB_3 and EN_UTMB_4, with no 'sheet 2'. The follower timetable exists in French only, which is why this file is the crew's English source of truth."
-    },
-    "supportingSources": [
-      { "name": "EN_UTMB_1 — Shuttle Schedules <> Chamonix (start and post-race, runners & followers)", "localCopy": "reference/official/EN_UTMB_1_chamonix.jpg", "language": "en", "usedFor": ["startShuttles", "otherRunnerShuttles"], "verified": true },
-      { "name": "EN_UTMB_3 — Shuttle Schedules <> Chamonix (network map, zone legend, map of Chamonix)", "localCopy": "reference/official/EN_UTMB_3_network_map.jpg", "language": "en", "usedFor": ["journeyTimes", "chamonixHubs", "roadClosures.additional"], "verified": true },
-      { "name": "EN_UTMB_4 — Shuttle lines index (Google Maps links)", "localCopy": "reference/official/EN_UTMB_4_lines_gmaps.jpg", "language": "en", "usedFor": ["warnings.no-chamonix-to-houches-line"], "verified": true, "note": "Used as the authority for the complete list of 20 UTMB lines on the Chamonix side, which is what establishes that no Chamonix -> Les Houches line exists." },
-      { "name": "Transport Guide 2026 (official English PDF)", "localCopy": "reference/official/EN_GUIDE_DES_TRANSPORTS_2026.pdf", "language": "en", "usedFor": ["passes", "roadClosures", "operatingNotes"], "verified": true, "note": "Text extracted locally with pdftotext. Contains NO information on Chamo'Nuit, the Mont-Blanc Express, Chamonix Bus Line 1 or the Guest Card — it covers UTMB Mobility shuttles only. That absence is itself why the local-transport gaps in this file remain unverified." },
-      { "name": "Course checkpoint data (km, cutoffs, assistance flags)", "localCopy": "course/utmb_course.html", "usedFor": ["crewPoints", "crewBase.coursePassage"], "verified": true, "note": "COURSE_DATA block. Cross-checked: U3 32.5 km Sat 00:00, U7 83.4 km Sat 13:15, U11 130.5 km Sun 02:30, U13 158.4 km Sun 11:15, U1 Les Houches 9.1 km water/no-assistance. All agree with the crew brief." }
-    ],
-    "excludedSources": [
-      { "name": "POST_RACE.png", "localCopy": "reference/official/POST_RACE.png", "excluded": true, "reason": "DELIBERATELY NOT USED. Despite the filename this sheet is the ETC / YCC <> Courmayeur timetable for 25/08 and 26/08 — a different race on different days. None of its times apply to UTMB race weekend (28–30/08). Do not merge it in." }
-    ],
-    "derivedFindings": {
-      "note": "The routing advice in crewPoints is NOT from any published sheet. No UTMB document is written for a crew based in Les Houches. These routes were derived by combining the follower timetable, the network map, the course cutoffs and the verified local-transport facts, and every step that could not be confirmed carries verified:false.",
-      "author": "Compiled for Suha's crew, 2026-08-27"
-    }
+  "verified": true,
+  "coursePassage": {
+   "checkpoint": "U1",
+   "name": "Les Houches",
+   "km": 9.1,
+   "support": "water",
+   "assistanceAllowed": false,
+   "travelRequired": false,
+   "expectedWindow": {
+    "date": "2026-08-28",
+    "from": "18:30",
+    "to": "19:15",
+    "verified": false,
+    "note": "Estimated from a 17:45 Chamonix start over 9.1 km with the first climb. NOT an official prediction — check LiveTrail on the night."
+   },
+   "note": "The course passes the crew's own village at km 9.1, roughly an hour into the race. It is a WATER POINT ONLY and personal assistance is NOT permitted here. The crew can stand on the trail and cheer, but must not hand over food, kit or drinks. Zero travel required — walk out of the door.",
+   "verified": true
   }
+ },
+ "zones": [
+  {
+   "id": "france",
+   "label": "France",
+   "passRequired": "UTMB Mobility pass — France",
+   "verified": true
+  },
+  {
+   "id": "italy",
+   "label": "Italy",
+   "passRequired": "UTMB Mobility pass — Italy",
+   "verified": true
+  },
+  {
+   "id": "switzerland",
+   "label": "Switzerland",
+   "passRequired": "UTMB Mobility pass — Switzerland",
+   "verified": true
+  }
+ ],
+ "passes": {
+  "model": "zone-based",
+  "note": "UTMB Mobility supporter passes are sold per race AND per country zone. Following the runner across France, Italy and Switzerland can require more than one pass. Champex-Lac (U11) and La Fouly are in the SWISS zone and need the Switzerland pass.",
+  "bookingOpened": "2026-06-09",
+  "bookingClosed": "2026-07-12",
+  "onSiteSales": false,
+  "resalePermitted": false,
+  "boardingCredential": "QR code emailed on booking; scanned when boarding. All bookings for one person are grouped under a single QR code.",
+  "crewStatus": "Crew already hold their passes — booking closed 12 July 2026 and there are no on-site sales.",
+  "verified": true,
+  "source": "EN_GUIDE_DES_TRANSPORTS_2026.pdf, 'I am a supporter or spectator' (p.6) and 'How do I book my UTMB Mobility pass?' (p.7)"
+ },
+ "followerShuttles": [
+  {
+   "n": 1,
+   "id": "cham-contamines",
+   "name": "Chamonix > Contamines",
+   "zone": "france",
+   "passZone": "france",
+   "date": "2026-08-28",
+   "dateEnd": "2026-08-28",
+   "direction": "oneway",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Chamonix",
+     "sublabel": "Grépon Bus",
+     "time": "17:30"
+    },
+    {
+     "name": "Saint Gervais",
+     "sublabel": "Le Pont",
+     "time": "18:00"
+    },
+    {
+     "name": "Contamines",
+     "sublabel": "NDG",
+     "time": "18:20"
+    }
+   ],
+   "frequencyText": "every 15 min",
+   "frequencyMinutes": 15,
+   "lastText": "20:30",
+   "lastTime": "20:30",
+   "lastDate": "2026-08-28",
+   "lastSourceText": "20:30",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 50,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": 50,
+   "verified": true,
+   "note": "ONE WAY only — this line takes you out to the Contamines valley and does not bring you back. The return is line ndg-cham. Note the Chamonix boarding point is GRÉPON BUS, not Maison Nordique, because this line runs in the Saint-Gervais direction. Its last outbound is 20:30, which is why it is the WRONG line for a U3 crew whose runner arrives after 21:30."
+  },
+  {
+   "n": 2,
+   "id": "passy-stgervais",
+   "name": "Passy <-> Saint Gervais",
+   "zone": "france",
+   "passZone": "france",
+   "date": "2026-08-28",
+   "dateEnd": "2026-08-29",
+   "direction": "both",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Passy",
+     "sublabel": "P+R",
+     "time": "16:00"
+    },
+    {
+     "name": "Mountain Store",
+     "sublabel": null,
+     "time": "16:05"
+    },
+    {
+     "name": "Le Fayet",
+     "sublabel": "Gare",
+     "time": "16:15"
+    }
+   ],
+   "frequencyText": "every 20 min",
+   "frequencyMinutes": 20,
+   "lastText": "02:00 (29/08)",
+   "lastTime": "02:00",
+   "lastDate": "2026-08-29",
+   "lastSourceText": "02:00AM 29/08",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 15,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": null,
+   "verified": true,
+   "note": "The only UTMB line that calls at LE FAYET (GARE) — the mainline/Mont-Blanc Express station — and it runs 20 min later than any other France-zone line (02:00 vs 01:00). That makes it the natural train-to-shuttle connector for a crew coming down-valley from Les Houches. CAVEAT: the poster titles the line 'Passy <-> Saint Gervais' but lists NO stop called Saint Gervais; Le Fayet is part of the Saint-Gervais-les-Bains commune, so the title may simply mean Le Fayet. See warning 'lefayet-to-stgervais-gap'.",
+   "unverifiedClaims": [
+    {
+     "claim": "This line reaches Saint Gervais village / La Poste, where line stgervais-ndg starts.",
+     "verified": false,
+     "note": "Not shown on the poster. The three printed stops stop at Le Fayet (Gare). Saint Gervais village sits roughly 300 m above Le Fayet. Confirm with UTMB Mobility or a driver before relying on it at night."
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "id": "stgervais-ndg",
+   "name": "Saint Gervais <-> NDG",
+   "zone": "france",
+   "passZone": "france",
+   "date": "2026-08-28",
+   "dateEnd": "2026-08-29",
+   "direction": "both",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Saint Gervais",
+     "sublabel": "La Poste",
+     "time": "16:30"
+    },
+    {
+     "name": "Contamines",
+     "sublabel": "UTMB",
+     "time": "16:50"
+    },
+    {
+     "name": "Notre Dame de la Gorge",
+     "sublabel": null,
+     "time": "17:00"
+    }
+   ],
+   "frequencyText": "every 20 min",
+   "frequencyMinutes": 20,
+   "lastText": "01:00 (29/08)",
+   "lastTime": "01:00",
+   "lastDate": "2026-08-29",
+   "lastSourceText": "01:00AM 29/08",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 30,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": 25,
+   "verified": true,
+   "note": "THE workhorse line for U3 Les Contamines. Bidirectional, every 20 min, running until 01:00 — i.e. right through Suha's entire arrival window and past the 00:00 cutoff. This is the line the U3 plan is built on. Legend segments (St-Gervais->Contamines 15 + Contamines->NDG 10 = 25 min) disagree slightly with the printed timetable (20 + 10 = 30 min); the timetable figure is used."
+  },
+  {
+   "n": 4,
+   "id": "contamines-ndg",
+   "name": "Contamines <-> NDG",
+   "zone": "france",
+   "passZone": "france",
+   "date": "2026-08-28",
+   "dateEnd": "2026-08-28",
+   "direction": "both",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Contamines",
+     "sublabel": "UTMB",
+     "time": "17:30"
+    },
+    {
+     "name": "Notre Dame de la Gorge",
+     "sublabel": null,
+     "time": "17:40"
+    }
+   ],
+   "frequencyText": "every 10 min",
+   "frequencyMinutes": 10,
+   "lastText": "23:59",
+   "lastTime": "23:59",
+   "lastDate": "2026-08-28",
+   "lastSourceText": "23:59M",
+   "lastSourceNote": "The source poster prints '23:59M'. The trailing 'M' is a typography error in the official artwork (the other cells read '02:00AM', '01:00AM' etc., so an 'A' has been dropped and the 'M' left behind). Rendered as 23:59.",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 10,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": 10,
+   "verified": true,
+   "note": "Short local hop, every 10 min. Useful only if the crew wants to move between the Contamines village aid station (U3) and Notre-Dame de la Gorge. Ends earlier (23:59) than line stgervais-ndg (01:00), so do not plan the last move of the night on it."
+  },
+  {
+   "n": 5,
+   "id": "ndg-cham",
+   "name": "NDG > Chamonix",
+   "zone": "france",
+   "passZone": "france",
+   "date": "2026-08-28",
+   "dateEnd": "2026-08-29",
+   "direction": "oneway",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Notre Dame de la Gorge",
+     "sublabel": null,
+     "time": "20:30"
+    },
+    {
+     "name": "Saint Gervais",
+     "sublabel": "Le Pont",
+     "time": "20:50"
+    },
+    {
+     "name": "Chamonix",
+     "sublabel": "Maison Nordique",
+     "time": "21:25"
+    }
+   ],
+   "frequencyText": "every 30 min",
+   "frequencyMinutes": 30,
+   "lastText": "01:00 (29/08)",
+   "lastTime": "01:00",
+   "lastDate": "2026-08-29",
+   "lastSourceText": "01:00AM 29/08",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 55,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": 50,
+   "verified": true,
+   "note": "ONE WAY return leg from the Contamines valley to Chamonix. Taking the last one (01:00 from NDG) lands you at Chamonix Maison Nordique around 01:25 — with Chamonix Bus Line 1 finished since 20:14 and no UTMB line onward to Les Houches. See warning 'night-return-risk'. It also stops at Saint Gervais (Le Pont), which is the alternative bail-out if the crew would rather stay down-valley."
+  },
+  {
+   "n": 6,
+   "id": "cham-courmayeur",
+   "name": "Chamonix <-> Courmayeur",
+   "zone": "italy",
+   "passZone": "italy",
+   "date": "2026-08-29",
+   "dateEnd": "2026-08-29",
+   "direction": "both",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Chamonix",
+     "sublabel": "Maison Nordique",
+     "time": "00:30"
+    },
+    {
+     "name": "Courmayeur",
+     "sublabel": "Centre Sportif",
+     "time": "01:15"
+    }
+   ],
+   "frequencyText": "every 30 min",
+   "frequencyMinutes": 30,
+   "lastText": "20:30",
+   "lastTime": "20:30",
+   "lastDate": "2026-08-29",
+   "lastSourceText": "20:30",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 45,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": 45,
+   "verified": true,
+   "note": "Through the Mont-Blanc tunnel. Bidirectional and frequent across the whole day, which makes U7 Courmayeur the easiest of the three big crew points. ITALY pass required. Carry ID/passport — it is an international crossing."
+  },
+  {
+   "n": 7,
+   "id": "courmayeur-arnouvaz",
+   "name": "Courmayeur <-> Arnouvaz",
+   "zone": "italy",
+   "passZone": "italy",
+   "date": "2026-08-29",
+   "dateEnd": "2026-08-30",
+   "direction": "both",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Courmayeur",
+     "sublabel": "Centre Sportif",
+     "time": "07:30"
+    },
+    {
+     "name": "Arnouvaz",
+     "sublabel": null,
+     "time": "08:15"
+    }
+   ],
+   "frequencyText": "every 60 min",
+   "frequencyMinutes": 60,
+   "lastText": "18:30 (30/08)",
+   "lastTime": "18:30",
+   "lastDate": "2026-08-30",
+   "lastSourceText": "18:30 30/08",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 45,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": 45,
+   "verified": true,
+   "note": "Extension beyond Courmayeur to the Arnouvaz aid station (U9, km 101.7). Only HOURLY — the sparsest line on the network, so a missed bus costs a full hour. U9 is NOT an assistance point; this is for spectating only."
+  },
+  {
+   "n": 8,
+   "id": "cham-orsieres",
+   "name": "Chamonix > Orsieres",
+   "zone": "switzerland",
+   "passZone": "switzerland",
+   "date": "2026-08-29",
+   "dateEnd": "2026-08-30",
+   "direction": "oneway",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Chamonix",
+     "sublabel": "Maison Nordique",
+     "time": "05:30"
+    },
+    {
+     "name": "Vallorcine",
+     "sublabel": "Gare",
+     "time": "05:55"
+    },
+    {
+     "name": "Trient",
+     "sublabel": null,
+     "time": "06:10"
+    },
+    {
+     "name": "Orsières",
+     "sublabel": null,
+     "time": "06:50"
+    }
+   ],
+   "frequencyText": "every 45 min",
+   "frequencyMinutes": 45,
+   "lastText": "03:00 (30/08)",
+   "lastTime": "03:00",
+   "lastDate": "2026-08-30",
+   "lastSourceText": "03:00AM 30/08",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 80,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": 90,
+   "verified": true,
+   "note": "The trunk line into Switzerland and the gateway to U11 Champex-Lac. Printed as ONE WAY (Chamonix > Orsières). It calls at Vallorcine (Gare) 25 min in, which means a crew already at Vallorcine can join it without going back to Chamonix. SWITZERLAND pass required. Carry ID/passport.",
+   "unverifiedClaims": [
+    {
+     "claim": "A published Orsières > Chamonix return working exists on this line.",
+     "verified": false,
+     "note": "The poster prints this line one-way and the official Google-Maps line index lists only 'CHAMONIX > ORSIÈRES'. A return must physically exist for a service running until 03:00 Sunday, but its direction and timetable are NOT published on any sheet the crew holds. Do not assume you can ride this line back — plan the Orsières->Trient->Vallorcine chain instead (see crew point U11)."
+    }
+   ]
+  },
+  {
+   "n": 9,
+   "id": "orsieres-champex",
+   "name": "Orsieres <-> Champex-Lac",
+   "zone": "switzerland",
+   "passZone": "switzerland",
+   "date": "2026-08-29",
+   "dateEnd": "2026-08-30",
+   "direction": "both",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Orsières",
+     "sublabel": null,
+     "time": "07:00"
+    },
+    {
+     "name": "Champex Lac",
+     "sublabel": null,
+     "time": "07:25"
+    }
+   ],
+   "frequencyText": "every 30 min",
+   "frequencyMinutes": 30,
+   "lastText": "04:00 (30/08)",
+   "lastTime": "04:00",
+   "lastDate": "2026-08-30",
+   "lastSourceText": "04:00 30/08",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 25,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": 30,
+   "verified": true,
+   "note": "The final leg to U11 Champex-Lac. Bidirectional and running until 04:00 Sunday — 90 min past Suha's 02:30 cutoff, so there is genuine margin here. SWITZERLAND pass required."
+  },
+  {
+   "n": 10,
+   "id": "orsieres-lafouly",
+   "name": "Orsieres <-> La Fouly",
+   "zone": "switzerland",
+   "passZone": "switzerland",
+   "date": "2026-08-29",
+   "dateEnd": "2026-08-29",
+   "direction": "both",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Orsières",
+     "sublabel": null,
+     "time": "07:15"
+    },
+    {
+     "name": "La Fouly",
+     "sublabel": null,
+     "time": "07:40"
+    }
+   ],
+   "frequencyText": "every 30 min",
+   "frequencyMinutes": 30,
+   "lastText": "23:00",
+   "lastTime": "23:00",
+   "lastDate": "2026-08-29",
+   "lastSourceText": "23:00",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 25,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": 30,
+   "verified": true,
+   "note": "Serves U10 La Fouly (km 116.2, cutoff Sat 22:30) — NOT an assistance point, spectating only. This line dies at 23:00, far earlier than the other Swiss lines, so it is a trap: if the crew detours to La Fouly they can be stranded there while the Champex line is still running. SWITZERLAND pass required."
+  },
+  {
+   "n": 11,
+   "id": "orsieres-trient",
+   "name": "Orsieres <-> Trient",
+   "zone": "switzerland",
+   "passZone": "switzerland",
+   "date": "2026-08-29",
+   "dateEnd": "2026-08-30",
+   "direction": "both",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Orsières",
+     "sublabel": null,
+     "time": "08:45"
+    },
+    {
+     "name": "Trient",
+     "sublabel": null,
+     "time": "09:30"
+    }
+   ],
+   "frequencyText": "every 30 min",
+   "frequencyMinutes": 30,
+   "lastText": "04:00 (30/08)",
+   "lastTime": "04:00",
+   "lastDate": "2026-08-30",
+   "lastSourceText": "04:00AM 30/08",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 45,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": null,
+   "verified": true,
+   "note": "KEY RETURN LINK. Bidirectional and running until 04:00 Sunday. Chained with trient-vallorcine it gives the U11 crew a published way OUT of Switzerland that does not depend on the one-way cham-orsieres line having an unpublished return. Also serves U12 Trient (km 147.0) for spectating. SWITZERLAND pass required."
+  },
+  {
+   "n": 12,
+   "id": "trient-vallorcine",
+   "name": "Trient <-> Vallorcine",
+   "zone": "switzerland",
+   "passZone": "switzerland",
+   "date": "2026-08-29",
+   "dateEnd": "2026-08-30",
+   "direction": "both",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Trient",
+     "sublabel": null,
+     "time": "09:00"
+    },
+    {
+     "name": "Vallorcine",
+     "sublabel": null,
+     "time": "09:15"
+    }
+   ],
+   "frequencyText": "every 30 min",
+   "frequencyMinutes": 30,
+   "lastText": "09:00 (30/08)",
+   "lastTime": "09:00",
+   "lastDate": "2026-08-30",
+   "lastSourceText": "09:00AM 30/08",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 15,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": 15,
+   "verified": true,
+   "note": "Shortest hop on the network and the border crossing back into France. Runs the LONGEST of any line — until 09:00 Sunday morning — which makes it the crew's safety net out of Switzerland. Drops you at Vallorcine, where the Mont-Blanc Express runs straight home to Les Houches. Crosses the Swiss/French border: carry ID/passport."
+  },
+  {
+   "n": 13,
+   "id": "cham-vallorcine",
+   "name": "Chamonix <-> Vallorcine",
+   "zone": "switzerland",
+   "passZone": "switzerland",
+   "date": "2026-08-29",
+   "dateEnd": "2026-08-30",
+   "direction": "both",
+   "audience": "followers",
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Chamonix",
+     "sublabel": "Maison Nordique",
+     "time": "05:00"
+    },
+    {
+     "name": "Vallorcine",
+     "sublabel": null,
+     "time": "05:30"
+    }
+   ],
+   "frequencyText": "every 30 min",
+   "frequencyMinutes": 30,
+   "lastText": "12:30 (30/08)",
+   "lastTime": "12:30",
+   "lastDate": "2026-08-30",
+   "lastSourceText": "12:30 30/08",
+   "lastSemanticsVerified": false,
+   "journeyMinutes": 30,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": null,
+   "journeyMinutesLegendRange": [
+    35,
+    40
+   ],
+   "verified": true,
+   "note": "Backup way to reach U13 Vallorcine. For a Les Houches crew the Mont-Blanc Express train is strictly better — direct, free with the Guest Card, and no Chamonix transfer. Runs until 12:30 Sunday, just past Suha's 11:15 Vallorcine cutoff.",
+   "zoneNote": {
+    "verified": false,
+    "note": "WHICH PASS THIS LINE NEEDS IS UNCLEAR. The follower poster prints it in the SWITZERLAND (29/08) column, but the network-map legend lists 'Chamonix <> Vallorcine' TWICE — once under ZONE FRANCE at 35 min and once under ZONE SUISSE at 40 min — and Vallorcine is physically in France. Recorded as switzerland to match the poster column. If the crew intends to use this line rather than the train, confirm the pass zone first."
+   }
+  }
+ ],
+ "startShuttles": [
+  {
+   "id": "houches-cham",
+   "name": "Houches > Chamonix",
+   "zone": "france",
+   "passZone": "france",
+   "date": "2026-08-28",
+   "dateEnd": "2026-08-28",
+   "direction": "oneway",
+   "singleRun": true,
+   "audience": "runners",
+   "followersAllowed": true,
+   "bookingRequired": true,
+   "stops": [
+    {
+     "name": "Houches",
+     "sublabel": "Prarion",
+     "time": "16:00"
+    },
+    {
+     "name": "Houches",
+     "sublabel": "Mairie",
+     "time": "16:05"
+    },
+    {
+     "name": "Les Bossons",
+     "sublabel": null,
+     "time": "16:15"
+    },
+    {
+     "name": "Chamonix",
+     "sublabel": "Grépon Bus",
+     "time": "16:35"
+    }
+   ],
+   "frequencyText": null,
+   "frequencyMinutes": null,
+   "lastText": null,
+   "lastTime": null,
+   "lastDate": null,
+   "lastSemanticsVerified": null,
+   "journeyMinutes": 35,
+   "journeyMinutesSource": "timetable",
+   "journeyMinutesLegend": null,
+   "verified": true,
+   "note": "SINGLE RUN — one bus, one time, no frequency column on the poster. This is a RUNNER start shuttle but the poster legend explicitly marks it 'RUNNER SHUTTLE - START - ACCESSIBLE TO FOLLOWERS', so the crew may ride it. It is the crew's one free, guaranteed Les Houches -> Chamonix move of the whole weekend, departing from their own village at 16:00 Friday and arriving Grépon Bus at 16:35 — 70 min before the 17:45 start. If they miss it, they are on Chamonix Bus Line 1. It runs OUT of Les Houches only; nothing in the UTMB network ever brings them back."
+  }
+ ],
+ "otherRunnerShuttles": {
+  "note": "Reference only — not part of the crew's plan, but recorded because this file is the single source of truth for transport. All are marked in the poster legend as accessible to followers. Verbatim from EN_UTMB_1_chamonix.jpg.",
+  "verified": true,
+  "start": [
+   {
+    "id": "lefayet-cham",
+    "name": "Le Fayet > Chamonix",
+    "date": "2026-08-28",
+    "singleRun": true,
+    "stops": [
+     {
+      "name": "Le Fayet",
+      "sublabel": "Gare",
+      "time": "15:30"
+     },
+     {
+      "name": "Chamonix",
+      "sublabel": "Grépon Bus",
+      "time": "15:55"
+     }
+    ]
+   },
+   {
+    "id": "vallorcine-cham",
+    "name": "Vallorcine > Chamonix",
+    "date": "2026-08-28",
+    "singleRun": true,
+    "stops": [
+     {
+      "name": "Vallorcine",
+      "sublabel": null,
+      "time": "16:00"
+     },
+     {
+      "name": "Le Buet",
+      "sublabel": null,
+      "time": "16:05"
+     },
+     {
+      "name": "Argentière",
+      "sublabel": "Gare",
+      "time": "16:15"
+     },
+     {
+      "name": "Les Chosalets",
+      "sublabel": null,
+      "time": "16:20"
+     },
+     {
+      "name": "Arveyron",
+      "sublabel": null,
+      "time": "16:30"
+     },
+     {
+      "name": "Chamonix",
+      "sublabel": "Grépon Bus",
+      "time": "16:40"
+     }
+    ]
+   },
+   {
+    "id": "cluses-cham",
+    "name": "Cluses > Chamonix",
+    "date": "2026-08-28",
+    "singleRun": true,
+    "stops": [
+     {
+      "name": "Cluses",
+      "sublabel": "Gare",
+      "time": "15:00"
+     },
+     {
+      "name": "Sallanches",
+      "sublabel": "Gare",
+      "time": "15:20"
+     },
+     {
+      "name": "Servoz",
+      "sublabel": "Gare",
+      "time": "15:50"
+     },
+     {
+      "name": "Chamonix",
+      "sublabel": "Grépon Bus",
+      "time": "16:10"
+     }
+    ]
+   },
+   {
+    "id": "contamines-cham-start",
+    "name": "Contamines > Chamonix",
+    "date": "2026-08-28",
+    "singleRun": true,
+    "stops": [
+     {
+      "name": "Contamines",
+      "sublabel": "Mairie",
+      "time": "15:00"
+     },
+     {
+      "name": "Saint Gervais",
+      "sublabel": "Le Pont",
+      "time": "15:15"
+     },
+     {
+      "name": "Chamonix",
+      "sublabel": "Grépon Bus",
+      "time": "15:50"
+     }
+    ]
+   }
+  ],
+  "postRace": [
+   {
+    "id": "cham-cluses-2808",
+    "name": "Chamonix > Cluses",
+    "date": "2026-08-28",
+    "singleRun": true,
+    "dateEnd": "2026-08-29",
+    "stops": [
+     {
+      "name": "Chamonix",
+      "sublabel": "Maison Nordique",
+      "time": "23:59"
+     },
+     {
+      "name": "Le Fayet",
+      "sublabel": "Gare",
+      "time": "00:30"
+     },
+     {
+      "name": "Sallanches",
+      "sublabel": "Gare",
+      "time": "00:45"
+     },
+     {
+      "name": "Cluses",
+      "sublabel": "Gare",
+      "time": "01:10"
+     }
+    ],
+    "note": "Runs down-valley from Chamonix at 23:59 Friday. It does NOT stop at Les Houches, so it does not solve the crew's night-return problem — but it does prove that a late Friday westbound movement exists if they end up in Chamonix and need to get to Le Fayet."
+   },
+   {
+    "id": "cham-cluses-2908",
+    "name": "Chamonix > Cluses",
+    "date": "2026-08-29",
+    "singleRun": true,
+    "runs": 2,
+    "stops": [
+     {
+      "name": "Chamonix",
+      "sublabel": "Maison Nordique",
+      "times": [
+       "04:00",
+       "23:59"
+      ]
+     },
+     {
+      "name": "Le Fayet",
+      "sublabel": "Gare",
+      "times": [
+       "04:30",
+       "00:30"
+      ]
+     },
+     {
+      "name": "Sallanches",
+      "sublabel": "Gare",
+      "times": [
+       "04:45",
+       "00:40"
+      ]
+     },
+     {
+      "name": "Cluses",
+      "sublabel": "Gare",
+      "times": [
+       "05:10",
+       "01:15"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "cham-cluses-3008",
+    "name": "Chamonix > Cluses",
+    "date": "2026-08-30",
+    "singleRun": true,
+    "runs": 2,
+    "stops": [
+     {
+      "name": "Chamonix",
+      "sublabel": "Maison Nordique",
+      "times": [
+       "04:00",
+       "17:00"
+      ]
+     },
+     {
+      "name": "Le Fayet",
+      "sublabel": "Gare",
+      "times": [
+       "04:30",
+       "17:20"
+      ]
+     },
+     {
+      "name": "Sallanches",
+      "sublabel": "Gare",
+      "times": [
+       "04:45",
+       "17:40"
+      ]
+     },
+     {
+      "name": "Cluses",
+      "sublabel": "Gare",
+      "times": [
+       "05:10",
+       "18:00"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "cham-contamines-post",
+    "name": "Chamonix > Contamines",
+    "date": "2026-08-29",
+    "dateAlt": "2026-08-30",
+    "singleRun": true,
+    "runs": 2,
+    "stops": [
+     {
+      "name": "Chamonix",
+      "sublabel": "Maison Nordique",
+      "times": [
+       "20:00",
+       "17:00"
+      ]
+     },
+     {
+      "name": "Saint Gervais",
+      "sublabel": "Le Pont",
+      "times": [
+       "20:30",
+       "17:30"
+      ]
+     },
+     {
+      "name": "Contamines",
+      "sublabel": "Mairie",
+      "times": [
+       "21:00",
+       "18:00"
+      ]
+     }
+    ],
+    "note": "First time column is 29/08, second is 30/08."
+   },
+   {
+    "id": "cham-orsieres-post",
+    "name": "Chamonix > Orsieres",
+    "date": "2026-08-29",
+    "dateEnd": "2026-08-30",
+    "stops": [
+     {
+      "name": "Chamonix",
+      "sublabel": "Maison Nordique",
+      "time": "05:30"
+     },
+     {
+      "name": "Orsières",
+      "sublabel": null,
+      "time": "06:50"
+     }
+    ],
+    "frequencyText": "every 60 min",
+    "frequencyMinutes": 60,
+    "lastText": "Sun 30/08",
+    "lastSourceText": "SUN. 30:08",
+    "lastSemanticsVerified": false
+   },
+   {
+    "id": "cham-trient-post",
+    "name": "Chamonix > Trient",
+    "date": "2026-08-29",
+    "dateEnd": "2026-08-30",
+    "stops": [
+     {
+      "name": "Chamonix",
+      "sublabel": "Maison Nordique",
+      "time": "05:00"
+     },
+     {
+      "name": "Vallorcine",
+      "sublabel": null,
+      "time": "05:40"
+     },
+     {
+      "name": "Trient",
+      "sublabel": null,
+      "time": "06:00"
+     }
+    ],
+    "frequencyText": "every 60 min",
+    "frequencyMinutes": 60,
+    "lastText": "09:00 (30/08)",
+    "lastTime": "09:00",
+    "lastDate": "2026-08-30",
+    "lastSourceText": "09:00AM 30/08",
+    "lastSemanticsVerified": false
+   }
+  ]
+ },
+ "localTransport": [
+  {
+   "id": "line1",
+   "name": "Chamonix Bus — Line 1",
+   "operator": "Chamonix Bus",
+   "type": "bus",
+   "servesCrewBase": true,
+   "verified": true,
+   "note": "VERIFIED and the crew's daily lifeline: Line 1 runs Les Houches <-> Chamonix <-> Les Praz / Flégère, every 30 minutes, daily, from 05:40 to 20:14, on the summer timetable that runs 21 June to 7 September — so it covers race weekend. The hard fact to plan around is the 20:14 finish: after that there is NO verified public link between Chamonix and Les Houches. Free with the Carte d'Hôte (Guest Card) in normal season.",
+   "facts": [
+    {
+     "fact": "Route: Les Houches <-> Chamonix <-> Les Praz / Flégère",
+     "verified": true
+    },
+    {
+     "fact": "Frequency: every 30 minutes, daily",
+     "verified": true
+    },
+    {
+     "fact": "Service span: 05:40 to 20:14",
+     "verified": true
+    },
+    {
+     "fact": "Summer timetable valid 21 June – 7 September, therefore covers 28–30 August 2026",
+     "verified": true
+    },
+    {
+     "fact": "Line 1 runs its normal hours on UTMB race weekend (no special early/late working, no diversion)",
+     "verified": false,
+     "note": "NOT VERIFIED. The network map shows a road-closure icon at Les Houches, which could affect routing. Race weekend is the busiest of the year and operators sometimes add or cut journeys. Confirm at the Chamonix Bus office or on the timetable posted at the stop."
+    },
+    {
+     "fact": "Line 1 is free with the Carte d'Hôte (Guest Card)",
+     "verified": false,
+     "note": "Normally true across the Chamonix valley for card holders, but not confirmed for this specific weekend or for this accommodation's card. Carry the card; expect it to work; do not be surprised if asked to pay."
+    }
+   ],
+   "crewImpact": "Anything that puts the crew in Chamonix after 20:14 leaves them with no verified way home. This single number drives every routing decision in this file."
+  },
+  {
+   "id": "train",
+   "name": "Mont-Blanc Express",
+   "operator": "SNCF / TMR",
+   "type": "train",
+   "servesCrewBase": true,
+   "verified": true,
+   "note": "VERIFIED to serve Les Houches station, which is next door to the crew base. The Servoz -> Vallorcine section is FREE with the Carte d'Hôte (Guest Card) issued by the accommodation — Les Houches, Chamonix and Vallorcine all sit inside that free section, which makes the train the cheapest and simplest tool the crew has. EXACT TIMES AT LES HOUCHES ARE NOT VERIFIED and must be checked at the station.",
+   "facts": [
+    {
+     "fact": "The Mont-Blanc Express calls at Les Houches station",
+     "verified": true
+    },
+    {
+     "fact": "The Servoz -> Vallorcine section is free with the Carte d'Hôte (Guest Card) issued by the accommodation",
+     "verified": true
+    },
+    {
+     "fact": "Les Houches -> Vallorcine is inside the free section and requires no change of train",
+     "verified": false,
+     "note": "Les Houches and Vallorcine both lie within Servoz–Vallorcine so the free-travel claim should hold, and the line is a single through route, but 'no change' has not been confirmed against a printed timetable. Confirm at Les Houches station."
+    },
+    {
+     "fact": "Exact departure and arrival times at Les Houches station",
+     "verified": false,
+     "note": "BIG GAP. No timetable in the crew's possession. Photograph the board at Les Houches station the day before."
+    },
+    {
+     "fact": "Last train of the evening from Le Fayet, and from Vallorcine",
+     "verified": false,
+     "note": "CRITICAL and unknown. This is what decides whether a down-valley or Swiss-side return is survivable. On the confirm-tomorrow checklist."
+    },
+    {
+     "fact": "The train runs normal hours on UTMB race weekend",
+     "verified": false,
+     "note": "Not confirmed. Vallorcine's roads and car parks are closed for the event, which historically increases rail demand; special workings are possible either way."
+    }
+   ],
+   "crewImpact": "The train is the answer for U13 Vallorcine and the first leg for U3. It is also the only mode that leaves from the crew's doorstep."
+  },
+  {
+   "id": "chamonuit",
+   "name": "Chamo'Nuit (night bus)",
+   "operator": "Chamonix Bus",
+   "type": "night-bus",
+   "servesCrewBase": null,
+   "verified": false,
+   "note": "UNVERIFIED — THIS IS THE BIGGEST GAP IN THE WHOLE PLAN. A night service called Chamo'Nuit is known to exist and its fare is known (4.50 EUR by card / 5.00 EUR cash, paid on board). NOTHING ELSE IS CONFIRMED: not the route, not the stops, not the operating hours, not the nights it runs, and CRUCIALLY NOT WHETHER IT SERVES LES HOUCHES AT ALL. Do not build any return plan on it until someone has confirmed it in person. If it does serve Les Houches on Friday night it solves the crew's worst problem; if it does not, the answer is a taxi.",
+   "facts": [
+    {
+     "fact": "A night bus service called Chamo'Nuit exists",
+     "verified": true
+    },
+    {
+     "fact": "Fare 4.50 EUR by card, 5.00 EUR cash, paid on board",
+     "verified": true
+    },
+    {
+     "fact": "Route and list of stops",
+     "verified": false,
+     "note": "Completely unknown."
+    },
+    {
+     "fact": "Operating hours and which nights it runs",
+     "verified": false,
+     "note": "Completely unknown."
+    },
+    {
+     "fact": "Whether it serves Les Houches at all",
+     "verified": false,
+     "note": "Completely unknown, and it is the single most valuable thing the crew can find out tomorrow."
+    },
+    {
+     "fact": "Whether it runs at all on UTMB race weekend",
+     "verified": false,
+     "note": "Completely unknown."
+    }
+   ],
+   "crewImpact": "If confirmed to serve Les Houches after midnight, it closes the night-return gap for U3. Until confirmed, treat the gap as open and budget for a taxi.",
+   "howToConfirm": "Chamonix Bus office or Les Houches tourist office, in person, tomorrow. Ask specifically: does Chamo'Nuit stop in Les Houches, on which nights, first and last departure from Chamonix."
+  }
+ ],
+ "chamonixHubs": {
+  "note": "Chamonix has TWO separate UTMB bus hubs and boarding the wrong one loses an hour. Verified from the Chamonix map on EN_UTMB_3_network_map.jpg.",
+  "verified": true,
+  "hubs": [
+   {
+    "id": "grepon-bus",
+    "name": "Grépon Bus",
+    "mapRef": 11,
+    "role": "UTMB Bus departures and arrivals for getting TO the race start line.",
+    "usedBy": [
+     "cham-contamines",
+     "houches-cham"
+    ]
+   },
+   {
+    "id": "maison-nordique",
+    "name": "Maison Nordique",
+    "mapRef": 9,
+    "role": "UTMB Bus departures and arrivals for race tracking (following the runner) — the official map annotates this as 'except St Gervais direction UTMB'.",
+    "usedBy": [
+     "ndg-cham",
+     "cham-courmayeur",
+     "cham-orsieres",
+     "cham-vallorcine"
+    ]
+   }
+  ],
+  "caveat": {
+   "verified": false,
+   "note": "The map's 'except St Gervais direction' note appears to apply to DEPARTURES only: the Chamonix > Contamines outbound (Saint-Gervais direction) leaves from Grépon Bus, yet the NDG > Chamonix return arrives at Maison Nordique. That reading is inferred from the timetables, not stated. If in doubt in Chamonix, check both — they are about 10 minutes apart on foot."
+  }
+ },
+ "crewPoints": [
+  {
+   "cp": "U3",
+   "name": "Les Contamines",
+   "km": 32.5,
+   "cutoff": {
+    "dow": "Sat",
+    "date": "2026-08-29",
+    "time": "00:00"
+   },
+   "support": "food",
+   "assistanceAllowed": true,
+   "zone": "france",
+   "passRequired": "france",
+   "difficulty": "moderate",
+   "difficultyRating": 3,
+   "headline": "GO DOWN-VALLEY VIA SAINT-GERVAIS — do not go via Chamonix.",
+   "reasoning": "The Chamonix > Contamines line (cham-contamines) has its LAST OUTBOUND at 20:30 Friday, before Suha's realistic arrival window at km 32.5 even opens, and it is one-way. The Saint Gervais <-> NDG line (stgervais-ndg) runs every 20 minutes until 01:00 — straight through the whole arrival window and past the 00:00 cutoff — and it is on the crew's own side of the valley, reachable from Les Houches by train without ever touching Chamonix.",
+   "legs": [
+    {
+     "seq": 1,
+     "mode": "walk",
+     "ref": null,
+     "from": "Crew base, Les Houches",
+     "to": "Les Houches railway station",
+     "durationMinutes": 2,
+     "verified": true,
+     "note": "The base is next door to the station. This is the crew's structural advantage — use it."
+    },
+    {
+     "seq": 2,
+     "mode": "train",
+     "ref": "train",
+     "from": "Les Houches",
+     "to": "Le Fayet (Gare) / Saint-Gervais-les-Bains-Le Fayet",
+     "durationMinutes": null,
+     "verified": false,
+     "note": "Mont-Blanc Express, down-valley. TIMES NOT VERIFIED — check the board at Les Houches station the day before and pick a departure that lands you at Le Fayet by about 20:00."
+    },
+    {
+     "seq": 3,
+     "mode": "utmb-shuttle",
+     "ref": "passy-stgervais",
+     "from": "Le Fayet (Gare)",
+     "to": "Saint Gervais",
+     "durationMinutes": 15,
+     "verified": false,
+     "note": "CONNECTOR LEG, PARTLY UNVERIFIED. Line passy-stgervais is the only UTMB line calling at Le Fayet (Gare) and it runs every 20 min until 02:00 — later than every other France-zone line. But the poster lists no stop actually named 'Saint Gervais', so whether it climbs to Saint Gervais village (La Poste) is unconfirmed. If it does not, the crew needs a local link from Le Fayet up to the village. Ask the driver."
+    },
+    {
+     "seq": 4,
+     "mode": "utmb-shuttle",
+     "ref": "stgervais-ndg",
+     "from": "Saint Gervais (La Poste)",
+     "to": "Contamines (UTMB)",
+     "durationMinutes": 20,
+     "verified": true,
+     "note": "Every 20 min, first 16:30, last 01:00. This is the reliable leg. Contamines (UTMB) is the assistance point itself."
+    }
+   ],
+   "returnOptions": [
+    {
+     "id": "u3-return-chamonix",
+     "preference": 1,
+     "label": "Contamines -> Chamonix, then unresolved",
+     "legs": [
+      {
+       "seq": 1,
+       "mode": "utmb-shuttle",
+       "ref": "stgervais-ndg",
+       "from": "Contamines (UTMB)",
+       "to": "Notre Dame de la Gorge",
+       "verified": true,
+       "note": "Or walk / take contamines-ndg (ends 23:59)."
+      },
+      {
+       "seq": 2,
+       "mode": "utmb-shuttle",
+       "ref": "ndg-cham",
+       "from": "Notre Dame de la Gorge",
+       "to": "Chamonix (Maison Nordique)",
+       "durationMinutes": 55,
+       "verified": true,
+       "note": "Every 30 min, last 01:00 from NDG. The 01:00 departure lands in Chamonix about 01:25."
+      },
+      {
+       "seq": 3,
+       "mode": "unresolved",
+       "ref": null,
+       "from": "Chamonix (Maison Nordique)",
+       "to": "Les Houches",
+       "verified": false,
+       "note": "NO VERIFIED OPTION. Line 1 finished at 20:14. No UTMB line runs Chamonix -> Les Houches at any hour (confirmed by the official line index: the only Les Houches line is HOUCHES > CHAMONIX, one-way, 16:00 Friday). Chamo'Nuit is unverified. Fall back to a taxi."
+      }
+     ]
+    },
+    {
+     "id": "u3-return-downvalley",
+     "preference": 2,
+     "label": "Stay down-valley: Contamines -> Saint Gervais -> Le Fayet",
+     "legs": [
+      {
+       "seq": 1,
+       "mode": "utmb-shuttle",
+       "ref": "stgervais-ndg",
+       "from": "Contamines (UTMB)",
+       "to": "Saint Gervais (La Poste)",
+       "durationMinutes": 20,
+       "verified": true,
+       "note": "Last 01:00."
+      },
+      {
+       "seq": 2,
+       "mode": "utmb-shuttle",
+       "ref": "passy-stgervais",
+       "from": "Saint Gervais",
+       "to": "Le Fayet (Gare)",
+       "durationMinutes": 15,
+       "verified": false,
+       "note": "Runs until 02:00 — the latest anything runs in the France zone."
+      },
+      {
+       "seq": 3,
+       "mode": "unresolved",
+       "ref": "train",
+       "from": "Le Fayet (Gare)",
+       "to": "Les Houches",
+       "verified": false,
+       "note": "Depends entirely on the LAST TRAIN FROM LE FAYET, which is unknown and very likely long gone by 01:00. On the confirm-tomorrow checklist. If there is no train, this option ends in a taxi from Le Fayet."
+      }
+     ]
+    }
+   ],
+   "warnings": [
+    "night-return-risk",
+    "last-time-ambiguous",
+    "lefayet-to-stgervais-gap",
+    "no-chamonix-to-houches-line"
+   ],
+   "notes": "Arrival window is wide: a strong runner could reach km 32.5 around 21:30, the cutoff is 00:00. Be in place by 21:00 and be prepared to wait. Les Contamines is closed to private cars — shuttle or train only."
+  },
+  {
+   "cp": "U7",
+   "name": "Courmayeur",
+   "km": 83.4,
+   "cutoff": {
+    "dow": "Sat",
+    "date": "2026-08-29",
+    "time": "13:15"
+   },
+   "support": "hotmeal",
+   "assistanceAllowed": true,
+   "zone": "italy",
+   "passRequired": "italy",
+   "difficulty": "easy",
+   "difficultyRating": 2,
+   "headline": "The easy one. Daylight, frequent buses both ways.",
+   "reasoning": "A Saturday-daytime crew point. Line 1 starts at 05:40 and the Chamonix <-> Courmayeur shuttle runs every 30 minutes in both directions from 00:30 to 20:30, so the crew can go and come back inside normal service hours with plenty of slack.",
+   "legs": [
+    {
+     "seq": 1,
+     "mode": "walk",
+     "ref": null,
+     "from": "Crew base, Les Houches",
+     "to": "Les Houches Line 1 bus stop",
+     "durationMinutes": 5,
+     "verified": false,
+     "note": "Line 1 serves Les Houches (verified); which stop is nearest the base is not confirmed. Walk it in daylight beforehand."
+    },
+    {
+     "seq": 2,
+     "mode": "line1",
+     "ref": "line1",
+     "from": "Les Houches",
+     "to": "Chamonix",
+     "durationMinutes": null,
+     "verified": true,
+     "note": "Every 30 min from 05:40. Before 05:40 there is no bus — you would need a taxi."
+    },
+    {
+     "seq": 3,
+     "mode": "utmb-shuttle",
+     "ref": "cham-courmayeur",
+     "from": "Chamonix (Maison Nordique)",
+     "to": "Courmayeur (Centre Sportif)",
+     "durationMinutes": 45,
+     "verified": true,
+     "note": "Every 30 min, 00:30 to 20:30. Board at MAISON NORDIQUE, not Grépon Bus."
+    }
+   ],
+   "returnOptions": [
+    {
+     "id": "u7-return",
+     "preference": 1,
+     "label": "Reverse the outbound",
+     "legs": [
+      {
+       "seq": 1,
+       "mode": "utmb-shuttle",
+       "ref": "cham-courmayeur",
+       "from": "Courmayeur (Centre Sportif)",
+       "to": "Chamonix (Maison Nordique)",
+       "durationMinutes": 45,
+       "verified": true,
+       "note": "Bidirectional, every 30 min, last 20:30."
+      },
+      {
+       "seq": 2,
+       "mode": "line1",
+       "ref": "line1",
+       "from": "Chamonix",
+       "to": "Les Houches",
+       "durationMinutes": null,
+       "verified": true,
+       "note": "MUST be back in Chamonix before 20:14 or Line 1 is finished. With a 13:15 cutoff this is easy — but do not linger in Courmayeur into the evening."
+      }
+     ]
+    }
+   ],
+   "warnings": [
+    "last-time-ambiguous",
+    "line1-cutoff-2014",
+    "border-id"
+   ],
+   "notes": "Italy pass required. Carry ID or passport — the shuttle runs through the Mont-Blanc tunnel. Courmayeur is a life base with a hot meal and drop bags, so plan for a longer stop with the runner. Courmayeur is closed to private cars."
+  },
+  {
+   "cp": "U11",
+   "name": "Champex-Lac",
+   "km": 130.5,
+   "cutoff": {
+    "dow": "Sun",
+    "date": "2026-08-30",
+    "time": "02:30"
+   },
+   "support": "hotmeal",
+   "assistanceAllowed": true,
+   "zone": "switzerland",
+   "passRequired": "switzerland",
+   "difficulty": "hard",
+   "difficultyRating": 5,
+   "headline": "THE HARD ONE. Two legs, a night transfer at Orsières, a Swiss pass, and a Saturday-evening departure deadline.",
+   "reasoning": "Champex-Lac is 90 minutes deep into Switzerland with a change at Orsières, and the crew must be there in the small hours of Sunday. The binding constraint is at the very start: the crew must leave Les Houches BEFORE Chamonix Bus Line 1 stops at 20:14 on Saturday, or they cannot reach Chamonix to catch the Swiss trunk line at all.",
+   "legs": [
+    {
+     "seq": 1,
+     "mode": "walk",
+     "ref": null,
+     "from": "Crew base, Les Houches",
+     "to": "Les Houches Line 1 bus stop",
+     "durationMinutes": 5,
+     "verified": false,
+     "note": "Or the railway station if using the train to Chamonix instead."
+    },
+    {
+     "seq": 2,
+     "mode": "line1",
+     "ref": "line1",
+     "from": "Les Houches",
+     "to": "Chamonix",
+     "durationMinutes": null,
+     "verified": true,
+     "note": "HARD DEADLINE: board before 20:14 Saturday. After that Line 1 is done and there is no verified way to Chamonix. The train is the alternative but its evening times are unverified."
+    },
+    {
+     "seq": 3,
+     "mode": "utmb-shuttle",
+     "ref": "cham-orsieres",
+     "from": "Chamonix (Maison Nordique)",
+     "to": "Orsières",
+     "durationMinutes": 80,
+     "verified": true,
+     "note": "Every 45 min, first 05:30 Sat, last 03:00 Sun. Calls at Vallorcine (Gare) and Trient en route. Board at MAISON NORDIQUE."
+    },
+    {
+     "seq": 4,
+     "mode": "transfer",
+     "ref": null,
+     "from": "Orsières",
+     "to": "Orsières",
+     "durationMinutes": null,
+     "verified": false,
+     "note": "NIGHT TRANSFER in a small Swiss village. Both lines run every 30–45 min so the wait should be short, but there is no verified indoor waiting area. Dress for standing outside at altitude in the dark."
+    },
+    {
+     "seq": 5,
+     "mode": "utmb-shuttle",
+     "ref": "orsieres-champex",
+     "from": "Orsières",
+     "to": "Champex Lac",
+     "durationMinutes": 25,
+     "verified": true,
+     "note": "Every 30 min, last 04:00 Sun — 90 min past Suha's cutoff, so there is real margin on this leg."
+    }
+   ],
+   "returnOptions": [
+    {
+     "id": "u11-return-trient-vallorcine",
+     "preference": 1,
+     "label": "RECOMMENDED — out via Trient and Vallorcine, then the train home",
+     "note": "Every leg here is printed as BIDIRECTIONAL on the poster, unlike the one-way Chamonix > Orsières trunk line, and it ends at Vallorcine where the crew's own free train line starts. It also avoids Chamonix entirely, so the 20:14 Line 1 problem never arises.",
+     "legs": [
+      {
+       "seq": 1,
+       "mode": "utmb-shuttle",
+       "ref": "orsieres-champex",
+       "from": "Champex Lac",
+       "to": "Orsières",
+       "durationMinutes": 25,
+       "verified": true,
+       "note": "Last 04:00 Sun."
+      },
+      {
+       "seq": 2,
+       "mode": "utmb-shuttle",
+       "ref": "orsieres-trient",
+       "from": "Orsières",
+       "to": "Trient",
+       "durationMinutes": 45,
+       "verified": true,
+       "note": "Every 30 min, last 04:00 Sun."
+      },
+      {
+       "seq": 3,
+       "mode": "utmb-shuttle",
+       "ref": "trient-vallorcine",
+       "from": "Trient",
+       "to": "Vallorcine",
+       "durationMinutes": 15,
+       "verified": true,
+       "note": "Every 30 min, last 09:00 Sun — the longest-running line on the whole network. Crosses back into France."
+      },
+      {
+       "seq": 4,
+       "mode": "train",
+       "ref": "train",
+       "from": "Vallorcine",
+       "to": "Les Houches",
+       "durationMinutes": null,
+       "verified": false,
+       "note": "Mont-Blanc Express, free with the Guest Card. FIRST TRAIN TIME UNKNOWN — expect a wait at Vallorcine until the first morning service. On the confirm-tomorrow checklist."
+      }
+     ]
+    },
+    {
+     "id": "u11-return-orsieres-chamonix",
+     "preference": 2,
+     "label": "Back the way you came — NOT RELIABLE",
+     "legs": [
+      {
+       "seq": 1,
+       "mode": "utmb-shuttle",
+       "ref": "orsieres-champex",
+       "from": "Champex Lac",
+       "to": "Orsières",
+       "durationMinutes": 25,
+       "verified": true
+      },
+      {
+       "seq": 2,
+       "mode": "unresolved",
+       "ref": "cham-orsieres",
+       "from": "Orsières",
+       "to": "Chamonix",
+       "verified": false,
+       "note": "Line cham-orsieres is printed ONE WAY and the official line index lists no Orsières > Chamonix working. A return bus must physically exist, but it is not published. Do not stake the night on it."
+      },
+      {
+       "seq": 3,
+       "mode": "unresolved",
+       "ref": null,
+       "from": "Chamonix",
+       "to": "Les Houches",
+       "verified": false,
+       "note": "Arriving Chamonix in the small hours of Sunday hits the same wall as U3: no Line 1, no UTMB line, Chamo'Nuit unverified. Taxi."
+      }
+     ]
+    }
+   ],
+   "warnings": [
+    "night-return-risk",
+    "line1-cutoff-2014",
+    "swiss-pass-required",
+    "border-id",
+    "oneway-orsieres",
+    "last-time-ambiguous"
+   ],
+   "notes": "SWITZERLAND pass required — Champex-Lac is in the Swiss zone. Carry ID or passport. Champex is a life base with a hot meal. Champex and La Fouly are both closed to private cars. Do NOT detour to La Fouly on the way: line orsieres-lafouly dies at 23:00 while everything else runs to 04:00, and it is not an assistance point anyway."
+  },
+  {
+   "cp": "U13",
+   "name": "Vallorcine",
+   "km": 158.4,
+   "cutoff": {
+    "dow": "Sun",
+    "date": "2026-08-30",
+    "time": "11:15"
+   },
+   "support": "food",
+   "assistanceAllowed": true,
+   "zone": "france",
+   "passRequired": null,
+   "difficulty": "easy",
+   "difficultyRating": 1,
+   "headline": "THE EASIEST ONE. Direct train from the doorstep, free with the Guest Card, no Chamonix transfer, no UTMB shuttle needed.",
+   "reasoning": "Les Houches and Vallorcine are both on the Mont-Blanc Express, and both sit inside the Servoz–Vallorcine section that is free with the Carte d'Hôte. The crew walks to their own station, rides one train, and arrives. No pass, no QR code, no shuttle, no Chamonix. Sunday late morning, in daylight.",
+   "legs": [
+    {
+     "seq": 1,
+     "mode": "walk",
+     "ref": null,
+     "from": "Crew base, Les Houches",
+     "to": "Les Houches railway station",
+     "durationMinutes": 2,
+     "verified": true
+    },
+    {
+     "seq": 2,
+     "mode": "train",
+     "ref": "train",
+     "from": "Les Houches",
+     "to": "Vallorcine",
+     "durationMinutes": null,
+     "verified": false,
+     "note": "Mont-Blanc Express, up-valley. Free with the Guest Card. EXACT TIMES NOT VERIFIED — check the board at Les Houches station. Aim to arrive well before the 11:15 cutoff."
+    }
+   ],
+   "returnOptions": [
+    {
+     "id": "u13-return",
+     "preference": 1,
+     "label": "Same train back",
+     "legs": [
+      {
+       "seq": 1,
+       "mode": "train",
+       "ref": "train",
+       "from": "Vallorcine",
+       "to": "Les Houches",
+       "durationMinutes": null,
+       "verified": false,
+       "note": "Free with the Guest Card. Daylight Sunday, so the night-return problem does not apply here."
+      }
+     ]
+    }
+   ],
+   "alternatives": [
+    {
+     "label": "UTMB shuttle via Chamonix",
+     "ref": "cham-vallorcine",
+     "verified": true,
+     "note": "Line cham-vallorcine runs Chamonix <-> Vallorcine every 30 min until 12:30 Sunday. Strictly worse for this crew: it requires getting to Chamonix first, costs a pass, and the poster/legend disagree about whether it is a France-zone or Switzerland-zone line. Use only if the train fails."
+    }
+   ],
+   "warnings": [
+    "train-times-unverified"
+   ],
+   "notes": "Last full assistance point before the finish — the most emotionally important stop of the weekend, and the cheapest to reach. Vallorcine is closed to private cars, so the train is the right tool anyway. No UTMB pass is needed for the recommended route."
+  }
+ ],
+ "roadClosures": {
+  "summary": "Roads AND parking are closed to private cars in these villages for the duration of the event. Access is only possible by UTMB Mobility shuttle (or, where it runs, by train).",
+  "verified": true,
+  "source": "EN_GUIDE_DES_TRANSPORTS_2026.pdf, 'Road and parking closures' (p.10), verbatim.",
+  "sourceQuote": "During the event, a number of roads and parking areas will be closed to traffic, making it impossible to access Les Contamines, Saint-Gervais, Courmayeur, La Fouly, Champex, Col de la Forclaz, Trient and Vallorcine by private car. Parking will be prohibited in these areas and access will only be possible via UTMB Mobility shuttle services.",
+  "villages": [
+   {
+    "name": "Les Contamines",
+    "country": "FR",
+    "verified": true
+   },
+   {
+    "name": "Saint-Gervais",
+    "country": "FR",
+    "verified": true
+   },
+   {
+    "name": "Courmayeur",
+    "country": "IT",
+    "verified": true
+   },
+   {
+    "name": "La Fouly",
+    "country": "CH",
+    "verified": true
+   },
+   {
+    "name": "Champex",
+    "country": "CH",
+    "verified": true
+   },
+   {
+    "name": "Col de la Forclaz",
+    "country": "CH",
+    "verified": true
+   },
+   {
+    "name": "Trient",
+    "country": "CH",
+    "verified": true
+   },
+   {
+    "name": "Vallorcine",
+    "country": "FR",
+    "verified": true
+   }
+  ],
+  "additional": [
+   {
+    "name": "Les Houches",
+    "country": "FR",
+    "verified": false,
+    "note": "NOT in the official guide's written list, but the network map (EN_UTMB_3) shows a road-closure icon at Les Houches. Since this is the crew's own village, the extent and timing of any closure matters to them directly — and it may also affect Chamonix Bus Line 1's routing. Confirm locally."
+   }
+  ],
+  "crewImpact": "The crew has no car option to any of their four crew points. Every plan in this file is shuttle, train or on foot by necessity, not by preference."
+ },
+ "warnings": [
+  {
+   "id": "night-return-risk",
+   "severity": "critical",
+   "title": "NIGHT RETURN TO LES HOUCHES IS UNSOLVED",
+   "body": "After crewing U3 Les Contamines on Friday night, the crew gets back to Chamonix around 01:00–01:25 — and there is NO VERIFIED WAY HOME from there. Chamonix Bus Line 1 finished at 20:14. The last train has long gone (exact time unknown). Chamo'Nuit is completely unverified. No UTMB shuttle runs Chamonix -> Les Houches at any hour. The same wall appears again on Sunday morning after U11 Champex-Lac if the crew routes back through Chamonix. PLAN FOR THIS BEFORE FRIDAY: get a local taxi number, save it in every phone, and agree in advance who calls it and roughly what it will cost.",
+   "verified": true,
+   "affects": [
+    "U3",
+    "U11"
+   ],
+   "affectsLines": [
+    "ndg-cham",
+    "line1"
+   ],
+   "mitigations": [
+    "Confirm whether Chamo'Nuit serves Les Houches, on which nights and until when.",
+    "Get a Chamonix / Les Houches taxi number and save it offline in every crew phone before Friday.",
+    "Consider the down-valley alternative: stay on the Saint-Gervais side (line passy-stgervais runs until 02:00) and take the first morning train home rather than crossing to Chamonix at all.",
+    "Agree a fallback meeting point and a 'we are stuck' message before splitting up."
+   ]
+  },
+  {
+   "id": "no-chamonix-to-houches-line",
+   "severity": "high",
+   "title": "No UTMB shuttle ever runs Chamonix -> Les Houches",
+   "body": "Verified negative. The official Google-Maps line index (EN_UTMB_4) lists all 20 UTMB lines for the Chamonix side, and the only one touching Les Houches is HOUCHES > CHAMONIX — one way, one single run, 16:00 Friday. The UTMB network takes people out of Les Houches once and never brings them back. Do not wait at Maison Nordique hoping for a bus.",
+   "verified": true,
+   "affects": [
+    "U3",
+    "U7",
+    "U11"
+   ],
+   "affectsLines": [
+    "houches-cham"
+   ]
+  },
+  {
+   "id": "line1-cutoff-2014",
+   "severity": "high",
+   "title": "Chamonix Bus Line 1 stops at 20:14",
+   "body": "Line 1 is the crew's only verified everyday link between Les Houches and Chamonix, and it runs 05:40 to 20:14, every 30 minutes. Anything that requires being in Chamonix after 20:14 needs a plan that does not involve Line 1. For U11 Champex-Lac this is a hard Saturday-evening departure deadline: board before 20:14 or the whole Swiss plan fails at the first leg.",
+   "verified": true,
+   "affects": [
+    "U7",
+    "U11"
+   ],
+   "affectsLines": [
+    "line1"
+   ]
+  },
+  {
+   "id": "swiss-pass-required",
+   "severity": "high",
+   "title": "Passes are ZONE-BASED — Champex-Lac and La Fouly need the SWISS pass",
+   "body": "UTMB Mobility supporter passes are sold per race and per country zone (France / Italy / Switzerland). Following Suha across all three requires more than one pass. Champex-Lac (U11) and La Fouly sit in the SWITZERLAND zone. Courmayeur (U7) is ITALY. Les Contamines (U3) is FRANCE. Vallorcine (U13) on the recommended train route needs no UTMB pass at all. Check that every crew member's QR code actually covers the zone they are travelling into BEFORE leaving the flat — a wrong-zone pass is refused at the door of the bus.",
+   "verified": true,
+   "affects": [
+    "U3",
+    "U7",
+    "U11"
+   ],
+   "note": "Line cham-vallorcine's zone is ambiguous — see its zoneNote."
+  },
+  {
+   "id": "booking-closed",
+   "severity": "medium",
+   "title": "Booking closed 12 July 2026 — no on-site sales",
+   "body": "UTMB Mobility pass sales and shuttle-time bookings ran 09/06/2026 to 12/07/2026 only. There are NO on-site sales and resale of passes is not permitted. The crew already hold their passes; nothing further can be bought now. Boarding is by QR code, emailed at booking and scanned on the bus — all of one person's journeys are grouped under a single QR code. Have it downloaded and screenshotted offline: mountain valleys have no signal.",
+   "verified": true,
+   "affects": [
+    "U3",
+    "U7",
+    "U11"
+   ]
+  },
+  {
+   "id": "last-time-ambiguous",
+   "severity": "medium",
+   "title": "\"every N min ---> HH:MM\" — last departure or end of service? UNVERIFIED",
+   "body": "The poster's closing time for each line is printed without explanation. It could mean the last bus LEAVES the first stop at that time, or that the service ENDS at that time (in which case the last useful departure is earlier). Nobody has confirmed which. Treat every published closing time as the last moment you can rely on, arrive at the stop at least 20 minutes earlier, and never make the final connection of the night the one that depends on this.",
+   "verified": true,
+   "affects": [
+    "U3",
+    "U7",
+    "U11",
+    "U13"
+   ],
+   "note": "This flag is mirrored on every line as lastSemanticsVerified: false."
+  },
+  {
+   "id": "lefayet-to-stgervais-gap",
+   "severity": "medium",
+   "title": "Le Fayet station to Saint Gervais village — connection unconfirmed",
+   "body": "The U3 route relies on getting from the Mont-Blanc Express station at Le Fayet up to Saint Gervais (La Poste), where line stgervais-ndg starts. Line passy-stgervais is titled 'Passy <-> Saint Gervais' and calls at Le Fayet (Gare), running until 02:00 — but the poster lists no stop actually named Saint Gervais, and the village sits roughly 300 m above the station. Whether that shuttle closes the gap is UNVERIFIED. Confirm before Friday evening; if it does not, find the local link (bus or taxi) up to the village.",
+   "verified": true,
+   "affects": [
+    "U3"
+   ],
+   "affectsLines": [
+    "passy-stgervais",
+    "stgervais-ndg"
+   ]
+  },
+  {
+   "id": "oneway-orsieres",
+   "severity": "medium",
+   "title": "Chamonix > Orsières is printed one-way — plan the return via Trient",
+   "body": "The follower poster prints line cham-orsieres as one-way and the official line index confirms no published Orsières > Chamonix working. A return bus must exist for a service running to 03:00 Sunday, but it is not documented. Use the bidirectional chain instead: Champex -> Orsières -> Trient -> Vallorcine -> train home. Every leg of that chain is printed as two-way and the Trient <-> Vallorcine link runs until 09:00 Sunday.",
+   "verified": true,
+   "affects": [
+    "U11"
+   ],
+   "affectsLines": [
+    "cham-orsieres",
+    "orsieres-trient",
+    "trient-vallorcine"
+   ]
+  },
+  {
+   "id": "train-times-unverified",
+   "severity": "medium",
+   "title": "Mont-Blanc Express times at Les Houches are unknown",
+   "body": "The train serves Les Houches and the Servoz–Vallorcine section is free with the Guest Card, both verified. The actual departure times are not. Three of the four crew plans start or end with this train. Photograph the timetable board at Les Houches station tomorrow, and specifically write down the LAST train from Le Fayet and the FIRST and LAST from Vallorcine.",
+   "verified": true,
+   "affects": [
+    "U3",
+    "U13",
+    "U11"
+   ],
+   "affectsLines": [
+    "train"
+   ]
+  },
+  {
+   "id": "border-id",
+   "severity": "low",
+   "title": "Carry ID or passport for Italy and Switzerland",
+   "body": "U7 Courmayeur is in Italy (through the Mont-Blanc tunnel) and U11 Champex-Lac is in Switzerland — which is outside the EU customs union. The Trient <-> Vallorcine shuttle also crosses the Swiss/French border. Spot checks happen. Everyone carries ID.",
+   "verified": true,
+   "affects": [
+    "U7",
+    "U11"
+   ]
+  },
+  {
+   "id": "timetables-may-change",
+   "severity": "low",
+   "title": "UTMB may change these timetables during the event",
+   "body": "Both official posters carry the same warning: 'these timetables could vary during the event due to the demands of the organisation (you will be notified of any changes by sms)'. Make sure the phone number on the UTMB booking is one the crew actually carries and can receive SMS on in the mountains.",
+   "verified": true,
+   "affects": [
+    "U3",
+    "U7",
+    "U11",
+    "U13"
+   ]
+  },
+  {
+   "id": "bus-rules",
+   "severity": "low",
+   "title": "UTMB bus rules: no under-3s, no pets, no bikes or scooters",
+   "body": "Children under 3 are not permitted on UTMB Mobility buses (exceptional derogations exist via the Point Info with proof of age). Pets and animals of any kind are not permitted regardless of size. Bikes and scooters are refused at the driver's discretion. The organisation also states the shuttle system is not recommended for young children given night waiting times and possible bad weather.",
+   "verified": true,
+   "affects": [
+    "U3",
+    "U7",
+    "U11",
+    "U13"
+   ]
+  },
+  {
+   "id": "no-assistance-les-houches",
+   "severity": "low",
+   "title": "Les Houches (km 9.1) is a water point — no crewing allowed",
+   "body": "The course passes the crew's own village about an hour into the race, but U1 Les Houches is a water point with NO personal assistance permitted. The crew can watch and cheer; they cannot hand over anything. The first legal assistance point is U3 Les Contamines.",
+   "verified": true,
+   "affects": []
+  }
+ ],
+ "journeyTimes": {
+  "note": "Verbatim from the network map legend on EN_UTMB_3_network_map.jpg. These are the organiser's own point-to-point figures and occasionally disagree with the printed timetables by a few minutes; where they do, each line's journeyMinutes uses the timetable and journeyMinutesLegend records the legend figure.",
+  "verified": true,
+  "unit": "minutes",
+  "entries": [
+   {
+    "from": "Chamonix",
+    "to": "Saint-Gervais",
+    "minutes": 35,
+    "zone": "france"
+   },
+   {
+    "from": "Saint-Gervais",
+    "to": "Les Contamines",
+    "minutes": 15,
+    "zone": "france"
+   },
+   {
+    "from": "Les Contamines",
+    "to": "Notre-Dame de la Gorge",
+    "minutes": 10,
+    "zone": "france"
+   },
+   {
+    "from": "Chamonix",
+    "to": "Notre-Dame de la Gorge",
+    "minutes": 50,
+    "zone": "france"
+   },
+   {
+    "from": "Cluses",
+    "to": "Chamonix",
+    "minutes": 50,
+    "zone": "france"
+   },
+   {
+    "from": "Chamonix",
+    "to": "Vallorcine",
+    "minutes": 35,
+    "zone": "france",
+    "note": "The legend lists Chamonix <> Vallorcine twice — 35 min under ZONE FRANCE and 40 min under ZONE SUISSE. Both are reproduced. Treat the real journey as 35–40 min."
+   },
+   {
+    "from": "Chamonix",
+    "to": "Courmayeur",
+    "minutes": 45,
+    "zone": "italy"
+   },
+   {
+    "from": "Courmayeur",
+    "to": "Arnouvaz",
+    "minutes": 45,
+    "zone": "italy"
+   },
+   {
+    "from": "Chamonix",
+    "to": "Orsières",
+    "minutes": 90,
+    "sourceText": "1H30MIN",
+    "zone": "switzerland"
+   },
+   {
+    "from": "Orsières",
+    "to": "La Fouly",
+    "minutes": 30,
+    "zone": "switzerland"
+   },
+   {
+    "from": "Orsières",
+    "to": "Champex-Lac",
+    "minutes": 30,
+    "zone": "switzerland"
+   },
+   {
+    "from": "Trient",
+    "to": "Vallorcine",
+    "minutes": 15,
+    "zone": "switzerland"
+   },
+   {
+    "from": "Chamonix",
+    "to": "Vallorcine",
+    "minutes": 40,
+    "zone": "switzerland",
+    "note": "Second of the two duplicate legend entries — see the France-zone entry above."
+   }
+  ]
+ },
+ "confirmTomorrowChecklist": [
+  {
+   "id": "guest-cards",
+   "priority": 1,
+   "item": "A Carte d'Hôte (Guest Card) in the hand of EVERY crew member, not just one",
+   "why": "It makes the Mont-Blanc Express free on Servoz–Vallorcine, which is the backbone of the U13 plan and the first leg of U3. Issued by the accommodation — ask at check-in.",
+   "answer": null,
+   "verified": false
+  },
+  {
+   "id": "chamonuit",
+   "priority": 1,
+   "item": "Chamo'Nuit: does it stop in LES HOUCHES, on which nights, and what are the first and last departures from Chamonix?",
+   "why": "THE BIGGEST GAP. It is the only candidate solution to the Friday-night return from U3. Ask in person at the Chamonix Bus office or Les Houches tourist office. Fare is known: 4.50 EUR by card / 5.00 EUR cash, on board.",
+   "answer": null,
+   "verified": false
+  },
+  {
+   "id": "last-train-lefayet",
+   "priority": 1,
+   "item": "LAST train from Le Fayet up-valley to Les Houches",
+   "why": "Decides whether the down-valley return from U3 (staying on the Saint-Gervais side) is survivable, or whether it ends in a taxi.",
+   "answer": null,
+   "verified": false
+  },
+  {
+   "id": "last-train-vallorcine",
+   "priority": 1,
+   "item": "LAST train from Vallorcine to Les Houches — and the FIRST one on Sunday morning",
+   "why": "The first Sunday train sets how long the crew waits at Vallorcine after the U11 Champex return chain. The last train matters if they stay late at U13.",
+   "answer": null,
+   "verified": false
+  },
+  {
+   "id": "taxi-number",
+   "priority": 1,
+   "item": "A local taxi number, saved offline in every crew phone",
+   "why": "It is the only unconditional answer to the night-return gap. Get it before Friday, not at 01:00 in a bus shelter.",
+   "answer": null,
+   "verified": false
+  },
+  {
+   "id": "line1-race-weekend",
+   "priority": 2,
+   "item": "Does Chamonix Bus Line 1 run its normal 05:40–20:14 on race weekend, and is it free with the Guest Card?",
+   "why": "Two crew plans depend on Line 1. Race weekend is the busiest of the year and the network map shows a road-closure icon at Les Houches.",
+   "answer": null,
+   "verified": false
+  },
+  {
+   "id": "les-houches-train-times",
+   "priority": 2,
+   "item": "Photograph the full timetable board at Les Houches station",
+   "why": "Three of four plans start or end on this train and no timetable is currently held. Two minutes of work removes the largest remaining unknown after Chamo'Nuit.",
+   "answer": null,
+   "verified": false
+  },
+  {
+   "id": "lefayet-stgervais-link",
+   "priority": 2,
+   "item": "Does the Passy <-> Saint Gervais shuttle actually reach Saint Gervais village (La Poste), or only Le Fayet (Gare)?",
+   "why": "It is the join between the train and the Contamines shuttle in the U3 plan. If it only reaches Le Fayet, the crew needs another way up to the village.",
+   "answer": null,
+   "verified": false
+  },
+  {
+   "id": "pass-zones",
+   "priority": 2,
+   "item": "Check every crew member's QR code covers France, Italy AND Switzerland as needed",
+   "why": "Passes are zone-based and cannot be bought now — booking closed 12 July and there are no on-site sales. A wrong-zone pass is refused at the bus door.",
+   "answer": null,
+   "verified": false
+  },
+  {
+   "id": "sms-number",
+   "priority": 3,
+   "item": "Confirm the phone number on the UTMB booking is one the crew carries",
+   "why": "UTMB notifies timetable changes by SMS during the event.",
+   "answer": null,
+   "verified": false
+  }
+ ],
+ "operatingNotes": {
+  "verified": true,
+  "source": "Footer text of UTMB_FR_accompagnants.png and EN_UTMB_1_chamonix.jpg",
+  "items": [
+   "Booking is required for all shuttles ('RÉSERVATION OBLIGATOIRE POUR TOUTES LES NAVETTES' / 'BOOKING REQUIRED FOR ALL SHUTTLES').",
+   "Timetables could vary during the event due to the demands of the organisation; changes are notified by SMS.",
+   "Helping, following or disturbing a runner is not allowed.",
+   "Given possible night waiting times and difficult weather, the shuttle system is not recommended for young children. Children under 3 are forbidden for safety reasons.",
+   "Pets, bikes and scooters are not recommended on organisation buses; each driver may refuse them.",
+   "Arrive early at the designated stop with the QR code received by email; it is scanned on boarding."
+  ]
+ },
+ "provenance": {
+  "primarySource": {
+   "name": "UTMB_FR — Horaires des navettes <> Chamonix — ACCOMPAGNANTS (followers)",
+   "url": "https://res.cloudinary.com/utmb-world/image/upload/v1/montblanc/Transports/UTMB_FR/UTMB_final2_175df14f2a",
+   "retrieved": "2026-08-26",
+   "language": "fr",
+   "localCopy": "reference/official/UTMB_FR_accompagnants.png",
+   "note": "All 13 follower lines in this file are transcribed verbatim from this poster and re-verified against the local copy at 200% zoom on 2026-08-27. UTMB NEVER PUBLISHED AN ENGLISH EQUIVALENT OF THIS SHEET — the English poster set runs EN_UTMB_1, EN_UTMB_3 and EN_UTMB_4, with no 'sheet 2'. The follower timetable exists in French only, which is why this file is the crew's English source of truth."
+  },
+  "supportingSources": [
+   {
+    "name": "EN_UTMB_1 — Shuttle Schedules <> Chamonix (start and post-race, runners & followers)",
+    "localCopy": "reference/official/EN_UTMB_1_chamonix.jpg",
+    "language": "en",
+    "usedFor": [
+     "startShuttles",
+     "otherRunnerShuttles"
+    ],
+    "verified": true
+   },
+   {
+    "name": "EN_UTMB_3 — Shuttle Schedules <> Chamonix (network map, zone legend, map of Chamonix)",
+    "localCopy": "reference/official/EN_UTMB_3_network_map.jpg",
+    "language": "en",
+    "usedFor": [
+     "journeyTimes",
+     "chamonixHubs",
+     "roadClosures.additional"
+    ],
+    "verified": true
+   },
+   {
+    "name": "EN_UTMB_4 — Shuttle lines index (Google Maps links)",
+    "localCopy": "reference/official/EN_UTMB_4_lines_gmaps.jpg",
+    "language": "en",
+    "usedFor": [
+     "warnings.no-chamonix-to-houches-line"
+    ],
+    "verified": true,
+    "note": "Used as the authority for the complete list of 20 UTMB lines on the Chamonix side, which is what establishes that no Chamonix -> Les Houches line exists."
+   },
+   {
+    "name": "Transport Guide 2026 (official English PDF)",
+    "localCopy": "reference/official/EN_GUIDE_DES_TRANSPORTS_2026.pdf",
+    "language": "en",
+    "usedFor": [
+     "passes",
+     "roadClosures",
+     "operatingNotes"
+    ],
+    "verified": true,
+    "note": "Text extracted locally with pdftotext. Contains NO information on Chamo'Nuit, the Mont-Blanc Express, Chamonix Bus Line 1 or the Guest Card — it covers UTMB Mobility shuttles only. That absence is itself why the local-transport gaps in this file remain unverified."
+   },
+   {
+    "name": "Course checkpoint data (km, cutoffs, assistance flags)",
+    "localCopy": "course/utmb_course.html",
+    "usedFor": [
+     "crewPoints",
+     "crewBase.coursePassage"
+    ],
+    "verified": true,
+    "note": "COURSE_DATA block. Cross-checked: U3 32.5 km Sat 00:00, U7 83.4 km Sat 13:15, U11 130.5 km Sun 02:30, U13 158.4 km Sun 11:15, U1 Les Houches 9.1 km water/no-assistance. All agree with the crew brief."
+   }
+  ],
+  "excludedSources": [
+   {
+    "name": "POST_RACE.png",
+    "localCopy": "reference/official/POST_RACE.png",
+    "excluded": true,
+    "reason": "DELIBERATELY NOT USED. Despite the filename this sheet is the ETC / YCC <> Courmayeur timetable for 25/08 and 26/08 — a different race on different days. None of its times apply to UTMB race weekend (28–30/08). Do not merge it in."
+   }
+  ],
+  "derivedFindings": {
+   "note": "The routing advice in crewPoints is NOT from any published sheet. No UTMB document is written for a crew based in Les Houches. These routes were derived by combining the follower timetable, the network map, the course cutoffs and the verified local-transport facts, and every step that could not be confirmed carries verified:false.",
+   "author": "Compiled for Suha's crew, 2026-08-27"
+  }
+ }
 }

@@ -29,6 +29,10 @@ body{font-family:-apple-system,"Avenir Next","Helvetica Neue",sans-serif;backgro
    Kept as a second declaration so a browser without env() keeps the 16px above. */
 .header{padding:calc(16px + var(--sa-t)) calc(16px + var(--sa-r)) 16px calc(16px + var(--sa-l))}
 .header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
+/* flex items default to min-width:auto, so this block refused to shrink below
+   the stats row's natural width and clipped "Chamonix -> Chamonix" at 390px. */
+.header-top>div{min-width:0}
+.stats{min-width:0}
 .header h1{font-size:19px;font-weight:700;letter-spacing:-.3px}
 .header h1 span{color:var(--water)}
 .stats{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap}
@@ -52,9 +56,14 @@ body{font-family:-apple-system,"Avenir Next","Helvetica Neue",sans-serif;backgro
 .legend-ring{flex-shrink:0}
 
 /* LAYOUT */
-.layout{display:grid;grid-template-columns:1fr;gap:0}
+/* minmax(0,1fr) not 1fr: plain `1fr` means minmax(AUTO,1fr), and the auto
+   floor stops the column shrinking below the map SVG / panel-title intrinsic
+   width — which overflowed the viewport at 390px and pushed the map zoom
+   controls off-screen on iPhone. Same reason .panel and the .header-top
+   child need min-width:0. */
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
 @media(min-width:960px){.layout{grid-template-columns:1fr 1fr}}
-.panel{border-bottom:1px solid #222;padding:14px 10px 10px}
+.panel{border-bottom:1px solid #222;padding:14px 10px 10px;min-width:0}
 @media(min-width:960px){.panel{border-bottom:none}
   .panel.map-panel{border-right:1px solid #222}
 }
