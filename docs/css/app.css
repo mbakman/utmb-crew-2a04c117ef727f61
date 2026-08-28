@@ -202,3 +202,191 @@ body.training-mode .section-hit.selected{fill:rgba(167,139,250,.28)}
    checklist / share / transport modules. An unfilled mount renders nothing. */
 .boot-error{margin:12px 16px;padding:12px 14px;border-radius:10px;background:#2d0a0a;border:1px solid #dc2626;color:#fca5a5;font-size:13.5px;line-height:1.5}
 .mount:empty{display:none}
+
+/* ── DAY PLAN (transport.js, #transportMount) ──────────────────────────────
+   The crew's race day: the four checkpoints they work, the six legs, the bus
+   reference and the rules. Same reading conditions as the checklist —
+   one-handed, at 3am, possibly through gloves:
+     - every interactive element is at least 44x44 CSS px
+     - the bib input is 16px so iOS does not zoom the page when it focuses
+     - nothing is hover-only; :hover rules are additive, behind @media(hover)
+     - state carried by colour AND text, never colour alone
+   Palette from :root above. System fonts only. Prefix: dp-  */
+.dp{
+  font-family:-apple-system,"Avenir Next","Helvetica Neue",sans-serif;
+  -webkit-tap-highlight-color:transparent;
+  padding:14px 16px 20px;border-top:1px solid #222;background:#121212;
+}
+/* iOS FIX (viewport-fit=cover): landscape notch on the side, home indicator
+   at the bottom. This block is the last thing on the page. */
+.dp{
+  padding-left:calc(16px + var(--sa-l));
+  padding-right:calc(16px + var(--sa-r));
+  padding-bottom:calc(20px + var(--sa-b));
+}
+.dp button,.dp a{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.dp button{cursor:pointer}
+
+/* header: title + the live-tracking box */
+.dp-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.dp-head-main{min-width:0;flex:1 1 220px}
+.dp-title{font-size:17px;font-weight:800;letter-spacing:-.2px;color:var(--text)}
+.dp-sub{margin-top:3px;font-size:12.5px;color:var(--muted);line-height:1.45}
+
+.dp-live{flex:0 1 auto;min-width:0;padding:9px 10px;border:1px solid #2f3f5c;border-radius:12px;background:#111a26}
+.dp-bib-label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--water)}
+.dp-bib-row{display:flex;align-items:stretch;gap:8px;margin-top:6px}
+.dp-bib{
+  width:92px;min-height:44px;padding:8px 10px;border-radius:10px;
+  border:1px solid #37506f;background:#0d1420;color:var(--text);
+  font-family:inherit;font-size:16px;font-weight:800;letter-spacing:.5px;
+  font-variant-numeric:tabular-nums;text-align:center;
+}
+.dp-bib:focus{outline:2px solid var(--water);outline-offset:1px;border-color:var(--water)}
+.dp-track{
+  display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+  padding:8px 14px;border-radius:10px;border:1px solid #166534;background:#0f2a1a;
+  color:#4ade80;font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap;
+}
+.dp-track:active{background:#14432a}
+.dp-bib-hint{margin-top:6px;font-size:11px;color:var(--muted)}
+
+/* section headings + shared notes */
+.dp-sec-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:18px 0 9px}
+.dp-head + .dp-cps > .dp-sec-title{margin-top:4px}
+.dp-note{margin:10px 0 0;padding:9px 11px;border-radius:10px;background:#161616;border:1px solid var(--border);font-size:12.5px;line-height:1.5;color:#d1d5db}
+.dp-hint{margin:8px 0 0;font-size:12px;line-height:1.5;color:var(--muted)}
+
+/* the four crew checkpoints */
+.dp-cp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.dp-cp-card{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:12px;background:var(--card);overflow:hidden}
+.dp-cp-open{
+  display:block;width:100%;min-height:44px;text-align:left;padding:11px 12px 12px;
+  border:0;background:transparent;color:var(--text);
+}
+.dp-cp-open:active{background:#232323}
+.dp-cp-top{display:flex;align-items:baseline;gap:7px;min-width:0}
+.dp-cp-id{flex-shrink:0;font-size:13px;font-weight:800;color:var(--supporter);letter-spacing:.3px}
+.dp-cp-name{font-size:15.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dp-cp-eta{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-top:7px}
+.dp-eta-time{font-size:20px;font-weight:800;color:var(--water);font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.dp-eta-win{font-style:normal;font-size:12px;font-weight:600;color:#93c5fd;font-variant-numeric:tabular-nums}
+.dp-cp-meta{display:block;margin-top:4px;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dp-cp-carbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.dp-carb-eat,.dp-carb-give{font-size:11.5px;font-weight:700;padding:4px 8px;border-radius:7px;white-space:nowrap}
+.dp-carb-eat{background:#0f2a1a;border:1px solid #166534;color:#4ade80}
+.dp-carb-give{background:#211a34;border:1px solid #4c3d80;color:#c4b5fd}
+.dp-cp-next{display:block;margin-top:7px;font-size:12px;color:var(--muted)}
+
+/* "Navigate" — a real anchor everywhere it appears, so it can be long-pressed */
+.dp-nav{
+  display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+  padding:6px 12px;border-top:1px solid var(--border);background:#171717;
+  color:var(--water);font-size:13.5px;font-weight:700;text-decoration:none;
+}
+.dp-nav:active{background:#1f2937}
+.dp-cp-card > .dp-nav{width:100%}
+.dp-step .dp-nav,.dp-d > .dp-nav{
+  margin-top:7px;border:1px solid #2f3f5c;border-radius:10px;align-self:flex-start;
+  min-width:132px;background:#111a26;
+}
+.dp-d > .dp-nav{display:flex;width:100%}
+
+/* the six legs */
+.dp-leg{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:11px 12px 12px;margin-bottom:10px}
+.dp-leg-head{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:9px}
+.dp-day{
+  flex-shrink:0;font-size:10.5px;font-weight:800;letter-spacing:.5px;
+  padding:3px 7px;border-radius:6px;background:#2d0a0a;border:1px solid #7f1d1d;color:#fca5a5;
+}
+.dp-leg-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.35;min-width:0}
+
+/* steps */
+.dp-steps{list-style:none;margin:0;padding:0}
+.dp-step{display:flex;gap:10px;padding:8px 0;border-top:1px solid #202020}
+.dp-steps > .dp-step:first-child{border-top:0;padding-top:2px}
+.dp-time{
+  flex:0 0 76px;font-size:13px;font-weight:800;color:#e5e7eb;
+  font-variant-numeric:tabular-nums;line-height:1.5;padding-top:1px;
+}
+.dp-step-body{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
+.dp-text{font-size:14px;line-height:1.5;color:#e5e7eb}
+.dp-step.is-eta{
+  margin:6px 0;padding:9px 10px;border-top:0;border:1px solid #7f1d1d;
+  border-left:4px solid var(--supporter);border-radius:10px;background:#1d1212;
+}
+.dp-step.is-eta .dp-time{color:#fca5a5;font-size:15px}
+.dp-step.is-eta .dp-text{font-weight:700;color:#fff}
+
+/* warning strips */
+.dp-warn{
+  display:flex;gap:7px;margin-top:7px;padding:8px 10px;border-radius:9px;
+  background:#241a08;border:1px solid #b45309;
+}
+.dp-warn-icon{flex-shrink:0;font-size:14px;line-height:1.45;color:#fbbf24}
+.dp-warn-text{font-size:13px;line-height:1.45;font-weight:600;color:#fcd34d}
+
+/* plan A / plan B halves (leg sat-cp13) */
+.dp-plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-bottom:4px}
+.dp-plan{border:1px solid #2a2a2a;border-radius:10px;background:#161616;padding:9px 11px 10px}
+.dp-plan-label{font-size:12.5px;font-weight:800;color:var(--accent);line-height:1.4;margin-bottom:5px}
+.dp-plan-b .dp-plan-label{color:#7dd3fc}
+.dp-steps-shared{margin-top:8px;border-top:1px dashed #333;padding-top:4px}
+
+/* bus reference */
+.dp-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.dp-table th{
+  text-align:left;padding:6px 8px;border-bottom:1px solid #333;color:var(--muted);
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+}
+.dp-table td{padding:8px;border-bottom:1px solid #202020;color:#e5e7eb;line-height:1.45;vertical-align:top}
+.dp-td-route{font-weight:700;min-width:150px}
+.dp-td-when{color:var(--muted);white-space:nowrap}
+.dp-td-detail{font-variant-numeric:tabular-nums}
+
+/* rules */
+.dp-rule-list{margin:0;padding:0 0 0 18px}
+.dp-rule{font-size:13px;line-height:1.55;color:#d1d5db;margin-bottom:5px}
+.dp-accuracy{margin-top:10px;font-size:11.5px;line-height:1.5;color:var(--muted)}
+
+/* drawer block (#drawerTransportMount) */
+.dp-d{
+  font-family:-apple-system,"Avenir Next","Helvetica Neue",sans-serif;
+  margin:4px 0 16px;padding:11px 12px 12px;border:1px solid var(--border);
+  border-radius:12px;background:#151515;display:flex;flex-direction:column;
+}
+.dp-d-head{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.dp-d-eta{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-top:6px}
+.dp-d-carbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.dp-d-next{margin-top:7px;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dp-d-sub{margin-top:12px;padding-top:9px;border-top:1px solid #242424;font-size:13.5px;font-weight:700;color:#e5e7eb;line-height:1.4}
+.dp-d .dp-plan{margin-top:8px}
+.dp-d .dp-steps{margin-top:4px}
+.dp-failed{background:#121212}
+
+@media (max-width:640px){
+  .dp-title{font-size:16px}
+  .dp-live{flex:1 1 100%}
+  .dp-text{font-size:15px}
+  .dp-time{flex-basis:70px;font-size:13.5px}
+  .dp-leg-title{font-size:15.5px}
+  /* 3 columns of timetable do not fit a phone: stack each row into a labelled
+     block instead of letting the detail column shrink to one word per line. */
+  .dp-table,.dp-table tbody,.dp-table tr,.dp-table td{display:block;width:100%}
+  .dp-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .dp-table tr{border:1px solid var(--border);border-radius:10px;background:var(--card);padding:8px 10px;margin-bottom:8px}
+  .dp-table td{border-bottom:0;padding:2px 0}
+  .dp-table td::before{
+    content:attr(data-l);display:block;font-size:10px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.5px;color:var(--muted);
+  }
+  .dp-td-when{white-space:normal}
+}
+
+/* Pointer devices only — never the sole signal for anything. */
+@media (hover:hover) and (pointer:fine){
+  .dp-cp-card:hover{border-color:#3a3a3a}
+  .dp-cp-open:hover{background:#1f1f1f}
+  .dp-nav:hover{background:#1f2937;color:#93c5fd}
+  .dp-track:hover{background:#14432a}
+}

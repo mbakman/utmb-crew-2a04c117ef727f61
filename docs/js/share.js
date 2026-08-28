@@ -894,13 +894,58 @@ window.UTMB = window.UTMB || {};
   var WRITE_ALIASES = ['importContent', 'applyContent', 'setContent', 'replaceContent', 'mergeContent'];
   var RENDER_ALIASES = ['render', 'refresh', 'rerender', 'redraw', 'update'];
 
+  /* Every live item on this phone, by id, straight from checklist.js — the only
+   * place that knows an item's tick and its lastModified stamp. The share
+   * payload carries neither (a link is a CONTENT transfer; ticks are shared
+   * through sync.js instead), so toFileShape() has to put them back by hand or
+   * setContent() writes done=false / lastModified=0 over the lot. */
+  function localItemIndex() {
+    var idx = Object.create(null);
+    var api = isPlainObject(UTMB.checklist) ? UTMB.checklist : null;
+    if (!api || typeof api.getContent !== 'function') return idx;
+    var content;
+    try { content = api.getContent(); } catch (err) {
+      console.warn('[UTMB share] could not read live checklist for tick preservation', err);
+      return idx;
+    }
+    if (!isPlainObject(content) || !isPlainObject(content.checkpoints)) return idx;
+    Object.keys(content.checkpoints).forEach(function (cpId) {
+      var cp = content.checkpoints[cpId];
+      if (!isPlainObject(cp)) return;
+      Object.keys(cp).forEach(function (phase) {
+        var arr = cp[phase];
+        if (!Array.isArray(arr)) return;
+        arr.forEach(function (it) {
+          if (isPlainObject(it) && it.id) idx[it.id] = it;
+        });
+      });
+    });
+    return idx;
+  }
+
+  function stampOf(raw) {
+    var n = Number(raw);
+    return (n === n && isFinite(n) && n > 0) ? n : 0;
+  }
+
   /* Canonical checklists.json-shaped object, so whatever consumes it sees the
    * same structure the app ships with. Metadata (km, cutoff, support, origin,
-   * phaseLabels...) is carried over from the seed file. */
+   * phaseLabels...) is carried over from the seed file.
+   *
+   * TICKS SURVIVE THIS. toFileShape() rebuilds the WHOLE merged content — all
+   * four checkpoints, not just the ones a cp-scoped link covered — so anything
+   * it omits is erased everywhere, and because refreshStamps() then dates the
+   * erasure to now(), the wipe wins every later item-level merge and takes the
+   * crew's ticks with it. Each item therefore leaves here carrying the done and
+   * lastModified it already had on this phone. Only items the accepted link
+   * genuinely added or altered get a fresh stamp — an accepted edit is a real
+   * edit and has to out-rank what the other phones are holding. */
   function toFileShape(content) {
     var base = baseChecklists() || {};
     var baseCps = isPlainObject(base.checkpoints) ? base.checkpoints : {};
     var checkpoints = {};
+    var localIdx = localItemIndex();
+    var stampNow = Date.now();
 
     orderedCpIds(content.cps).forEach(function (id) {
       var cp = content.cps[id];
@@ -914,7 +959,20 @@ window.UTMB = window.UTMB || {};
       entry.name = cp.name || seed.name || cpDisplayName(id, content);
       orderedPhases(cp).forEach(function (phase) {
         entry[phase] = cp.phases[phase].map(function (it) {
-          return { id: it.id, text: it.text, critical: !!it.critical, draft: !!it.draft };
+          var out = { id: it.id, text: it.text, critical: !!it.critical, draft: !!it.draft };
+          var mine = localIdx[it.id];
+          if (!mine) {
+            /* New to this phone. New everywhere, as far as it can tell. */
+            out.done = false;
+            out.lastModified = stampNow;
+            return out;
+          }
+          out.done = !!mine.done;
+          var unchanged = mine.text === out.text &&
+            !!mine.critical === out.critical &&
+            !!mine.draft === out.draft;
+          out.lastModified = unchanged ? stampOf(mine.lastModified) : stampNow;
+          return out;
         });
       });
       checkpoints[id] = entry;
@@ -951,9 +1009,10 @@ window.UTMB = window.UTMB || {};
     return removed;
   }
 
-  /* Ticks are per-device and are NOT content, so they are never written here.
-   * The only thing we do to them is drop the orphans left behind by items the
-   * accepted update removed — every surviving id keeps its tick untouched. */
+  /* Ticks are shared crew state, and they ride on the item — toFileShape() has
+   * already carried every surviving one across. The only thing left to do is
+   * drop the orphans left behind by items the accepted update removed. Every
+   * surviving id keeps its tick untouched. */
   function dropTicks(api, removedSet, removedCount) {
     if (!removedCount) return 0;
     var dropped = 0;
@@ -1003,7 +1062,8 @@ window.UTMB = window.UTMB || {};
 
     /* Preferred path. checklist.js owns the content; hand it the merged set and
      * let it persist, repaint and announce. Its setContent() replaces the edit
-     * overlay wholesale and leaves ticks alone — exactly what we want. */
+     * overlay wholesale, so `shaped` has to be complete — including the done
+     * and lastModified toFileShape() just restored onto every item. */
     if (api) {
       for (var i = 0; i < WRITE_ALIASES.length && !viaApi; i++) {
         var fn = WRITE_ALIASES[i];

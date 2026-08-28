@@ -102,10 +102,15 @@
   </div>
 </div>
 
-<!-- mount points below the main layout: filled in by checklist.js and
-     transport.js. Empty sections render nothing. -->
-<section class="mount" id="checklistMount"></section>
+<!-- mount points below the main layout: filled in by transport.js and
+     checklist.js. Empty sections render nothing.
+
+     The DAY PLAN comes first: on race day it is what the crew opens the app
+     for, and its header carries the runner's bib and the live-tracking link.
+     The order of these two sections is presentation only — neither module
+     cares where its mount sits. -->
 <section class="mount" id="transportMount"></section>
+<section class="mount" id="checklistMount"></section>
 
 <div class="toast" id="toast"></div>
 <div class="overlay" id="overlay"></div>
@@ -141,7 +146,12 @@
      main.js owns ALL of start-up, including registering the service worker and
      the order the feature modules come up in (checklist before share, and the
      share receive path dead last). There is deliberately no inline script on
-     this page. -->
+     this page.
+
+     js/sync.js (crew state sync) carries `defer`, so it runs after the page is
+     parsed — i.e. after main.js — and main.js starts it last of all, once the
+     checklist is painted and any incoming share link has been consumed. The app
+     works without it; if it is missing, nothing else changes. -->
 <script src="js/store.js"></script>
 <script src="js/data.js"></script>
 <script src="js/map.js"></script>
@@ -150,6 +160,7 @@
 <script src="js/checklist.js"></script>
 <script src="js/share.js"></script>
 <script src="js/transport.js"></script>
+<script src="js/sync.js" defer></script>
 <script src="js/main.js"></script>
 
 </body>

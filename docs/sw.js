@@ -7,8 +7,12 @@
  * ------------------------------------------------------------------
  *  - Precaches every asset the app ships on 'install', so the very first
  *    online visit is the only one that ever needs a network.
- *  - Serves cache-first. The app has zero external dependencies and no
- *    server to talk to, so once precached it runs in airplane mode.
+ *  - Serves cache-first. The app has zero external dependencies, so once
+ *    precached it runs in airplane mode.
+ *  - EXCEPT anything under api/ — the live crew sync endpoint. Those requests
+ *    are not intercepted at all: no cache read, no cache write, no fallback.
+ *    They either reach the server or they fail, and js/sync.js treats a
+ *    failure as "stay local and try again in 15 seconds".
  *  - Navigations fall back to the cached index.html, which is what keeps a
  *    shared deep link working offline: the "#s=..." fragment is never sent
  *    to the worker (fragments are client-side only), so any in-scope
@@ -20,8 +24,8 @@
  *  - skipWaiting() + clients.claim().
  *
  * Why skipWaiting()/claim() is safe here even though it can normally mix an
- * old page's JS with new data files: this app loads all nine of its scripts
- * from <script> tags and fetches all four JSON payloads during boot, and the
+ * old page's JS with new data files: this app loads all of its scripts
+ * from <script> tags and fetches its JSON payloads during boot, and the
  * worker is only registered on window 'load' — i.e. after that boot has
  * already run. On a first-ever visit the claim therefore lands after every
  * asset is in memory, and on every later visit the worker is already active
@@ -33,6 +37,8 @@
  * and keep REQUIRED_ASSETS / OPTIONAL_ASSETS in step with the contents of
  * docs/. A path listed here that does not exist on the server makes the
  * install fail (required) or leaves a hole in the offline app (optional).
+ * docs/api/ is the one exception: it is server-side and must never appear in
+ * either manifest.
  */
 
 'use strict';
@@ -42,11 +48,29 @@
  * ------------------------------------------------------------------ */
 
 var CACHE_PREFIX = 'utmb-crew';
-/* v3: index.html gained explicit icon <link>s, and store.js / drawer.js /
- * checklist.js now render cutoffs in 24-hour time. The app is already live and
- * this worker serves cache-first, so a phone that installed v2 keeps serving v2
- * until this string changes — bumping it is what makes an update reach anyone. */
-var CACHE_VERSION = 'v3';
+/* v4: live crew sync, in one bump. v3 is what is deployed and this is the next
+ * version anyone receives, so everything below ships together under the one
+ * string — there is no intermediate release for a second number to name.
+ *
+ *   - js/sync.js and day-plan.json join the manifest, store.js grew the shared
+ *     state layer, and anything under api/ is now excluded from this worker
+ *     entirely (see the fetch handler).
+ *   - Shared-tick correctness: an item's lastModified lives on the item and
+ *     nowhere else, so a merged un-tick can no longer be resurrected by a
+ *     reload, and share links preserve done/lastModified instead of wiping
+ *     every tick in every checkpoint.
+ *   - The Track button is aimed by day-plan.json + the shared bib.
+ *   - Sync failures the crew cannot see are now visible: a rejected token and
+ *     a server that will not save both raise a banner.
+ *   - day-plan.json itself changed: it is now byte-identical to the verified
+ *     source transport/day-plan-data.json (CP7 "Cutoff SAT 13:15", and the
+ *     BUS REFERENCE rows got their first-departure times and SUN day markers
+ *     back), and it moved from OPTIONAL_ASSETS to REQUIRED_ASSETS.
+ *
+ * The app is already live and this worker serves cache-first, so a phone that
+ * installed v3 keeps serving v3 until this string changes — bumping it is what
+ * makes an update reach anyone. */
+var CACHE_VERSION = 'v4';
 var CACHE_NAME = CACHE_PREFIX + '-' + CACHE_VERSION;
 
 /* Everything is resolved against the directory this worker lives in, so the
@@ -86,7 +110,15 @@ var REQUIRED_ASSETS = [
   'js/main.js',
 
   'course.json',
-  'topo-meta.json'
+  'topo-meta.json',
+
+  /* The day plan is the primary race-day view — index.html mounts
+   * #transportMount first for exactly that reason — so a precache miss here
+   * leaves the crew looking at a one-line notice where the whole plan should
+   * be until the next online visit. That is a worse outcome than retrying the
+   * install, and at 12 KB it is a far cheaper fetch to insist on than
+   * course.json at 80 KB, which is already required. */
+  'day-plan.json'
 ];
 
 /* Degrade rather than abort. topo.jpg is 2.1 MB and by far the most likely
@@ -99,6 +131,12 @@ var OPTIONAL_ASSETS = [
   'shuttles.json',
   'checklists.json',
   'topo.jpg',
+
+  /* Live sync. Optional on purpose: without it the app is exactly the
+   * offline-first thing it was before, so a bad fetch here must never abort an
+   * install and cost a crew member their whole offline copy on race day. The
+   * runtime cache picks it up on the next online visit. */
+  'js/sync.js',
 
   'manifest.webmanifest',
   'icons/apple-touch-icon.png',
@@ -322,18 +360,27 @@ function handleAsset(request) {
 self.addEventListener('fetch', function (event) {
   var request = event.request;
 
-  if (request.method !== 'GET') return;
-
-  /* Chrome DevTools issues these while a page is open; fetch() throws on
-   * them. Let the browser handle it. */
-  if (request.cache === 'only-if-cached' && request.mode !== 'same-origin') return;
-
   var url;
   try {
     url = new URL(request.url);
   } catch (err) {
     return;
   }
+
+  /* ── the live-sync API is off limits to this worker ──────────────────
+   * Returning without calling respondWith() hands the request straight back
+   * to the browser: network only, never written to the cache, never answered
+   * from it. This has to come before everything else. A cached GET of
+   * api/checklist.php would pin the crew to a stale version number forever
+   * and quietly stop every phone from ever seeing an update again — the exact
+   * failure a cache-first worker is built to cause. */
+  if (url.pathname.indexOf('/api/') !== -1) return;
+
+  if (request.method !== 'GET') return;
+
+  /* Chrome DevTools issues these while a page is open; fetch() throws on
+   * them. Let the browser handle it. */
+  if (request.cache === 'only-if-cached' && request.mode !== 'same-origin') return;
 
   /* Same-origin, in-scope only. The app ships no external dependency, so
    * anything else is not ours to answer. */

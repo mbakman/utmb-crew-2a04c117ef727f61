@@ -13,10 +13,16 @@
  *   4. checklist  BEFORE share: share.js diffs an incoming link against the
  *                 checklist's content, and an empty checklist makes every item
  *                 in that link look new.
- *   5. transport  needs the drawer to exist before it can paint into it.
+ *   5. transport  the day plan. Needs the drawer to exist before it can paint
+ *                 into it, and fetches docs/day-plan.json itself.
  *   6. share UI   the header button and the sheets.
- *   7. share RECEIVE  dead last. UTMB.share.receivePending() is what consumes a
- *                 "#s=..." link, and it must see loaded content or nothing.
+ *   7. share RECEIVE  UTMB.share.receivePending() is what consumes a "#s=..."
+ *                 link, and it must see loaded content or nothing.
+ *   8. sync       crew state sync (js/sync.js). Loaded with `defer` and boots
+ *                 itself — it waits for the checklist to have content before it
+ *                 merges anything, so it cannot mistake "not loaded yet" for
+ *                 "the crew deleted everything". Listed last here because that
+ *                 is the order it comes up in, not because this file drives it.
  *
  * Every module init is idempotent, and each one also self-registers on
  * UTMB.ready(), so the app still comes up if this file is ever loaded out of
@@ -128,10 +134,19 @@ window.UTMB = window.UTMB || {};
       if (UTMB.share && typeof UTMB.share.init === 'function') UTMB.share.init();
     });
 
-    /* LAST. Anything earlier would diff an incoming crew link against a
-     * checklist this phone has not finished loading. */
+    /* Anything earlier would diff an incoming crew link against a checklist
+     * this phone has not finished loading. */
     step('share:receive', function () {
       if (UTMB.share && typeof UTMB.share.receivePending === 'function') UTMB.share.receivePending();
+    });
+
+    /* js/sync.js boots itself: it is a standalone IIFE that waits until the
+     * checklist has content before it merges anything, which is exactly the
+     * ordering constraint this function exists to enforce. Nothing to do here
+     * unless a future build exposes an explicit entry point. A missing sync.js
+     * is not an error — the app is fully usable without it. */
+    step('sync', function () {
+      if (UTMB.sync && typeof UTMB.sync.init === 'function') UTMB.sync.init(ctx);
     });
   }
 

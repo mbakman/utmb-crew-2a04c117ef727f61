@@ -6,10 +6,10 @@
  * "corrects" it. Everything is written with textContent, never innerHTML, so a
  * quote or an angle bracket in a crew note can never break the page.
  *
- * TWO SEPARATE STATES — this distinction is the whole design:
+ * STATE — one shared document. This changed for race day:
  *
- *   CONTENT (shared)      the items themselves: id, text, critical, draft, and
- *                         their order inside a phase. Editable. Exportable.
+ *   CONTENT (shared)      the items themselves: id, text, critical, draft, done,
+ *                         lastModified, and their order inside a phase.
  *                         localStorage key  utmb_checklist
  *                         shape { version, baseVersion, savedAt,
  *                                 checkpoints: { <cpId>: { before:[], onArrival:[], beforeLeaving:[] } } }
@@ -17,13 +17,24 @@
  *                         stored; untouched ones fall through to checklists.json,
  *                         so a later content update still reaches them.
  *
- *   TICKS (per-device)    which items are done, keyed by ITEM ID, flat.
- *                         localStorage key  utmb_checklist_ticks
- *                         shape { "<itemId>": true }
- *                         NOT part of shared content. Never exported as content,
- *                         never merged into it, and cleared independently by the
- *                         per-checkpoint "Reset ticks" action (which never
- *                         deletes an item).
+ *   TICKS ARE NOW SHARED. A tick is a change to the ITEM (item.done), not a
+ *   separate per-device map: someone ticks "poles packed" and the whole crew
+ *   sees it. Every item carries `lastModified` (epoch ms), stamped on ANY
+ *   change to that item — tick, text, critical/draft flag, add, move. sync.js
+ *   merges item by item: union of both sides, newer lastModified wins the whole
+ *   item, an item is NEVER dropped by an automatic merge.
+ *
+ *   An item that has never been changed on this device carries lastModified 0,
+ *   so any real edit from any device beats it. Nothing here ever stamps an item
+ *   just because the page was loaded.
+ *
+ *   utmb_checklist_ticks is still written, as a flat {itemId:true} projection of
+ *   item.done, so the old share-link plumbing keeps working. It is a MIRROR, not
+ *   a source of truth: on load it is only consulted to migrate ticks made before
+ *   this change (items with no stamp).
+ *
+ *   All persistence goes through UTMB.store.set — never localStorage directly —
+ *   because sync.js is instrumented on those calls.
  *
  * Public API — window.UTMB.checklist
  * ----------------------------------
@@ -33,15 +44,21 @@
  *                             checkpoints: { <cpId>: {
  *                               name, km, cutoff, support, edited,
  *                               before:[item], onArrival:[item], beforeLeaving:[item] } }}
- *                            item = {id, text, critical, draft}. Deep clone: mutating the
- *                            result changes nothing. Contains no tick state at all.
+ *                            item = {id, text, critical, draft, done, lastModified}.
+ *                            Deep clone: mutating the result changes nothing.
  *   setContent(obj)       accepts the getContent() shape OR a bare {cpId:{phases}} map;
  *                         replaces the edit overlay wholesale and returns getContent().
  *                         setContent(null) drops every edit back to checklists.json.
  *                         Ignores unknown keys, drops malformed items, never throws.
- *                         Leaves ticks alone.
- *   getTicks()            -> {itemId: true}, clone, per-device only.
- *   setTicks(obj)         replaces the tick map (truthy values only). Returns getTicks().
+ *                         Carries done/lastModified through when they are present.
+ *   getTicks()            -> {itemId: true}, projection of item.done across every
+ *                         checkpoint. Clone.
+ *   setTicks(obj)         sets item.done from a flat {itemId:true} map (every item not
+ *                         listed is unticked), stamping each item it changes.
+ *                         Returns getTicks().
+ *   reload()              re-read the shared state out of UTMB.store and repaint.
+ *                         This is what runs when sync.js fires
+ *                         window CustomEvent('utmb:remote-update').
  *   onChange(cb)          cb({reason, cpId, content, ticks}); returns an unsubscribe fn.
  *                         reason is one of: content:set / checkpoint:set / checklist:create /
  *                         item:add / item:update / item:remove / item:move / tick /
@@ -75,6 +92,7 @@ window.UTMB = window.UTMB || {};
    * ═══════════════════════════════════════════════════════════════════════ */
   var SLOT_CONTENT = 'checklist';         /* -> localStorage "utmb_checklist"       */
   var SLOT_TICKS = 'checklist_ticks';     /* -> localStorage "utmb_checklist_ticks" */
+  var SLOT_MIGRATED = 'ticks_migrated';   /* -> localStorage "utmb_ticks_migrated"  */
 
   var FALLBACK_ORDER = ['before', 'onArrival', 'beforeLeaving'];
   var FALLBACK_LABELS = {
@@ -89,7 +107,12 @@ window.UTMB = window.UTMB || {};
   var phaseLabels = FALLBACK_LABELS;
 
   var overrides = Object.create(null);    /* cpId -> {phase: [item]}  (edited only) */
-  var ticks = Object.create(null);        /* itemId -> true                          */
+
+  /* Ticks made BEFORE ticks became shared, read once out of utmb_checklist_ticks
+   * and folded into the items in loadPersisted(). Kept afterwards only so a tick
+   * whose item no longer exists cannot resurrect. item.done is the truth. */
+  var legacyTicks = Object.create(null);  /* itemId -> true */
+  var migratedLegacy = false;             /* the fold-in above runs once, at boot */
 
   var course = null;
   var booted = false;
@@ -147,8 +170,18 @@ window.UTMB = window.UTMB || {};
    * normalisation — everything that enters the module goes through here, so a
    * hand-edited localStorage blob or a bad import can never poison the render.
    * ═══════════════════════════════════════════════════════════════════════ */
+  /* An epoch-ms stamp, or 0 for "never explicitly changed here". Never invents
+   * a stamp: a missing/garbage value must lose to any real edit from any device,
+   * and must not make a page load look like a change. */
+  function stampOf(raw) {
+    var n = typeof raw === 'number' ? raw : parseInt(raw, 10);
+    return (typeof n === 'number' && isFinite(n) && n > 0) ? n : 0;
+  }
+
+  function now() { return Date.now(); }
+
   function normalizeItem(raw, cpId, phase, seen) {
-    var text = '', id = '', critical = false, draft = false;
+    var text = '', id = '', critical = false, draft = false, done = false, stamp = 0;
     if (typeof raw === 'string') {
       text = raw;
     } else if (isObj(raw)) {
@@ -156,6 +189,8 @@ window.UTMB = window.UTMB || {};
       id = trim(raw.id);
       critical = !!raw.critical;
       draft = !!raw.draft;
+      done = !!raw.done;
+      stamp = stampOf(raw.lastModified);
     } else {
       return null;
     }
@@ -163,7 +198,7 @@ window.UTMB = window.UTMB || {};
     if (!text) return null;
     if (!id || seen[id]) id = mintId(cpId, phase);
     seen[id] = true;
-    return { id: id, text: text, critical: critical, draft: draft };
+    return { id: id, text: text, critical: critical, draft: draft, done: done, lastModified: stamp };
   }
 
   function normalizePhases(cpId, raw) {
@@ -181,12 +216,21 @@ window.UTMB = window.UTMB || {};
     return out;
   }
 
+  function cloneItem(it) {
+    return {
+      id: it.id,
+      text: it.text,
+      critical: !!it.critical,
+      draft: !!it.draft,
+      done: !!it.done,
+      lastModified: stampOf(it.lastModified)
+    };
+  }
+
   function clonePhases(phases) {
     var out = {};
     phaseOrder.forEach(function (phase) {
-      out[phase] = (phases[phase] || []).map(function (it) {
-        return { id: it.id, text: it.text, critical: !!it.critical, draft: !!it.draft };
-      });
+      out[phase] = (phases[phase] || []).map(cloneItem);
     });
     return out;
   }
@@ -274,11 +318,28 @@ window.UTMB = window.UTMB || {};
     return null;
   }
 
+  /* An item id is unique across the whole board, and a tick arrives as a bare
+   * id, so this is how a tick finds the checkpoint that owns it. */
+  function findAnywhere(itemId) {
+    if (!itemId) return null;
+    var ids = checkpointIds();
+    for (var i = 0; i < ids.length; i++) {
+      var hit = findItem(ids[i], itemId);
+      if (hit) return { cpId: ids[i], phase: hit.phase, index: hit.index, item: hit.item };
+    }
+    return null;
+  }
+
+  function isDone(itemId) {
+    var hit = findAnywhere(itemId);
+    return hit ? !!hit.item.done : !!legacyTicks[itemId];
+  }
+
   function progressOf(cpId) {
     var all = itemsOf(cpId);
     var done = 0, critOpen = 0, drafts = 0;
     all.forEach(function (it) {
-      if (ticks[it.id]) done += 1;
+      if (it.done) done += 1;
       else if (it.critical) critOpen += 1;
       if (it.draft) drafts += 1;
     });
@@ -289,7 +350,7 @@ window.UTMB = window.UTMB || {};
     var phases = effective(cpId);
     var list = (phases && phases[phase]) || [];
     var done = 0;
-    list.forEach(function (it) { if (ticks[it.id]) done += 1; });
+    list.forEach(function (it) { if (it.done) done += 1; });
     return { done: done, total: list.length };
   }
 
@@ -305,8 +366,38 @@ window.UTMB = window.UTMB || {};
     });
   }
 
+  /* The flat {itemId:true} mirror of item.done. Written for the older share-link
+   * plumbing that still reads this slot; never read back as truth. */
   function persistTicks() {
-    UTMB.store.set(SLOT_TICKS, ticks);
+    UTMB.store.set(SLOT_TICKS, getTicks());
+  }
+
+  /* Ticks taken before ticks were shared live in utmb_checklist_ticks and not on
+   * the items. Fold them in ONCE, and only onto items that carry no stamp — an
+   * item someone has actually edited since must not be overwritten by this
+   * device's history. The stamp stays 0 so a real remote edit still wins.
+   *
+   * "ONCE" means once per DEVICE, not once per page load. migratedLegacy is
+   * module state and a reload resets it, so the fact that it ran is recorded in
+   * localStorage instead. Without that, the mirror slot — which is now written
+   * from item.done on every content change — turns into a second source of
+   * truth that a reload replays over the top of a remote UN-tick, resurrecting
+   * the tick and pushing it back out to the whole crew. */
+  function migrateLegacyTicks() {
+    var ids = Object.keys(legacyTicks);
+    if (!ids.length) return 0;
+    var moved = 0;
+    ids.forEach(function (itemId) {
+      var hit = findAnywhere(itemId);
+      if (!hit || hit.item.done || hit.item.lastModified) return;
+      ensureOverride(hit.cpId);
+      var live = findItem(hit.cpId, itemId);
+      if (!live) return;
+      live.item.done = true;
+      moved += 1;
+    });
+    if (moved) persistContent();
+    return moved;
   }
 
   function loadPersisted() {
@@ -317,10 +408,62 @@ window.UTMB = window.UTMB || {};
         if (isObj(src[cpId])) overrides[cpId] = normalizePhases(cpId, src[cpId]);
       });
     }
-    var rawTicks = UTMB.store.get(SLOT_TICKS, null);
-    if (isObj(rawTicks)) {
-      Object.keys(rawTicks).forEach(function (id) { if (rawTicks[id]) ticks[id] = true; });
+    /* First boot on this device only. A remote update must never be
+     * re-interpreted through this device's pre-sync tick history — and after
+     * the first run the mirror slot is just a projection of item.done, so
+     * replaying it can only ever undo somebody else's un-tick.
+     *
+     * The flag is written with writeJSON, not set(), because set() fires
+     * 'utmb:local-change' and a bookkeeping flag is not a crew edit. */
+    if (!migratedLegacy) {
+      migratedLegacy = true;
+      var alreadyRun = UTMB.store.readJSON('utmb_' + SLOT_MIGRATED, false) === true;
+      if (!alreadyRun) {
+        var rawTicks = UTMB.store.get(SLOT_TICKS, null);
+        if (isObj(rawTicks)) {
+          Object.keys(rawTicks).forEach(function (id) { if (rawTicks[id]) legacyTicks[id] = true; });
+        }
+        migrateLegacyTicks();
+        UTMB.store.writeJSON('utmb_' + SLOT_MIGRATED, true);
+      }
     }
+  }
+
+  /* A cheap value fingerprint of everything that is shared, used to decide
+   * whether a reload actually changed anything. */
+  function fingerprint() {
+    var parts = [];
+    checkpointIds().forEach(function (cpId) {
+      itemsOf(cpId).forEach(function (it) {
+        parts.push(cpId + '' + it.id + '' + it.text + '' +
+          (it.critical ? 1 : 0) + (it.draft ? 1 : 0) + (it.done ? 1 : 0));
+      });
+    });
+    return parts.join('');
+  }
+
+  /* Re-read the shared state out of the store and repaint. This is the whole
+   * client half of the sync contract: sync.js merges, writes through the store,
+   * then fires window CustomEvent('utmb:remote-update') and we come here.
+   * Silent — no prompt, no diff sheet; that UI belongs to the share-link path.
+   *
+   * The change event is emitted ONLY if the reload actually moved something.
+   * store.js turns 'checklist:change' into 'utmb:local-change', which sync.js
+   * reads as "this device edited something, push it" — so an unconditional
+   * notify here would bounce every remote update straight back at the server
+   * and two phones would ping-pong versions at each other all night. When
+   * sync.js has already landed the merge through setContent()/setTicks() the
+   * repaint and the notify have happened; this is then a no-op by design. */
+  function reload() {
+    var before = fingerprint();
+    overrides = Object.create(null);
+    seedCache = Object.create(null);
+    editing = null;
+    confirming = null;
+    loadPersisted();
+    renderAll();
+    if (fingerprint() !== before) notify('remote:update', null);
+    return getContent();
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -341,16 +484,27 @@ window.UTMB = window.UTMB || {};
     UTMB.emit('checklist:change', payload);
   }
 
-  /* Content changed: write it, flag the header Save button, repaint, announce. */
+  /* Content changed: write it, flag the header Save button, repaint, announce.
+   *
+   * persistTicks() is not optional here. A tick rides on the item now, so any
+   * content write can change it — setContent() landing a merged state is the
+   * common case, and it can un-tick without setTicks() seeing a diff to report.
+   * Leaving the mirror behind would strand the OLD tick in localStorage, where
+   * the next reload picks it up as "legacy" history and puts it back. */
   function afterContentChange(reason, cpId) {
     persistContent();
+    persistTicks();
     UTMB.store.markDirty();
     renderAll();
     notify(reason, cpId);
   }
 
-  /* Ticks changed: per-device only, so no markDirty — nothing to "commit". */
+  /* A tick is content now, so it is written to the content slot as well as the
+   * flat mirror. Deliberately does NOT markDirty: a tick is already saved the
+   * instant it is made, and turning the header Save button red every time
+   * someone ticks a box would make that warning meaningless on race day. */
   function afterTickChange(reason, cpId) {
+    persistContent();
     persistTicks();
     renderAll();
     notify(reason, cpId);
@@ -367,7 +521,9 @@ window.UTMB = window.UTMB || {};
       id: mintId(cpId, phase),
       text: txt(text),
       critical: !!opts.critical,
-      draft: !!opts.draft
+      draft: !!opts.draft,
+      done: false,
+      lastModified: now()
     };
     if (typeof opts.index === 'number' && opts.index >= 0 && opts.index < phases[phase].length) {
       phases[phase].splice(opts.index, 0, item);
@@ -390,6 +546,8 @@ window.UTMB = window.UTMB || {};
     }
     if (patch && 'critical' in patch) hit.item.critical = !!patch.critical;
     if (patch && 'draft' in patch) hit.item.draft = !!patch.draft;
+    if (patch && 'done' in patch) hit.item.done = !!patch.done;
+    hit.item.lastModified = now();
     afterContentChange('item:update', cpId);
     return true;
   }
@@ -400,10 +558,10 @@ window.UTMB = window.UTMB || {};
     var hit = findItem(cpId, itemId);
     if (!hit) return false;
     overrides[cpId][hit.phase].splice(hit.index, 1);
-    /* Drop the orphaned tick too — ids are never reused, so it could not come
-     * back to haunt a future item. Ticks are per-device, so this is a silent
-     * local write, not a content change. */
-    if (ticks[itemId]) { delete ticks[itemId]; persistTicks(); }
+    /* The tick went with the item — it lives on the item now. Drop the stale
+     * mirror entry so the boot migration cannot resurrect it. */
+    if (legacyTicks[itemId]) delete legacyTicks[itemId];
+    persistTicks();
     if (!opts || opts.silent !== true) afterContentChange('item:remove', cpId);
     return true;
   }
@@ -418,25 +576,38 @@ window.UTMB = window.UTMB || {};
     if (next < 0 || next >= list.length) return false;
     var moved = list.splice(hit.index, 1)[0];
     list.splice(next, 0, moved);
+    moved.lastModified = now();
     afterContentChange('item:move', cpId);
     return true;
   }
 
+  /* A tick is a change to the item, and the item is shared: the whole crew sees
+   * it. Promotes the checkpoint into the edit overlay first, because that is
+   * where the shared document lives. */
   function setTick(itemId, on) {
     if (!itemId) return;
-    if (on) ticks[itemId] = true;
-    else delete ticks[itemId];
-    afterTickChange('tick', null);
+    var hit = findAnywhere(itemId);
+    if (!hit) return;
+    if (!!hit.item.done === !!on) return;
+    ensureOverride(hit.cpId);
+    var live = findItem(hit.cpId, itemId);
+    if (!live) return;
+    live.item.done = !!on;
+    live.item.lastModified = now();
+    afterTickChange('tick', hit.cpId);
   }
 
-  function toggleTick(itemId) { setTick(itemId, !ticks[itemId]); }
+  function toggleTick(itemId) { setTick(itemId, !isDone(itemId)); }
 
   function resetTicks(cpId) {
     var cleared = 0;
+    var stamp = now();
+    if (itemsOf(cpId).some(function (it) { return it.done; })) ensureOverride(cpId);
     itemsOf(cpId).forEach(function (it) {
-      if (ticks[it.id]) { delete ticks[it.id]; cleared += 1; }
+      if (it.done) { it.done = false; it.lastModified = stamp; cleared += 1; }
     });
-    afterTickChange('ticks:reset', cpId);
+    if (cleared) afterTickChange('ticks:reset', cpId);
+    else renderAll();   /* nothing was ticked, but the confirm panel must close */
     return cleared;
   }
 
@@ -488,19 +659,38 @@ window.UTMB = window.UTMB || {};
     return getContent();
   }
 
+  /* Flat {itemId:true} projection of item.done across every checkpoint. Kept for
+   * share.js, which prunes ticks whose item an incoming link removed. */
   function getTicks() {
     var out = {};
-    Object.keys(ticks).forEach(function (id) { if (ticks[id]) out[id] = true; });
+    checkpointIds().forEach(function (cpId) {
+      itemsOf(cpId).forEach(function (it) { if (it.done) out[it.id] = true; });
+    });
     return out;
   }
 
+  /* Applies a flat tick map onto the items: anything not listed is unticked.
+   * Only items whose state actually changes are stamped. */
   function setTicks(next) {
-    var fresh = Object.create(null);
+    var want = Object.create(null);
     if (isObj(next)) {
-      Object.keys(next).forEach(function (id) { if (next[id]) fresh[id] = true; });
+      Object.keys(next).forEach(function (id) { if (next[id]) want[id] = true; });
     }
-    ticks = fresh;
-    afterTickChange('ticks:set', null);
+    var stamp = now();
+    var changed = 0;
+    checkpointIds().forEach(function (cpId) {
+      var dirty = itemsOf(cpId).some(function (it) { return !!it.done !== !!want[it.id]; });
+      if (!dirty) return;
+      ensureOverride(cpId);
+      itemsOf(cpId).forEach(function (it) {
+        var target = !!want[it.id];
+        if (!!it.done === target) return;
+        it.done = target;
+        it.lastModified = stamp;
+        changed += 1;
+      });
+    });
+    if (changed) afterTickChange('ticks:set', null);
     return getTicks();
   }
 
@@ -718,7 +908,7 @@ window.UTMB = window.UTMB || {};
    * item row
    * ═══════════════════════════════════════════════════════════════════════ */
   function buildItem(cpId, phase, item, index, count) {
-    var done = !!ticks[item.id];
+    var done = !!item.done;
     var li = h('li', 'ck-item' +
       (done ? ' is-done' : '') +
       (item.critical ? ' is-critical' : '') +
@@ -945,7 +1135,7 @@ window.UTMB = window.UTMB || {};
           renderAll();
         }, pr.total === 0));
       foot.appendChild(h('p', 'ck-hint',
-        'Ticks are saved on this device only and are never shared. Items are never deleted by a reset.'));
+        'Ticks are shared with the whole crew — everyone sees this list. Items are never deleted by a reset.'));
     }
     root.appendChild(foot);
 
@@ -1069,6 +1259,34 @@ window.UTMB = window.UTMB || {};
     if (mount) mount.textContent = '';
   });
 
+  /* sync.js merged a remote change into the store and told us about it. Repaint
+   * from the store, silently — the crew is not prompted mid-race. The one thing
+   * we protect is a half-typed edit: if someone is in the middle of renaming an
+   * item, the repaint waits until they are done rather than eating their words.
+   * (The share-link path still shows its diff-and-review sheet; that is a
+   * deliberate, user-initiated import, not this.) */
+  var remoteRetry = null;
+
+  function applyRemote() {
+    if (!booted) return;
+    if (editing) {
+      /* Still typing. Come back for it — do not drop the update. */
+      if (!remoteRetry) {
+        remoteRetry = setInterval(function () {
+          if (editing) return;
+          clearInterval(remoteRetry);
+          remoteRetry = null;
+          reload();
+        }, 1500);
+      }
+      return;
+    }
+    if (remoteRetry) { clearInterval(remoteRetry); remoteRetry = null; }
+    reload();
+  }
+
+  window.addEventListener('utmb:remote-update', applyRemote);
+
   /* Bring the module up from a bootstrap context. main.js calls this FIRST of
    * all the feature modules, because share.js diffs an incoming link against
    * whatever this module holds — if it runs before the seed is in, every item
@@ -1146,7 +1364,7 @@ window.UTMB = window.UTMB || {};
     checkpointIds: checkpointIds,
     getCheckpoint: getCheckpoint,
     setCheckpoint: setCheckpoint,
-    items: function (cpId) { return itemsOf(cpId).map(function (i) { return { id: i.id, text: i.text, critical: i.critical, draft: i.draft }; }); },
+    items: function (cpId) { return itemsOf(cpId).map(cloneItem); },
     progress: progressOf,
     phaseOrder: function () { return phaseOrder.slice(); },
     phaseLabels: function () {
@@ -1155,11 +1373,14 @@ window.UTMB = window.UTMB || {};
       return out;
     },
 
-    /* --- ticks (per device) --- */
-    isTicked: function (itemId) { return !!ticks[itemId]; },
+    /* --- ticks (SHARED with the crew; a tick stamps the item) --- */
+    isTicked: function (itemId) { return isDone(itemId); },
     setTick: setTick,
     toggleTick: toggleTick,
     resetTicks: resetTicks,
+
+    /* --- shared-state sync --- */
+    reload: reload,
 
     /* --- content edits --- */
     addItem: addItem,

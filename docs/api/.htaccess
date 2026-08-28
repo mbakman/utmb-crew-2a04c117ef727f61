@@ -1,0 +1,67 @@
+# UTMB crew live-sync API.
+#
+# Only checklist.php is reachable over HTTP. The shared state file, its lock and
+# its staging file all live in this directory and must never be fetchable: the
+# whole point of the endpoint is that reads and writes go through the PHP so
+# they are versioned and locked. A crawler or a bored browser pulling
+# checklist-live.json directly would also hand out the crew's plan in the clear.
+#
+# Both authz syntaxes are present. cPanel is normally Apache 2.4 (mod_authz_core,
+# "Require"), but a 2.2-era vhost would silently ignore that block and serve
+# everything, so the old Order/Deny form is kept as a fallback.
+
+Options -Indexes
+
+# 1. Deny everything in this directory by default.
+<FilesMatch ".">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# 2. Belt and braces: name the data files explicitly, so they stay denied even
+#    if a server-level config neutralises the catch-all above.
+<FilesMatch "\.(json|lock|tmp|bak|log)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+<FilesMatch "^checklist-live\.">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# 3. Re-open the one file that is supposed to be public. This section comes last
+#    on purpose: Apache merges <Files>/<FilesMatch> in the order they appear, so
+#    the grant here overrides the denials above for this file only.
+<Files "checklist.php">
+  <IfModule mod_authz_core.c>
+    Require all granted
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+  </IfModule>
+</Files>
+
+# The API is live state; never let a proxy or a browser hand back a stale copy.
+<IfModule mod_headers.c>
+  <Files "checklist.php">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set X-Robots-Tag "noindex, nofollow, noarchive"
+  </Files>
+</IfModule>

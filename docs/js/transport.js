@@ -1,157 +1,158 @@
-/* transport.js — crew shuttles, passes and travel timings.
+/* transport.js — the crew's DAY PLAN.
  *
- * Renders, for every checkpoint the drawer opens, the answer to the only
- * transport question this crew has: "how do we get there from Les Houches, and
- * how do we get home again?"
+ * Rewritten for race day. The old version rendered 13 shuttle lines out of
+ * shuttles.json; on the day itself the crew does not read a timetable, they
+ * read their own plan. So this file now renders exactly two things:
  *
- * Everything on screen is read out of docs/shuttles.json at run time. Nothing is
- * hardcoded — if a fact is not in that file it is not shown, and if a fact is
- * flagged `verified: false` it is shown wearing an UNVERIFIED badge. That rule
- * is the whole point of the file's verification contract: a crew standing in a
- * bus shelter at 01:00 has to be able to tell a timetable from a guess.
+ *   1. the FOUR checkpoints the crew actually works
+ *      (CP3 Les Contamines · CP7 Courmayeur · CP11 Champex-Lac · CP13 Vallorcine)
+ *   2. the day plan itself, straight out of docs/day-plan.json —
+ *      six legs as timeline cards, runner ETA chips with their ±20 windows and
+ *      carb hand-over numbers, warning strips, "Navigate" links, the eight-row
+ *      bus reference and the rules footer.
+ *
+ * EVERY time and label on screen is printed VERBATIM out of day-plan.json.
+ * Nothing here computes, rounds, re-formats or "corrects" a time. If a figure
+ * is wrong, it is wrong in the JSON and that is where it gets fixed — a crew
+ * standing at a bus stop at 00:30 must be reading the same string that was
+ * checked against the official poster.
+ *
+ * day-plan.json is fetched on a RELATIVE path (the site lives in an unguessable
+ * subdirectory) and is precached by sw.js, so this works offline. If the fetch
+ * fails the section degrades to a one-line notice and the rest of the app is
+ * untouched.
+ *
+ * Everything is built with createElement + textContent — never innerHTML — so
+ * an apostrophe or an angle bracket in the plan can never break the page.
+ *
+ * SHARED STATE: the runner's bib lives in the shared crew state (meta.bib) and
+ * is read/written through UTMB.store, never through localStorage directly, so
+ * sync.js sees every write. When sync.js lands a remote update it fires
+ * window CustomEvent('utmb:remote-update'); we repaint the bib from the store.
+ * The "Track runner" button is aimed by meta.liveTracking in day-plan.json with
+ * that shared bib substituted in, so correcting the bib on any phone re-aims
+ * the button on all of them.
  *
  * Public surface
- *   UTMB.transport.init(ctx)                    idempotent; main.js drives it
+ *   UTMB.transport.init(ctx)                     idempotent; main.js drives it
  *   UTMB.transport.isReady()
- *   UTMB.transport.renderFor(cpId, containerEl) -> true if something was drawn
- *   UTMB.transport.renderOverview()             the #transportMount board
+ *   UTMB.transport.renderOverview()              paints #transportMount
+ *   UTMB.transport.renderFor(cpId, containerEl)  -> true if something was drawn
+ *   UTMB.transport.renderBib()                   repaint bib field + track link from store
+ *   UTMB.transport.getBib() / setBib(v)
  *   UTMB.transport.isCrewPoint(cpId)
- *   UTMB.transport.crewPointFor(cpId)
- *   UTMB.transport.lineFor(ref)
- *   UTMB.transport.data()
+ *   UTMB.transport.data()                        the parsed day plan
  *
- * Wiring: main.js calls init(ctx) with the parsed shuttles.json (and UTMB.ready()
- * does the same if some other bootstrap runs the page). init() paints the crew
- * board into #transportMount; 'cp:open' / 'cp:close' paint and clear
- * #drawerTransportMount. index.html is untouched.
- *
- * Styles are injected from here (prefixed `tr-`) rather than added to app.css,
- * so this module owns its own presentation and cannot collide with the
- * checklist or share modules.
+ * Styles live in css/app.css (prefix `dp-`), not injected from here, so they
+ * are precached with the rest of the stylesheet.
  */
 window.UTMB = window.UTMB || {};
 
 (function (UTMB) {
   'use strict';
 
-  var shuttles = null;   /* parsed docs/shuttles.json, or null if it failed to load */
+  var PLAN_PATH = 'day-plan.json';
+
+  /* Last-resort tracking URL. Only ever used if day-plan.json failed to load or
+   * carries no meta.liveTracking — it is the generic UTMB live page, which is
+   * of no use to a crew mid-race, so the real link always comes from the plan. */
+  var TRACK_URL = 'https://live.utmb.world/utmb';
+
+  /* The runner id inside a live.utmb.world URL: ".../runners/<id>[?#...]".
+   * Matching it is what lets the shared bib field actually re-aim the button. */
+  var RUNNER_SEG = /(\/runners\/)([^/?#]*)/;
+
+  var SLOT_META = 'meta';                 /* -> localStorage "utmb_meta" */
+
+  var plan = null;        /* parsed day-plan.json, or null if it failed to load */
   var course = null;
-  var idx = null;        /* lookup tables built once, in buildIndex() */
+  var planPromise = null;
+  var booted = false;
+  var loadFailed = false;
+
+  /* The four crew checkpoints, in course order. cp = course.json / drawer id,
+   * key = the runner block in day-plan.json, leg = the leg that covers it. */
+  var CREW_POINTS = [
+    { cp: 'U3', key: 'cp3', leg: 'fri-cp3', label: 'CP3' },
+    { cp: 'U7', key: 'cp7', leg: 'sat-cp7', label: 'CP7' },
+    { cp: 'U11', key: 'cp11', leg: 'sat-cp11', label: 'CP11' },
+    { cp: 'U13', key: 'cp13', leg: 'sat-cp13', label: 'CP13' }
+  ];
+
+  /* Checkpoints that are not crew points but still appear in the plan, so the
+   * drawer can show the crew what happens there. */
+  var EXTRA_LEG_FOR_CP = {
+    start: 'fri-prerace',
+    U1: 'fri-prerace',
+    finish: 'sun-finish'
+  };
 
   /* ─────────────────────────────────────────────────────────────────────────
-   * Text helpers
+   * tiny helpers
    * ───────────────────────────────────────────────────────────────────────── */
 
-  function esc(v) {
-    if (v === null || v === undefined) return '';
-    return String(v)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+  function isObj(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
+
+  function txt(v) {
+    return typeof v === 'string' ? v : (v === null || v === undefined ? '' : String(v));
   }
 
-  /* Fold accents and punctuation so "Saint-Gervais" matches the poster's
-   * "Saint Gervais" and "Orsières" matches "Orsieres". */
-  function norm(s) {
-    var t = String(s === null || s === undefined ? '' : s);
-    if (typeof t.normalize === 'function') {
-      t = t.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  function h(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined && text !== null && text !== '') node.textContent = text;
+    return node;
+  }
+
+  function mkBtn(cls, aria, fn) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    if (cls) b.className = cls;
+    if (aria) b.setAttribute('aria-label', aria);
+    if (fn) b.addEventListener('click', fn);
+    return b;
+  }
+
+  /* An external map link. Always a real anchor (a phone must be able to long-press
+   * it), always target=_blank + rel=noopener. */
+  function mkLink(url, label, cls) {
+    var a = document.createElement('a');
+    a.className = cls || 'dp-nav';
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = label;
+    return a;
+  }
+
+  function crewFor(cpId) {
+    for (var i = 0; i < CREW_POINTS.length; i++) {
+      if (CREW_POINTS[i].cp === cpId) return CREW_POINTS[i];
     }
-    return t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    return null;
   }
 
-  function fmtMinutes(m) {
-    if (typeof m !== 'number' || !isFinite(m) || m <= 0) return null;
-    if (m < 60) return m + ' min';
-    var h = Math.floor(m / 60), r = m % 60;
-    return r ? h + ' h ' + r : h + ' h';
-  }
-
-  /* "2026-08-29" -> "Sat 29/08", using event.days so the labels stay in one place. */
-  function fmtDay(dateStr) {
-    if (!dateStr) return '';
-    var d = idx && idx.days[dateStr];
-    if (d) return (d.dow ? d.dow + ' ' : '') + (d.label || dateStr);
-    return dateStr;
-  }
-
-  function fmtWhen(time, dateStr) {
-    if (!time) return '';
-    var day = fmtDay(dateStr);
-    return day ? time + ' ' + day : time;
-  }
-
-  /* Comparable stamp for "which service dies first". Times after midnight
-   * already carry the following date in shuttles.json, so a plain parse is
-   * enough — no roll-over arithmetic needed here. */
-  function stamp(dateStr, time) {
-    if (!dateStr || !time) return null;
-    var t = Date.parse(dateStr + 'T' + (time.length === 4 ? '0' + time : time) + ':00');
-    return isNaN(t) ? null : t;
-  }
-
-  /* ─────────────────────────────────────────────────────────────────────────
-   * Index
-   * ───────────────────────────────────────────────────────────────────────── */
-
-  function buildIndex(s) {
-    var lines = Object.create(null);   /* ref -> {ref, line, kind} — never mutates the JSON */
-    var hubOf = Object.create(null);   /* line ref -> chamonix hub */
-
-    function addLine(l, kind) {
-      if (l && l.id && !lines[l.id]) lines[l.id] = { ref: l.id, line: l, kind: kind };
+  function legById(id) {
+    var legs = (plan && Array.isArray(plan.legs)) ? plan.legs : [];
+    for (var i = 0; i < legs.length; i++) {
+      if (legs[i] && legs[i].id === id) return legs[i];
     }
-
-    (s.followerShuttles || []).forEach(function (l) { addLine(l, 'follower'); });
-    (s.startShuttles || []).forEach(function (l) { addLine(l, 'start'); });
-    var other = s.otherRunnerShuttles || {};
-    (other.start || []).forEach(function (l) { addLine(l, 'runner'); });
-    (other.postRace || []).forEach(function (l) { addLine(l, 'runner'); });
-    (s.localTransport || []).forEach(function (l) { addLine(l, 'local'); });
-
-    var warnings = Object.create(null);
-    (s.warnings || []).forEach(function (w) { if (w && w.id) warnings[w.id] = w; });
-
-    var zones = Object.create(null);
-    (s.zones || []).forEach(function (z) { if (z && z.id) zones[z.id] = z; });
-
-    var days = Object.create(null);
-    (s.event && s.event.days ? s.event.days : []).forEach(function (d) {
-      if (d && d.date) days[d.date] = d;
-    });
-
-    var crewPoints = Object.create(null);
-    (s.crewPoints || []).forEach(function (c) { if (c && c.cp) crewPoints[c.cp] = c; });
-
-    ((s.chamonixHubs && s.chamonixHubs.hubs) || []).forEach(function (h) {
-      (h.usedBy || []).forEach(function (ref) { if (!hubOf[ref]) hubOf[ref] = h; });
-    });
-
-    var closedVillages = Object.create(null);
-    var rc = s.roadClosures || {};
-    (rc.villages || []).concat(rc.additional || []).forEach(function (v) {
-      if (v && v.name) closedVillages[norm(v.name)] = v;
-    });
-
-    return {
-      lines: lines,
-      warnings: warnings,
-      zones: zones,
-      days: days,
-      crewPoints: crewPoints,
-      hubOf: hubOf,
-      closedVillages: closedVillages
-    };
+    return null;
   }
 
-  function lineFor(ref) {
-    if (!ref || !idx) return null;
-    return idx.lines[ref] || null;
+  function linkFor(ref) {
+    if (!ref || !plan || !isObj(plan.links)) return null;
+    var l = plan.links[ref];
+    return (isObj(l) && l.url) ? l : null;
+  }
+
+  function runnerFor(key) {
+    var r = plan && isObj(plan.runner) ? plan.runner[key] : null;
+    return isObj(r) ? r : null;
   }
 
   function courseCp(cpId) {
-    if (!course || !course.cps) return null;
+    if (!course || !Array.isArray(course.cps)) return null;
     for (var i = 0; i < course.cps.length; i++) {
       if (course.cps[i].id === cpId) return course.cps[i];
     }
@@ -159,1001 +160,600 @@ window.UTMB = window.UTMB || {};
   }
 
   /* ─────────────────────────────────────────────────────────────────────────
-   * Line metadata
+   * bib — shared crew state, meta.bib
+   *
+   * Read and written through UTMB.store so the sync module sees every change.
+   * Duck-typed: if store.js grows a dedicated bib/meta accessor we use it,
+   * otherwise the generic slot API. Never touches localStorage directly.
    * ───────────────────────────────────────────────────────────────────────── */
 
-  /* localTransport entries carry their timetable inside the `facts` list rather
-   * than in dedicated fields. The strings are written "Label: value", so lift
-   * the two labels we can use into structured values; anything that does not
-   * match is left alone and still gets rendered verbatim further down. */
-  var FACT_LABEL_RE = /^([A-Za-z][^:]{0,30}):\s*([\s\S]+)$/;
-  var SPAN_RE = /(\d{1,2}:\d{2})\s*(?:to|-|–|—|until)\s*(\d{1,2}:\d{2})/;
-
-  function localMeta(line) {
-    var m = { frequency: null, span: null, firstTime: null, lastTime: null, route: null };
-    (line.facts || []).forEach(function (f) {
-      var hit = FACT_LABEL_RE.exec(f && f.fact ? f.fact : '');
-      if (!hit) return;
-      var label = norm(hit[1]);
-      var value = hit[2].trim();
-      if (label === 'frequency') m.frequency = value;
-      else if (label === 'route') m.route = value;
-      else if (label === 'service span') {
-        m.span = value;
-        var t = SPAN_RE.exec(value);
-        if (t) { m.firstTime = t[1]; m.lastTime = t[2]; }
-      }
-    });
-    return m;
-  }
-
-  /* The stop a leg actually boards at, so "first departure" is the time printed
-   * against that stop rather than against the head of the line. */
-  function boardingStop(line, fromName) {
-    var stops = line.stops || [];
-    if (!stops.length) return null;
-    var want = norm(fromName);
-    for (var i = 0; i < stops.length; i++) {
-      var sn = norm(stops[i].name);
-      if (!sn) continue;
-      if (sn === want || (want && want.indexOf(sn) >= 0)) return stops[i];
+  /* store.js owns meta.bib and exposes getBib()/setBib(); the generic slot read
+   * below is only a fall-back for a build where it does not (the slot is the
+   * same one store.js writes, so both paths agree). */
+  function readMeta() {
+    var s = UTMB.store;
+    if (!s) return {};
+    try {
+      var slot = s.get(SLOT_META, null);
+      return isObj(slot) ? slot : {};
+    } catch (err) {
+      console.warn('[UTMB] could not read shared meta', err);
+      return {};
     }
-    return stops[0];
   }
 
-  function stopLabel(st) {
-    if (!st) return '';
-    return st.name + (st.sublabel ? ' (' + st.sublabel + ')' : '');
+  /* Falls back to the bib baked into day-plan.json so the field is never blank
+   * on a fresh device. */
+  function getBib() {
+    var s = UTMB.store;
+    var stored = '';
+    try {
+      if (s && typeof s.getBib === 'function') stored = txt(s.getBib());
+      else stored = txt(readMeta().bib);
+    } catch (err) {
+      console.warn('[UTMB] could not read the bib', err);
+    }
+    if (stored) return stored;
+    return plan && isObj(plan.runner) ? txt(plan.runner.bib) : '';
   }
 
-  function zoneLabel(zoneId) {
-    var z = idx && idx.zones[zoneId];
-    return z ? z.label : (zoneId || '');
+  function setBib(value) {
+    var v = txt(value).replace(/^\s+|\s+$/g, '');
+    var s = UTMB.store;
+    if (!s) return v;
+    try {
+      if (typeof s.setBib === 'function') { s.setBib(v); return v; }
+      var m = readMeta();
+      if (m.bib === v) return v;
+      m.bib = v;
+      m.bibModified = Date.now();
+      s.set(SLOT_META, m);
+    } catch (err) {
+      console.warn('[UTMB] could not write the bib', err);
+    }
+    return v;
   }
 
   /* ─────────────────────────────────────────────────────────────────────────
-   * HTML fragments
+   * live tracking — meta.liveTracking in day-plan.json, aimed by the shared bib
+   *
+   * The bib field sits immediately left of the Track button and says it is
+   * shared with the crew, so the button has to follow it. It does not compute a
+   * URL: it takes the one the plan supplies and swaps the runner id in it for
+   * whatever bib the crew has agreed on. If the plan's URL is not of the
+   * ".../runners/<id>" form it is opened exactly as written — same rule as
+   * every other time and link in this file, which are printed verbatim.
    * ───────────────────────────────────────────────────────────────────────── */
+  function trackInfo() {
+    var meta = (plan && isObj(plan.meta)) ? plan.meta : {};
+    var live = isObj(meta.liveTracking) ? meta.liveTracking : {};
+    var url = txt(live.url) || TRACK_URL;
+    var label = txt(live.label);
+    var bib = getBib();
 
-  function unverifiedBadge(label) {
-    return '<span class="tr-unv">' + esc(label || 'UNVERIFIED') + '</span>';
-  }
-
-  function chip(text, cls) {
-    if (!text) return '';
-    return '<span class="tr-chip' + (cls ? ' tr-chip-' + cls : '') + '">' + esc(text) + '</span>';
-  }
-
-  /* A chip that carries its own UNVERIFIED mark — used for the "last departure"
-   * figures, every one of which is flagged lastSemanticsVerified: false. */
-  function chipUnverified(text) {
-    return '<span class="tr-chip tr-chip-warn">' + esc(text) + ' ' + unverifiedBadge('UNVERIFIED') + '</span>';
-  }
-
-  function note(text, cls) {
-    if (!text) return '';
-    return '<div class="tr-note' + (cls ? ' ' + cls : '') + '">' + esc(text) + '</div>';
-  }
-
-  function unverifiedNote(text, label) {
-    return '<div class="tr-note tr-note-unv">' + unverifiedBadge(label) + ' ' + esc(text || '') + '</div>';
-  }
-
-  function sectionLabel(text, extra) {
-    return '<div class="tr-sec">' + esc(text) +
-      (extra ? '<span class="tr-sec-x">' + esc(extra) + '</span>' : '') + '</div>';
-  }
-
-  var MODE = {
-    walk: 'Walk',
-    train: 'Train',
-    'utmb-shuttle': 'UTMB shuttle',
-    line1: 'Line 1 bus',
-    bus: 'Bus',
-    transfer: 'Transfer',
-    unresolved: 'No verified option'
-  };
-
-  function modeTag(mode) {
-    var label = MODE[mode] || (mode ? String(mode) : 'Leg');
-    return '<span class="tr-mode tr-mode-' + esc(mode || 'other') + '">' + esc(label) + '</span>';
-  }
-
-  /* ─────────────────────────────────────────────────────────────────────────
-   * Legs
-   * ───────────────────────────────────────────────────────────────────────── */
-
-  function legChips(leg, entry) {
-    var out = [];
-    var mins = (typeof leg.durationMinutes === 'number' && leg.durationMinutes > 0)
-      ? leg.durationMinutes
-      : (entry && typeof entry.line.journeyMinutes === 'number' ? entry.line.journeyMinutes : null);
-    var journey = fmtMinutes(mins);
-    if (journey) out.push(chip(journey, 'time'));
-
-    if (entry) {
-      var line = entry.line;
-      if (entry.kind === 'local') {
-        var lm = localMeta(line);
-        if (lm.frequency) out.push(chip(lm.frequency, 'freq'));
-        if (lm.firstTime && lm.lastTime) {
-          out.push(chip('first ' + lm.firstTime, 'first'));
-          out.push(chip('last ' + lm.lastTime, 'last'));
-        } else if (lm.span) {
-          out.push(chip(lm.span, 'freq'));
-        }
-      } else {
-        if (line.frequencyText) out.push(chip(line.frequencyText, 'freq'));
-        else if (line.singleRun) out.push(chip('single run — one bus only', 'freq'));
-
-        var st = boardingStop(line, leg.from);
-        if (st && st.time) out.push(chip('first ' + st.time + ' from ' + stopLabel(st), 'first'));
-
-        var lastLabel = line.lastTime
-          ? 'last ' + fmtWhen(line.lastTime, line.lastDate)
-          : (line.lastText ? 'last ' + line.lastText : null);
-        if (lastLabel) {
-          /* lastSemanticsVerified is false on every published line: nobody has
-           * confirmed whether the poster figure is the last departure or the
-           * end of service. Show that, every time. */
-          out.push(line.lastSemanticsVerified === false ? chipUnverified(lastLabel) : chip(lastLabel, 'last'));
-        }
-        if (line.direction === 'oneway') out.push(chip('ONE WAY', 'oneway'));
-        if (line.passZone) out.push(chip(zoneLabel(line.passZone) + ' pass', 'pass'));
-        if (line.bookingRequired) out.push(chip('booking required', 'book'));
-      }
-    }
-    if (!out.length) return '';
-    return '<div class="tr-chips">' + out.join('') + '</div>';
-  }
-
-  function legHtml(leg, n) {
-    var entry = lineFor(leg.ref);
-    var unresolved = leg.mode === 'unresolved';
-    var cls = 'tr-leg' + (unresolved ? ' tr-leg-unresolved' : '') +
-      (leg.mode === 'transfer' ? ' tr-leg-transfer' : '');
-
-    var html = '<li class="' + cls + '">';
-    html += '<span class="tr-leg-n">' + esc(n) + '</span>';
-    html += '<div class="tr-leg-body">';
-    html += '<div class="tr-leg-route">' + modeTag(leg.mode) +
-      '<span class="tr-leg-od">' + esc(leg.from) + ' <span class="tr-arrow">&rarr;</span> ' + esc(leg.to) + '</span></div>';
-
-    if (entry) {
-      html += '<div class="tr-leg-line">' + esc(entry.line.name) +
-        (entry.line.operator ? ' <span class="tr-op">' + esc(entry.line.operator) + '</span>' : '') + '</div>';
-    }
-
-    html += legChips(leg, entry);
-
-    if (leg.verified === false) {
-      html += unverifiedNote(leg.note, unresolved ? 'NO VERIFIED OPTION' : 'UNVERIFIED');
-    } else if (leg.note) {
-      html += note(leg.note);
-    }
-
-    /* A claim the whole leg leans on but nobody has confirmed — the Le Fayet ->
-     * Saint Gervais join is exactly this, and it is load-bearing for U3. */
-    if (entry) {
-      (entry.line.unverifiedClaims || []).forEach(function (c) {
-        if (c.verified === false) {
-          html += unverifiedNote(c.claim + ' ' + (c.note || ''), 'UNVERIFIED CLAIM');
-        }
-      });
-      if (entry.line.zoneNote && entry.line.zoneNote.verified === false) {
-        html += unverifiedNote(entry.line.zoneNote.note, 'PASS ZONE UNVERIFIED');
-      }
-    }
-
-    html += '</div></li>';
-    return html;
-  }
-
-  function legsHtml(legs) {
-    if (!legs || !legs.length) return '';
-    return '<ol class="tr-legs">' + legs.map(function (leg, i) {
-      return legHtml(leg, typeof leg.seq === 'number' ? leg.seq : i + 1);
-    }).join('') + '</ol>';
-  }
-
-  /* ─────────────────────────────────────────────────────────────────────────
-   * Return journey
-   * ───────────────────────────────────────────────────────────────────────── */
-
-  /* The binding constraint on getting home: whichever service in the
-   * recommended return chain shuts down first. For a return that involves
-   * Chamonix Bus Line 1 that is 20:14, not the UTMB shuttle's headline time. */
-  function bindingLast(option, assumedDate) {
-    var best = null;
-    (option.legs || []).forEach(function (leg) {
-      var entry = lineFor(leg.ref);
-      if (!entry) return;
-      var line = entry.line, time = null, date = null, assumed = false;
-      if (entry.kind === 'local') {
-        var lm = localMeta(line);
-        if (!lm.lastTime) return;
-        time = lm.lastTime;
-        date = assumedDate || null;
-        assumed = true;
-      } else {
-        if (!line.lastTime) return;
-        time = line.lastTime;
-        date = line.lastDate || null;
-      }
-      var ts = stamp(date, time);
-      if (ts === null) return;
-      if (best === null || ts < best.ts) {
-        best = { ts: ts, time: time, date: date, assumed: assumed, leg: leg, line: line, kind: entry.kind };
-      }
-    });
-    return best;
-  }
-
-  function returnOptionHtml(option, isBest, assumedDate) {
-    var html = '<div class="tr-ret' + (isBest ? ' tr-ret-best' : ' tr-ret-alt') + '">';
-    html += '<div class="tr-ret-head">' +
-      '<span class="tr-ret-tag">' + (isBest ? 'RECOMMENDED' : 'FALLBACK') + '</span>' +
-      '<span class="tr-ret-label">' + esc(option.label || '') + '</span></div>';
-    if (option.note) html += note(option.note);
-    html += legsHtml(option.legs);
-
-    if (isBest) {
-      var b = bindingLast(option, assumedDate);
-      if (b) {
-        html += '<div class="tr-last">' +
-          '<span class="tr-last-k">LAST RETURN</span>' +
-          '<span class="tr-last-v">' + esc(fmtWhen(b.time, b.date)) + '</span>' +
-          '<span class="tr-last-src">' + esc(b.line.name) + ' &middot; from ' + esc(b.leg.from) + '</span>' +
-          (b.assumed
-            ? ' ' + unverifiedBadge('DATE ASSUMED')
-            : (b.line.lastSemanticsVerified === false ? ' ' + unverifiedBadge('UNVERIFIED') : '')) +
-          '<div class="tr-last-why">Earliest closing service in this chain — everything else runs later, so this is the clock that matters.</div>' +
-          '</div>';
-      } else {
-        html += '<div class="tr-last tr-last-none">' +
-          '<span class="tr-last-k">LAST RETURN</span>' +
-          '<span class="tr-last-v">not published</span> ' + unverifiedBadge('UNVERIFIED') +
-          '<div class="tr-last-why">No timetable in the crew’s possession covers the return leg. Check it in person before you go.</div>' +
-          '</div>';
-      }
-    }
-    html += '</div>';
-    return html;
-  }
-
-  /* ─────────────────────────────────────────────────────────────────────────
-   * Warnings
-   * ───────────────────────────────────────────────────────────────────────── */
-
-  var SEVERITY_RANK = { critical: 0, high: 1, medium: 2, low: 3 };
-
-  function warningHtml(w) {
-    var sev = w.severity || 'medium';
-    var html = '<div class="tr-warn tr-warn-' + esc(sev) + '">';
-    html += '<div class="tr-warn-head"><span class="tr-sev">' + esc(sev.toUpperCase()) + '</span>' +
-      '<span class="tr-warn-title">' + esc(w.title) + '</span></div>';
-    html += '<div class="tr-warn-body">' + esc(w.body) + '</div>';
-    if (w.verified === false) html += unverifiedNote(w.note || '', 'UNVERIFIED');
-    else if (w.note) html += note(w.note);
-    if (w.mitigations && w.mitigations.length) {
-      html += '<ul class="tr-mit">' + w.mitigations.map(function (m) {
-        return '<li>' + esc(m) + '</li>';
-      }).join('') + '</ul>';
-    }
-    return html + '</div>';
-  }
-
-  function warningsHtml(ids) {
-    var list = (ids || []).map(function (id) { return idx.warnings[id]; }).filter(Boolean);
-    if (!list.length) return '';
-    list.sort(function (a, b) {
-      return (SEVERITY_RANK[a.severity] === undefined ? 9 : SEVERITY_RANK[a.severity]) -
-        (SEVERITY_RANK[b.severity] === undefined ? 9 : SEVERITY_RANK[b.severity]);
-    });
-    var loud = list.filter(function (w) { return w.severity === 'critical' || w.severity === 'high'; });
-    var quiet = list.filter(function (w) { return w.severity !== 'critical' && w.severity !== 'high'; });
-
-    var html = sectionLabel('Warnings', list.length + ' for this checkpoint');
-    html += loud.map(warningHtml).join('');
-    if (quiet.length) {
-      html += '<details class="tr-more"><summary>' + quiet.length + ' more warning' +
-        (quiet.length === 1 ? '' : 's') + ' (' +
-        esc(quiet.map(function (w) { return w.severity; }).join(', ')) + ')</summary>' +
-        quiet.map(warningHtml).join('') + '</details>';
-    }
-    return html;
-  }
-
-  /* ─────────────────────────────────────────────────────────────────────────
-   * Passes, boarding, line detail
-   * ───────────────────────────────────────────────────────────────────────── */
-
-  function passHtml(cpt, usedRefs) {
-    var passes = shuttles.passes || {};
-    var html = sectionLabel('Pass & boarding');
-    html += '<div class="tr-pass">';
-
-    if (cpt.passRequired) {
-      var z = idx.zones[cpt.passRequired];
-      html += '<div class="tr-pass-need"><b>' + esc((z && z.passRequired) || cpt.passRequired) + '</b> — ' +
-        esc(cpt.name) + ' is in the ' + esc(zoneLabel(cpt.zone)) + ' zone.</div>';
-      if (z && z.verified === false) html += unverifiedNote('Zone definition unconfirmed.', 'UNVERIFIED');
-    } else {
-      html += '<div class="tr-pass-need tr-pass-free"><b>No UTMB pass needed</b> on the recommended route.</div>';
-    }
-
-    if (passes.crewStatus) html += note(passes.crewStatus);
-    if (passes.boardingCredential) html += note(passes.boardingCredential);
-    if (passes.verified === false) html += unverifiedNote('Pass rules unconfirmed.', 'UNVERIFIED');
-
-    /* Chamonix has two UTMB hubs and boarding the wrong one costs an hour. */
-    var hubs = [];
-    usedRefs.forEach(function (ref) {
-      var h = idx.hubOf[ref];
-      if (!h) return;
-      var e = lineFor(ref);
-      hubs.push(esc(e ? e.line.name : ref) + ' &rarr; <b>' + esc(h.name) + '</b>');
-    });
-    if (hubs.length) {
-      html += '<div class="tr-hub"><span class="tr-hub-k">Chamonix boarding point</span>' +
-        '<ul class="tr-hub-l"><li>' + hubs.join('</li><li>') + '</li></ul></div>';
-      var caveat = shuttles.chamonixHubs && shuttles.chamonixHubs.caveat;
-      if (caveat && caveat.verified === false) html += unverifiedNote(caveat.note, 'UNVERIFIED');
-    }
-
-    return html + '</div>';
-  }
-
-  function lineDetailHtml(entry) {
-    var line = entry.line;
-    var html = '<div class="tr-line">';
-    html += '<div class="tr-line-name">' + esc(line.name) +
-      (line.verified === false ? ' ' + unverifiedBadge('UNVERIFIED LINE') : '') + '</div>';
-
-    var chips = [];
-    if (entry.kind === 'local') {
-      var lm = localMeta(line);
-      if (line.operator) chips.push(chip(line.operator));
-      if (lm.frequency) chips.push(chip(lm.frequency, 'freq'));
-      if (lm.span) chips.push(chip(lm.span, 'last'));
-      if (lm.route) chips.push(chip(lm.route));
-    } else {
-      if (line.zone) chips.push(chip(zoneLabel(line.zone) + ' zone', 'pass'));
-      if (line.direction) chips.push(chip(line.direction === 'both' ? 'both directions' : 'one way',
-        line.direction === 'oneway' ? 'oneway' : null));
-      if (line.frequencyText) chips.push(chip(line.frequencyText, 'freq'));
-      var jm = fmtMinutes(line.journeyMinutes);
-      if (jm) chips.push(chip(jm + ' end to end', 'time'));
-      if (line.lastTime || line.lastText) {
-        var lbl = 'last ' + (line.lastTime ? fmtWhen(line.lastTime, line.lastDate) : line.lastText);
-        chips.push(line.lastSemanticsVerified === false ? chipUnverified(lbl) : chip(lbl, 'last'));
-      }
-      if (line.date) chips.push(chip('runs ' + fmtDay(line.date) +
-        (line.dateEnd && line.dateEnd !== line.date ? ' → ' + fmtDay(line.dateEnd) : '')));
-    }
-    if (chips.length) html += '<div class="tr-chips">' + chips.join('') + '</div>';
-
-    if (line.stops && line.stops.length) {
-      html += '<ul class="tr-stops">' + line.stops.map(function (st) {
-        return '<li><span class="tr-stop-t">' + esc(st.time || '') + '</span>' + esc(stopLabel(st)) + '</li>';
-      }).join('') + '</ul>';
-    }
-
-    if (line.note) html += note(line.note);
-
-    (line.facts || []).forEach(function (f) {
-      if (f.verified === false) {
-        html += unverifiedNote(f.fact + (f.note ? ' — ' + f.note : ''), 'UNVERIFIED');
-      } else {
-        html += '<div class="tr-fact">' + esc(f.fact) + '</div>';
-      }
-    });
-
-    (line.unverifiedClaims || []).forEach(function (c) {
-      if (c.verified === false) html += unverifiedNote(c.claim + ' ' + (c.note || ''), 'UNVERIFIED CLAIM');
-    });
-    if (line.zoneNote && line.zoneNote.verified === false) {
-      html += unverifiedNote(line.zoneNote.note, 'PASS ZONE UNVERIFIED');
-    }
-    if (line.lastSourceNote) html += note(line.lastSourceNote);
-
-    return html + '</div>';
-  }
-
-  function linesUsedHtml(refs) {
-    var entries = refs.map(lineFor).filter(Boolean);
-    if (!entries.length) return '';
-    return '<details class="tr-more"><summary>Line details (' + entries.length + ')</summary>' +
-      entries.map(lineDetailHtml).join('') + '</details>';
-  }
-
-  /* ─────────────────────────────────────────────────────────────────────────
-   * "Confirm before you go" — every open question in the file is flagged
-   * verified:false with a null answer. Show the ones that name this checkpoint.
-   * ───────────────────────────────────────────────────────────────────────── */
-
-  function confirmHtml(cpt) {
-    var items = (shuttles.confirmTomorrowChecklist || []).filter(function (it) {
-      if (it.verified !== false) return false;
-      var hay = norm((it.item || '') + ' ' + (it.why || ''));
-      return hay.split(' ').indexOf(norm(cpt.cp)) >= 0 || hay.indexOf(norm(cpt.name)) >= 0;
-    });
-    if (!items.length) return '';
-    items.sort(function (a, b) { return (a.priority || 9) - (b.priority || 9); });
-    return '<details class="tr-more tr-more-open"><summary>Confirm before you go (' + items.length + ' open)</summary>' +
-      items.map(function (it) {
-        return '<div class="tr-confirm">' + unverifiedBadge('OPEN') +
-          '<span class="tr-confirm-item">' + esc(it.item) + '</span>' +
-          (it.why ? note(it.why) : '') + '</div>';
-      }).join('') + '</details>';
-  }
-
-  /* ─────────────────────────────────────────────────────────────────────────
-   * Crew checkpoint block
-   * ───────────────────────────────────────────────────────────────────────── */
-
-  function collectRefs(cpt, bestReturn) {
-    var refs = [];
-    function take(legs) {
-      (legs || []).forEach(function (l) {
-        if (l.ref && refs.indexOf(l.ref) < 0 && lineFor(l.ref)) refs.push(l.ref);
-      });
-    }
-    take(cpt.legs);
-    if (bestReturn) take(bestReturn.legs);
-    return refs;
-  }
-
-  function crewPointHtml(cpt) {
-    var origin = (shuttles.crewBase && shuttles.crewBase.village) || 'Les Houches';
-    var returns = (cpt.returnOptions || []).slice().sort(function (a, b) {
-      return (a.preference || 99) - (b.preference || 99);
-    });
-    var best = returns[0] || null;
-    var refs = collectRefs(cpt, best);
-    var assumedDate = cpt.cutoff && cpt.cutoff.date ? cpt.cutoff.date : null;
-
-    var html = '<div class="tr-block">';
-
-    html += '<div class="tr-head">' +
-      '<span class="tr-head-t">Getting here from ' + esc(origin) + '</span>' +
-      (cpt.difficulty
-        ? '<span class="tr-diff tr-diff-' + esc(cpt.difficulty) + '">' + esc(cpt.difficulty.toUpperCase()) +
-          (cpt.difficultyRating ? ' · ' + esc(cpt.difficultyRating) + '/5' : '') + '</span>'
-        : '') +
-      '</div>';
-
-    if (cpt.cutoff && cpt.cutoff.time) {
-      html += '<div class="tr-when">Be there before the <b>' +
-        esc((cpt.cutoff.dow ? cpt.cutoff.dow + ' ' : '') + cpt.cutoff.time) + '</b> cutoff' +
-        (typeof cpt.km === 'number' ? ' · km ' + esc(cpt.km) : '') + '</div>';
-    }
-
-    if (cpt.headline) html += '<div class="tr-headline">' + esc(cpt.headline) + '</div>';
-    if (cpt.reasoning) html += '<div class="tr-why"><span class="tr-why-k">Why this way</span>' + esc(cpt.reasoning) + '</div>';
-
-    html += sectionLabel('Route out', (cpt.legs || []).length + ' legs');
-    html += legsHtml(cpt.legs);
-
-    if (returns.length) {
-      html += sectionLabel('Getting back');
-      html += returnOptionHtml(returns[0], true, assumedDate);
-      /* Lower-preference returns are real options but not the plan — one tap
-       * away rather than another screen of scrolling past the plan itself. */
-      returns.slice(1).forEach(function (opt) {
-        html += '<details class="tr-more"><summary>Fallback: ' + esc(opt.label || 'other way back') +
-          '</summary>' + returnOptionHtml(opt, false, assumedDate) + '</details>';
+    if (bib && RUNNER_SEG.test(url)) {
+      url = url.replace(RUNNER_SEG, function (all, pre) {
+        return pre + encodeURIComponent(bib);
       });
     }
 
-    if (cpt.alternatives && cpt.alternatives.length) {
-      html += sectionLabel('Alternative route out');
-      cpt.alternatives.forEach(function (alt) {
-        var e = lineFor(alt.ref);
-        html += '<div class="tr-alt"><div class="tr-alt-label">' + esc(alt.label) +
-          (alt.verified === false ? ' ' + unverifiedBadge('UNVERIFIED') : '') + '</div>';
-        if (e) html += legChips({ from: '', ref: alt.ref }, e);
-        if (alt.note) html += note(alt.note);
-        if (e && e.line.zoneNote && e.line.zoneNote.verified === false) {
-          html += unverifiedNote(e.line.zoneNote.note, 'PASS ZONE UNVERIFIED');
-        }
-        html += '</div>';
-      });
+    /* Keep the plan's own wording, but never let it advertise a bib the crew
+     * has since corrected. */
+    if (bib) {
+      if (/\bbib\b/i.test(label)) label = label.replace(/(\bbib\s*#?\s*)\S+/i, '$1' + bib);
+      else label = label ? (label + ' — bib ' + bib) : ('Track runner — bib ' + bib);
     }
+    if (!label) label = 'Track runner';
 
-    html += passHtml(cpt, refs);
-    html += warningsHtml(cpt.warnings);
-
-    if (cpt.notes) {
-      html += sectionLabel('On the ground');
-      html += '<div class="tr-onground">' + esc(cpt.notes) + '</div>';
-    }
-
-    html += confirmHtml(cpt);
-    html += linesUsedHtml(refs);
-    html += sourceHtml();
-    html += '</div>';
-    return html;
+    return { url: url, label: label };
   }
 
-  function sourceHtml() {
-    var bits = [];
-    if (shuttles.compiledAt) bits.push('shuttles.json compiled ' + shuttles.compiledAt);
-    if (shuttles.schemaVersion) bits.push('v' + shuttles.schemaVersion);
-    if (shuttles.timezone) bits.push('all times ' + shuttles.timezone);
-    if (!bits.length) return '';
-    return '<div class="tr-src">' + esc(bits.join(' · ')) + '</div>';
-  }
-
-  /* ─────────────────────────────────────────────────────────────────────────
-   * Non-crew checkpoint block — deliberately short
-   * ───────────────────────────────────────────────────────────────────────── */
-
-  /* Follower lines that call at this place, so the crew know whether they could
-   * at least stand there and cheer. Exact name match only — "Contamines" must
-   * not be dragged in by "Les Contamines". */
-  function spectatorLines(cpName) {
-    var want = norm(cpName);
-    if (!want) return [];
-    var out = [];
-    (shuttles.followerShuttles || []).forEach(function (l) {
-      var hit = (l.stops || []).some(function (st) { return norm(st.name) === want; });
-      if (hit && out.indexOf(l) < 0) out.push(l);
-    });
-    return out;
-  }
-
-  function noCrewHtml(cpId) {
-    var cp = courseCp(cpId);
-    var name = cp ? cp.name : cpId;
-    var html = '<div class="tr-block tr-block-nocrew">';
-    html += '<div class="tr-head"><span class="tr-head-t">Crew access</span>' +
-      '<span class="tr-diff tr-diff-none">NO CREW ACCESS</span></div>';
-
-    /* Les Houches is the crew's own village and the course runs through it —
-     * worth its own sentence, because "we live here" reads like "we can crew
-     * here" and it is not true. */
-    var passage = shuttles.crewBase && shuttles.crewBase.coursePassage;
-    if (passage && passage.checkpoint === cpId) {
-      html += '<div class="tr-nocrew-lead">' + esc(passage.note) + '</div>';
-      var w = passage.expectedWindow;
-      if (w && w.from) {
-        var win = 'Expect the runner ' + w.from + '–' + w.to + (w.date ? ' ' + fmtDay(w.date) : '');
-        if (w.verified === false) html += unverifiedNote(win + '. ' + (w.note || ''), 'UNVERIFIED');
-        else html += note(win + '.');
-      }
-    } else if (cpId === 'start') {
-      html += '<div class="tr-nocrew-lead">The start line, not an assistance point. What matters here is getting the crew ' +
-        'into Chamonix in time to watch it.</div>';
-      (shuttles.startShuttles || []).forEach(function (l) {
-        html += '<div class="tr-line">' +
-          '<div class="tr-line-name">' + esc(l.name) + '</div>' +
-          legChips({ from: 'Houches', ref: l.id }, lineFor(l.id)) +
-          note(l.note) + '</div>';
-      });
-    } else if (cpId === 'finish') {
-      html += '<div class="tr-nocrew-lead">The finish line. Nothing to hand over — just be there. ' +
-        'Sunday daylight, so Chamonix Bus Line 1 is running normally.</div>';
-    } else {
-      html += '<div class="tr-nocrew-lead">' + esc(name) +
-        ' is not a personal-assistance point. No gear, food or drink may be handed over here' +
-        (cp && cp.support === 'water' ? ' — it is a water point only.' : '.') +
-        ' The crew points are U3 Les Contamines, U7 Courmayeur, U11 Champex-Lac and U13 Vallorcine.</div>';
-
-      var lines = spectatorLines(name);
-      if (lines.length) {
-        html += '<div class="tr-nocrew-spec">Spectating only, if you want to go anyway:</div>';
-        html += '<ul class="tr-spec-l">' + lines.map(function (l) {
-          var lastBit = l.lastTime ? ', last ' + fmtWhen(l.lastTime, l.lastDate) : '';
-          return '<li><b>' + esc(l.name) + '</b> — ' + esc(l.frequencyText || 'see timetable') + esc(lastBit) +
-            (l.passZone ? ' · ' + esc(zoneLabel(l.passZone)) + ' pass' : '') +
-            (l.lastSemanticsVerified === false ? ' ' + unverifiedBadge('LAST TIME UNVERIFIED') : '') + '</li>';
-        }).join('') + '</ul>';
-      }
+  /* Point the Track button (and the hint under it) at the current bib. The
+   * nodes can be passed in so this also works while the header is still
+   * detached, before it has been mounted and is findable by id. */
+  function renderTrack(anchorEl, hintEl) {
+    var a = anchorEl || document.getElementById('dayTrackLink');
+    if (!a) return false;
+    var info = trackInfo();
+    if (a.getAttribute('href') !== info.url) a.href = info.url;
+    a.title = info.label;
+    a.setAttribute('aria-label', info.label);
+    var hint = hintEl || document.getElementById('dayTrackHint');
+    if (hint) {
+      var text = info.label + ' · shared with the whole crew';
+      if (hint.textContent !== text) hint.textContent = text;
     }
-
-    var noAssist = idx.warnings['no-assistance-les-houches'];
-    if (cpId === 'U1' && noAssist) html += warningHtml(noAssist);
-
-    html += sourceHtml();
-    return html + '</div>';
-  }
-
-  /* ─────────────────────────────────────────────────────────────────────────
-   * Public entry point
-   * ───────────────────────────────────────────────────────────────────────── */
-
-  function renderFor(cpId, containerEl) {
-    var el = typeof containerEl === 'string' ? document.getElementById(containerEl) : containerEl;
-    if (!el) return false;
-
-    if (!shuttles || !idx) {
-      el.innerHTML = '<div class="tr-block tr-block-empty">' +
-        '<div class="tr-head"><span class="tr-head-t">Transport</span></div>' +
-        '<div class="tr-nocrew-lead">Shuttle timetable unavailable on this device — shuttles.json did not load. ' +
-        'Reload once while online; after that it works offline.</div></div>';
-      return false;
-    }
-
-    var cpt = idx.crewPoints[cpId];
-    el.innerHTML = cpt ? crewPointHtml(cpt) : noCrewHtml(cpId);
     return true;
   }
 
+  /* Repaint the bib input from the store. Never clobbers what the user is
+   * currently typing — but the Track button is repainted either way, so the
+   * link is correct the moment the bib is, not one render later. */
+  function renderBib() {
+    renderTrack();
+    var input = document.getElementById('dayBibInput');
+    if (!input) return false;
+    if (document.activeElement === input) return false;
+    var v = getBib();
+    if (input.value !== v) input.value = v;
+    return true;
+  }
+
+  function buildLiveBox() {
+    var box = h('div', 'dp-live');
+    box.id = 'dayLive';
+
+    var label = h('label', 'dp-bib-label', 'Runner bib');
+    label.setAttribute('for', 'dayBibInput');
+    box.appendChild(label);
+
+    var row = h('div', 'dp-bib-row');
+
+    var input = document.createElement('input');
+    input.id = 'dayBibInput';
+    input.className = 'dp-bib';
+    input.type = 'text';
+    input.inputMode = 'numeric';
+    input.autocomplete = 'off';
+    input.setAttribute('autocorrect', 'off');
+    input.setAttribute('autocapitalize', 'off');
+    input.spellcheck = false;
+    input.maxLength = 12;
+    input.placeholder = 'bib';
+    input.value = getBib();
+    input.setAttribute('aria-label', 'Runner bib number, shared with the crew');
+
+    /* Debounced write, then a final write on blur/change. Both go through
+     * UTMB.store.set so sync.js is notified. */
+    var timer = null;
+    input.addEventListener('input', function () {
+      clearTimeout(timer);
+      var v = input.value;
+      timer = setTimeout(function () { timer = null; setBib(v); renderTrack(); }, 300);
+    });
+    input.addEventListener('change', function () {
+      clearTimeout(timer); timer = null;
+      setBib(input.value);
+      renderTrack();
+    });
+    input.addEventListener('blur', function () {
+      clearTimeout(timer); timer = null;
+      var v = setBib(input.value);
+      input.value = v;
+      renderTrack();
+    });
+    row.appendChild(input);
+
+    /* Href is set by renderTrack() below, from the plan + the shared bib. The
+     * button label stays short and fixed because .dp-track is white-space:nowrap
+     * and shares a flex row with the input; the plan's own wording (and the live
+     * bib) go to title, aria-label and the hint line, which wrap. */
+    var track = mkLink(TRACK_URL, '📡 Track runner', 'dp-track');
+    track.id = 'dayTrackLink';
+    row.appendChild(track);
+    box.appendChild(row);
+
+    var hint = h('div', 'dp-bib-hint', 'Shared with the whole crew · opens live.utmb.world');
+    hint.id = 'dayTrackHint';
+    box.appendChild(hint);
+
+    renderTrack(track, hint);
+    return box;
+  }
+
   /* ─────────────────────────────────────────────────────────────────────────
-   * Crew transport board — #transportMount, full width under the map/profile.
-   *
-   * index.html reserves that mount for this module; without it the section
-   * stays empty and .mount:empty hides it, so the four crew points and the
-   * clock that actually binds them (the last service home) are only reachable
-   * by opening each checkpoint one at a time. Same card idiom as the checklist
-   * board next to it, and every unverified figure keeps its badge.
+   * day-plan pieces
    * ───────────────────────────────────────────────────────────────────────── */
 
-  function orderedCrewPoints() {
-    var pts = (shuttles.crewPoints || []).filter(function (c) { return c && c.cp; }).slice();
-    if (course && Array.isArray(course.cps)) {
-      var rank = Object.create(null);
-      course.cps.forEach(function (c, i) { rank[c.id] = i; });
-      pts.sort(function (a, b) {
-        var ra = rank[a.cp] === undefined ? 9999 : rank[a.cp];
-        var rb = rank[b.cp] === undefined ? 9999 : rank[b.cp];
-        return ra - rb;
-      });
-    }
-    return pts;
+  function buildHead() {
+    var meta = isObj(plan.meta) ? plan.meta : {};
+    var head = h('header', 'dp-head');
+    head.id = 'dayPlanHead';
+
+    var main = h('div', 'dp-head-main');
+    main.appendChild(h('h2', 'dp-title', txt(meta.title) || 'Crew Day Plan'));
+    if (meta.subtitle) main.appendChild(h('div', 'dp-sub', txt(meta.subtitle)));
+    head.appendChild(main);
+
+    head.appendChild(buildLiveBox());
+    return head;
   }
 
-  function overviewCardHtml(cpt) {
-    var returns = (cpt.returnOptions || []).slice().sort(function (a, b) {
-      return (a.preference || 99) - (b.preference || 99);
+  /* One step row inside a leg. `eta:true` makes it the runner's own line;
+   * `warn` hangs a warning strip under it; `link` adds a Navigate anchor. */
+  function buildStep(step) {
+    if (!isObj(step)) return null;
+    var li = h('li', 'dp-step' + (step.eta ? ' is-eta' : '') + (step.warn ? ' has-warn' : ''));
+
+    li.appendChild(h('span', 'dp-time', txt(step.time)));
+
+    var body = h('span', 'dp-step-body');
+    body.appendChild(h('span', 'dp-text', txt(step.text)));
+
+    var link = linkFor(step.link);
+    if (link) {
+      var nav = mkLink(link.url, '📍 Navigate');
+      nav.title = txt(link.label);
+      nav.setAttribute('aria-label', 'Navigate to ' + txt(link.label));
+      body.appendChild(nav);
+    }
+
+    if (step.warn) {
+      var warn = h('span', 'dp-warn');
+      warn.appendChild(h('b', 'dp-warn-icon', '⚠'));
+      warn.appendChild(h('span', 'dp-warn-text', txt(step.warn)));
+      body.appendChild(warn);
+    }
+
+    li.appendChild(body);
+    return li;
+  }
+
+  function buildSteps(steps, cls) {
+    var ol = h('ol', 'dp-steps' + (cls ? ' ' + cls : ''));
+    (Array.isArray(steps) ? steps : []).forEach(function (s) {
+      var row = buildStep(s);
+      if (row) ol.appendChild(row);
     });
-    var best = returns[0] || null;
-    var assumedDate = cpt.cutoff && cpt.cutoff.date ? cpt.cutoff.date : null;
-    var b = best ? bindingLast(best, assumedDate) : null;
+    return ol;
+  }
 
-    var loud = (cpt.warnings || []).map(function (id) { return idx.warnings[id]; })
-      .filter(function (w) { return w && (w.severity === 'critical' || w.severity === 'high'); });
+  /* leg sat-cp13 carries planA / planB halves plus a shared steps array. */
+  function buildPlanHalf(half, tag) {
+    var box = h('div', 'dp-plan dp-plan-' + tag);
+    box.appendChild(h('div', 'dp-plan-label', txt(half.label)));
+    box.appendChild(buildSteps(half.steps));
+    return box;
+  }
 
-    var html = '<button type="button" class="tr-ov-card" data-cp="' + esc(cpt.cp) + '" ' +
-      'aria-label="Open the transport plan for ' + esc(cpt.name) + '">';
+  function buildLeg(leg) {
+    var art = h('article', 'dp-leg');
+    art.setAttribute('data-leg', txt(leg.id));
 
-    html += '<div class="tr-ov-top"><span class="tr-ov-cp">' + esc(cpt.cp) + '</span>' +
-      '<span class="tr-ov-name">' + esc(cpt.name) + '</span></div>';
+    var head = h('div', 'dp-leg-head');
+    head.appendChild(h('span', 'dp-day', txt(leg.day)));
+    head.appendChild(h('h3', 'dp-leg-title', txt(leg.title)));
+    art.appendChild(head);
 
-    html += '<div class="tr-ov-row">' +
-      (cpt.difficulty
-        ? '<span class="tr-diff tr-diff-' + esc(cpt.difficulty) + '">' + esc(cpt.difficulty.toUpperCase()) +
-          (cpt.difficultyRating ? ' · ' + esc(cpt.difficultyRating) + '/5' : '') + '</span>'
-        : '') +
-      (cpt.passRequired ? chip(zoneLabel(cpt.zone) + ' pass', 'pass') : chip('no pass', 'first')) +
-      '</div>';
+    var hasA = isObj(leg.planA), hasB = isObj(leg.planB);
+    if (hasA || hasB) {
+      var plans = h('div', 'dp-plans');
+      if (hasA) plans.appendChild(buildPlanHalf(leg.planA, 'a'));
+      if (hasB) plans.appendChild(buildPlanHalf(leg.planB, 'b'));
+      art.appendChild(plans);
+    }
+
+    if (Array.isArray(leg.steps) && leg.steps.length) {
+      art.appendChild(buildSteps(leg.steps, (hasA || hasB) ? 'dp-steps-shared' : ''));
+    }
+    return art;
+  }
+
+  /* The four crew checkpoint cards: ETA chip with its ±20 window, the cutoff,
+   * what he eats there, what the crew hands over, and the next leg. */
+  function buildCrewCard(pt) {
+    var r = runnerFor(pt.key);
+    var cp = courseCp(pt.cp);
+    var card = h('div', 'dp-cp-card');
+    card.setAttribute('data-cp', pt.cp);
+
+    var open = mkBtn('dp-cp-open', 'Open the crew checklist for ' + (cp ? cp.name : pt.label), function () {
+      if (UTMB.drawer && typeof UTMB.drawer.open === 'function') UTMB.drawer.open(pt.cp);
+    });
+
+    var top = h('span', 'dp-cp-top');
+    top.appendChild(h('span', 'dp-cp-id', pt.label));
+    top.appendChild(h('span', 'dp-cp-name', cp ? cp.name : pt.label));
+    open.appendChild(top);
+
+    if (r) {
+      var eta = h('span', 'dp-cp-eta');
+      eta.appendChild(h('b', 'dp-eta-time', txt(r.eta)));
+      if (r.window) eta.appendChild(h('i', 'dp-eta-win', '±20 · ' + txt(r.window)));
+      open.appendChild(eta);
+    }
 
     var bits = [];
-    if (typeof cpt.km === 'number') bits.push('km ' + cpt.km);
-    if (cpt.cutoff && cpt.cutoff.time) {
-      bits.push('cutoff ' + (cpt.cutoff.dow ? cpt.cutoff.dow + ' ' : '') + cpt.cutoff.time);
-    }
-    if (bits.length) html += '<div class="tr-ov-meta">' + esc(bits.join(' · ')) + '</div>';
+    if (cp && typeof cp.km === 'number') bits.push('km ' + cp.km);
+    if (r && r.cutoff) bits.push('cutoff ' + txt(r.cutoff));
+    if (bits.length) open.appendChild(h('span', 'dp-cp-meta', bits.join(' · ')));
 
-    html += '<div class="tr-ov-last"><span class="tr-ov-k">Last way home</span>';
-    if (b) {
-      html += '<span class="tr-ov-v">' + esc(fmtWhen(b.time, b.date)) + '</span>' +
-        (b.assumed
-          ? ' ' + unverifiedBadge('DATE ASSUMED')
-          : (b.line.lastSemanticsVerified === false ? ' ' + unverifiedBadge('UNVERIFIED') : ''));
-    } else {
-      html += '<span class="tr-ov-v tr-ov-none">not published</span> ' + unverifiedBadge('UNVERIFIED');
-    }
-    html += '</div>';
-
-    if (loud.length) {
-      html += '<div class="tr-ov-warn">' + loud.length + ' serious warning' +
-        (loud.length === 1 ? '' : 's') + '</div>';
+    if (r && (r.eatHere || r.handOver)) {
+      var carbs = h('span', 'dp-cp-carbs');
+      if (r.eatHere) carbs.appendChild(h('b', 'dp-carb-eat', 'Eats ' + txt(r.eatHere)));
+      if (r.handOver) carbs.appendChild(h('b', 'dp-carb-give', 'Hand over ' + txt(r.handOver)));
+      open.appendChild(carbs);
     }
 
-    return html + '</button>';
+    if (r && r.nextLeg) open.appendChild(h('span', 'dp-cp-next', 'Then ' + txt(r.nextLeg)));
+
+    card.appendChild(open);
+
+    var link = linkFor(pt.key);
+    if (link) {
+      var nav = mkLink(link.url, '📍 Navigate');
+      nav.title = txt(link.label);
+      nav.setAttribute('aria-label', 'Navigate to ' + txt(link.label));
+      card.appendChild(nav);
+    }
+    return card;
   }
 
-  function overviewHtml() {
-    var pts = orderedCrewPoints();
-    if (!pts.length) return '';
-    var origin = (shuttles.crewBase && shuttles.crewBase.village) || 'Les Houches';
+  function buildCrewSection() {
+    var sec = h('section', 'dp-cps');
+    sec.id = 'dayCrewPoints';
+    sec.appendChild(h('div', 'dp-sec-title', 'Your 4 checkpoints'));
 
-    var html = '<div class="tr-ov">';
-    html += '<div class="tr-ov-head"><div class="tr-ov-title">Crew transport</div>' +
-      '<div class="tr-ov-sum">' + pts.length + ' access points from ' + esc(origin) + '</div></div>';
-    html += '<div class="tr-ov-grid">' + pts.map(overviewCardHtml).join('') + '</div>';
-    html += '<div class="tr-ov-foot">Tap a checkpoint for the full route out, the passes it needs and the way back. ' +
-      'Times wearing an UNVERIFIED badge have not been confirmed against a published timetable.</div>';
-    html += sourceHtml();
-    return html + '</div>';
+    var grid = h('div', 'dp-cp-grid');
+    CREW_POINTS.forEach(function (pt) { grid.appendChild(buildCrewCard(pt)); });
+    sec.appendChild(grid);
+
+    var meta = isObj(plan.meta) ? plan.meta : {};
+    if (meta.etaNote) sec.appendChild(h('p', 'dp-note', txt(meta.etaNote)));
+    sec.appendChild(h('p', 'dp-hint', 'Tap a checkpoint to open its crew checklist and notes.'));
+    return sec;
   }
+
+  function buildLegsSection() {
+    var sec = h('section', 'dp-legs');
+    sec.id = 'dayLegs';
+    sec.appendChild(h('div', 'dp-sec-title', 'Day plan'));
+    (Array.isArray(plan.legs) ? plan.legs : []).forEach(function (leg) {
+      if (isObj(leg)) sec.appendChild(buildLeg(leg));
+    });
+    return sec;
+  }
+
+  function buildBusSection() {
+    var rows = Array.isArray(plan.busReference) ? plan.busReference : [];
+    if (!rows.length) return null;
+
+    var sec = h('section', 'dp-bus');
+    sec.id = 'dayBusRef';
+    sec.appendChild(h('div', 'dp-sec-title', 'Bus reference'));
+
+    var table = h('table', 'dp-table');
+    var thead = h('thead');
+    var hr = h('tr');
+    ['Route', 'When', 'Detail'].forEach(function (t) { hr.appendChild(h('th', null, t)); });
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    var tbody = h('tbody');
+    rows.forEach(function (row) {
+      if (!isObj(row)) return;
+      var tr = h('tr');
+      var c1 = h('td', 'dp-td-route', txt(row.route)); c1.setAttribute('data-l', 'Route');
+      var c2 = h('td', 'dp-td-when', txt(row.when)); c2.setAttribute('data-l', 'When');
+      var c3 = h('td', 'dp-td-detail', txt(row.detail)); c3.setAttribute('data-l', 'Detail');
+      tr.appendChild(c1); tr.appendChild(c2); tr.appendChild(c3);
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    sec.appendChild(table);
+    return sec;
+  }
+
+  function buildRulesSection() {
+    var rules = Array.isArray(plan.rules) ? plan.rules : [];
+    var meta = isObj(plan.meta) ? plan.meta : {};
+    if (!rules.length && !meta.accuracyNote) return null;
+
+    var foot = h('footer', 'dp-rules');
+    foot.id = 'dayRules';
+    foot.appendChild(h('div', 'dp-sec-title', 'Rules'));
+    if (rules.length) {
+      var ul = h('ul', 'dp-rule-list');
+      rules.forEach(function (r) { ul.appendChild(h('li', 'dp-rule', txt(r))); });
+      foot.appendChild(ul);
+    }
+    if (meta.accuracyNote) foot.appendChild(h('p', 'dp-accuracy', txt(meta.accuracyNote)));
+    return foot;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+   * #transportMount — the whole day plan
+   * ───────────────────────────────────────────────────────────────────────── */
 
   function renderOverview() {
     var mount = document.getElementById('transportMount');
     if (!mount) return false;
-    if (!shuttles || !idx) { mount.innerHTML = ''; return false; }
 
-    mount.innerHTML = overviewHtml();
-
-    var cards = mount.querySelectorAll('.tr-ov-card');
-    for (var i = 0; i < cards.length; i++) {
-      cards[i].addEventListener('click', function (ev) {
-        var id = ev.currentTarget.getAttribute('data-cp');
-        if (id && UTMB.drawer && typeof UTMB.drawer.open === 'function') UTMB.drawer.open(id);
-      });
+    if (!plan) {
+      mount.textContent = '';
+      if (loadFailed) {
+        var box = h('div', 'dp dp-failed');
+        box.id = 'dayPlan';
+        box.appendChild(h('div', 'dp-sec-title', 'Day plan'));
+        box.appendChild(h('p', 'dp-hint',
+          'The day plan could not be loaded on this device. Open the app once with a ' +
+          'signal and it is cached from then on.'));
+        mount.appendChild(box);
+      }
+      return false;
     }
+
+    var root = h('div', 'dp');
+    root.id = 'dayPlan';
+    root.appendChild(buildHead());
+    root.appendChild(buildCrewSection());
+    root.appendChild(buildLegsSection());
+    var bus = buildBusSection(); if (bus) root.appendChild(bus);
+    var rules = buildRulesSection(); if (rules) root.appendChild(rules);
+
+    mount.textContent = '';
+    mount.appendChild(root);
     return true;
   }
 
   /* ─────────────────────────────────────────────────────────────────────────
-   * Styles — injected here so this module owns its own presentation.
-   * System fonts only; palette inherited from app.css :root.
+   * #drawerTransportMount — the crew's plan for the open checkpoint
    * ───────────────────────────────────────────────────────────────────────── */
 
-  var CSS = [
-    '.tr-block{margin:0 0 16px;padding:12px;border:1px solid var(--border);border-radius:12px;background:#151515;',
-    '  font-family:-apple-system,"Avenir Next","Helvetica Neue",sans-serif}',
-    '.tr-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}',
-    '.tr-head-t{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}',
-    '.tr-diff{font-size:10px;font-weight:700;letter-spacing:.4px;padding:3px 7px;border-radius:6px;white-space:nowrap;',
-    '  background:#1c1c1c;color:var(--muted);border:1px solid #2e2e2e}',
-    '.tr-diff-easy{background:#132a19;color:var(--food);border-color:#1d5233}',
-    '.tr-diff-moderate{background:#2c2510;color:#facc15;border-color:#5c4d15}',
-    '.tr-diff-hard{background:#2e1414;color:var(--hotmeal);border-color:#7f1d1d}',
-    '.tr-diff-none{background:#1c1c1c;color:#8b8b8b}',
-    '.tr-when{font-size:12px;color:var(--muted);margin-bottom:8px}',
-    '.tr-when b{color:var(--text)}',
-    '.tr-headline{font-size:14px;font-weight:700;line-height:1.35;color:#fff;background:#1e1a10;border-left:3px solid #facc15;',
-    '  padding:8px 10px;border-radius:0 8px 8px 0;margin-bottom:8px}',
-    '.tr-why{font-size:12.5px;line-height:1.5;color:#c8c8c8;margin-bottom:12px}',
-    '.tr-why-k{display:block;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--muted);',
-    '  text-transform:uppercase;margin-bottom:3px}',
-    '.tr-sec{display:flex;align-items:baseline;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.7px;',
-    '  text-transform:uppercase;color:var(--accent);margin:14px 0 7px;padding-top:8px;border-top:1px solid var(--border)}',
-    '.tr-sec-x{font-weight:600;letter-spacing:.2px;color:var(--muted);text-transform:none}',
-    /* legs */
-    '.tr-legs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}',
-    '.tr-leg{display:flex;gap:9px;align-items:flex-start;background:#191919;border:1px solid #232323;',
-    '  border-radius:10px;padding:8px 9px}',
-    '.tr-leg-unresolved{background:#241010;border-color:#5b1d1d}',
-    '.tr-leg-transfer{background:#241d10;border-color:#5c4a15}',
-    '.tr-leg-n{flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:#2b2b2b;color:#e5e5e5;',
-    '  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}',
-    '.tr-leg-unresolved .tr-leg-n{background:#7f1d1d;color:#fff}',
-    '.tr-leg-body{flex:1 1 auto;min-width:0}',
-    '.tr-leg-route{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;line-height:1.35;color:var(--text)}',
-    '.tr-leg-od{font-weight:600}',
-    '.tr-arrow{color:var(--muted);font-weight:400}',
-    '.tr-mode{font-size:9.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:2px 6px;',
-    '  border-radius:5px;background:#2b2b2b;color:#cfcfcf;white-space:nowrap}',
-    '.tr-mode-walk{background:#20262e;color:#9db6d6}',
-    '.tr-mode-train{background:#152238;color:var(--water)}',
-    '.tr-mode-utmb-shuttle{background:#132a19;color:var(--food)}',
-    '.tr-mode-line1{background:#251a30;color:var(--accent)}',
-    '.tr-mode-transfer{background:#3a2f10;color:#facc15}',
-    '.tr-mode-unresolved{background:#5b1d1d;color:#fecaca}',
-    '.tr-leg-line{font-size:11.5px;color:#9fb0c8;margin-top:3px}',
-    '.tr-op{color:var(--muted)}',
-    /* chips */
-    '.tr-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}',
-    '.tr-chip{font-size:10.5px;font-weight:600;line-height:1.35;padding:2px 6px;border-radius:5px;',
-    '  background:#232323;color:#d4d4d4;border:1px solid #2e2e2e;white-space:nowrap}',
-    '.tr-chip-time{color:#e5e5e5}',
-    '.tr-chip-freq{color:#a7d8ff;border-color:#28394d}',
-    '.tr-chip-first{color:#9ae6b4;border-color:#22402c}',
-    '.tr-chip-last{color:#fca5a5;border-color:#4a2020}',
-    '.tr-chip-oneway{color:#fbbf24;border-color:#5c4d15}',
-    '.tr-chip-pass{color:var(--accent);border-color:#3c3060}',
-    '.tr-chip-book{color:var(--muted)}',
-    '.tr-chip-warn{white-space:normal;background:#2a1a1a;border-color:#5b2a2a;color:#fca5a5}',
-    /* the UNVERIFIED badge — has to be impossible to miss */
-    '.tr-unv{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.7px;padding:1px 5px;border-radius:4px;',
-    '  background:var(--supporter);color:#fff;text-transform:uppercase;vertical-align:baseline;white-space:nowrap}',
-    '.tr-note{font-size:11.5px;line-height:1.5;color:#a8a8a8;margin-top:5px}',
-    '.tr-note-unv{color:#f0c9c9;background:#2a1414;border:1px solid #5b2a2a;border-radius:7px;padding:6px 8px}',
-    '.tr-fact{font-size:11.5px;line-height:1.5;color:#a8a8a8;margin-top:4px;padding-left:12px;position:relative}',
-    '.tr-fact:before{content:"\\2713";position:absolute;left:0;color:var(--food);font-size:10px}',
-    /* return */
-    '.tr-ret{border:1px solid #232323;border-radius:10px;padding:9px;margin-bottom:9px;background:#171717}',
-    '.tr-ret-best{border-color:#1d5233}',
-    '.tr-ret-alt{opacity:.9}',
-    '.tr-ret-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px}',
-    '.tr-ret-tag{font-size:9.5px;font-weight:800;letter-spacing:.6px;padding:2px 6px;border-radius:5px;',
-    '  background:#2b2b2b;color:var(--muted)}',
-    '.tr-ret-best .tr-ret-tag{background:#132a19;color:var(--food)}',
-    '.tr-ret-label{font-size:12.5px;font-weight:700;color:var(--text)}',
-    '.tr-last{margin-top:9px;padding:8px 9px;border-radius:8px;background:#111;border:1px solid #333;',
-    '  display:flex;flex-wrap:wrap;align-items:baseline;gap:7px}',
-    '.tr-last-k{font-size:9.5px;font-weight:800;letter-spacing:.7px;color:var(--muted)}',
-    '.tr-last-v{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.2px}',
-    '.tr-last-src{font-size:11px;color:#9fb0c8;flex:1 1 100%}',
-    '.tr-last-why{flex:1 1 100%;font-size:11px;line-height:1.45;color:var(--muted)}',
-    '.tr-last-none .tr-last-v{color:#fca5a5}',
-    /* alternatives */
-    '.tr-alt{border:1px dashed #333;border-radius:10px;padding:9px;background:#171717}',
-    '.tr-alt-label{font-size:12.5px;font-weight:700;color:var(--text)}',
-    /* warnings */
-    '.tr-warn{border-radius:10px;padding:9px;margin-bottom:8px;border:1px solid #2e2e2e;background:#181818}',
-    '.tr-warn-critical{border-color:var(--supporter);background:#2a0f0f}',
-    '.tr-warn-high{border-color:#7f1d1d;background:#221212}',
-    '.tr-warn-medium{border-color:#5c4d15;background:#1e1a10}',
-    '.tr-warn-low{border-color:#2e2e2e}',
-    '.tr-warn-head{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:5px}',
-    '.tr-sev{font-size:9px;font-weight:800;letter-spacing:.7px;padding:2px 5px;border-radius:4px;background:#2b2b2b;color:#d4d4d4}',
-    '.tr-warn-critical .tr-sev{background:var(--supporter);color:#fff}',
-    '.tr-warn-high .tr-sev{background:#7f1d1d;color:#fecaca}',
-    '.tr-warn-medium .tr-sev{background:#5c4d15;color:#fde68a}',
-    '.tr-warn-title{font-size:12.5px;font-weight:700;color:#fff;line-height:1.3}',
-    '.tr-warn-body{font-size:11.5px;line-height:1.5;color:#c9c9c9}',
-    '.tr-mit{margin:6px 0 0;padding-left:16px;font-size:11.5px;line-height:1.5;color:#a8a8a8}',
-    '.tr-mit li{margin-bottom:3px}',
-    /* pass / hubs / lines */
-    '.tr-pass{font-size:12px;line-height:1.5;color:#c9c9c9}',
-    '.tr-pass-need{margin-bottom:5px;color:var(--text)}',
-    '.tr-pass-free b{color:var(--food)}',
-    '.tr-hub{margin-top:7px}',
-    '.tr-hub-k{display:block;font-size:9.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}',
-    '.tr-hub-l{margin:4px 0 0;padding-left:16px;font-size:11.5px;line-height:1.6;color:#c9c9c9}',
-    '.tr-line{border-top:1px solid #232323;padding-top:8px;margin-top:8px}',
-    '.tr-line:first-child{border-top:none;padding-top:0;margin-top:0}',
-    '.tr-line-name{font-size:12.5px;font-weight:700;color:var(--text)}',
-    '.tr-stops{list-style:none;margin:6px 0 0;padding:0;font-size:11.5px;line-height:1.6;color:#c9c9c9}',
-    '.tr-stops li{display:flex;gap:8px}',
-    '.tr-stop-t{flex:0 0 42px;color:#9ae6b4;font-weight:700;font-variant-numeric:tabular-nums}',
-    /* disclosure blocks */
-    '.tr-more{margin-top:10px;border:1px solid var(--border);border-radius:10px;background:#141414}',
-    '.tr-more>summary{cursor:pointer;list-style:none;padding:8px 10px;font-size:11.5px;font-weight:700;',
-    '  color:var(--muted);-webkit-tap-highlight-color:transparent}',
-    '.tr-more>summary::-webkit-details-marker{display:none}',
-    '.tr-more>summary:before{content:"\\25B8 ";color:var(--accent)}',
-    '.tr-more[open]>summary:before{content:"\\25BE "}',
-    '.tr-more[open]>summary{border-bottom:1px solid var(--border)}',
-    '.tr-more>*:not(summary){margin-left:10px;margin-right:10px}',
-    '.tr-more>*:last-child{margin-bottom:10px}',
-    '.tr-more-open>summary{color:#fca5a5}',
-    '.tr-confirm{padding-top:8px}',
-    '.tr-confirm-item{font-size:12px;font-weight:600;color:var(--text);margin-left:6px;line-height:1.4}',
-    /* non-crew */
-    '.tr-block-nocrew,.tr-block-empty{background:#141414}',
-    '.tr-nocrew-lead{font-size:12.5px;line-height:1.5;color:#c9c9c9}',
-    '.tr-nocrew-spec{font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;',
-    '  color:var(--muted);margin-top:10px}',
-    '.tr-spec-l{margin:5px 0 0;padding-left:16px;font-size:11.5px;line-height:1.6;color:#c9c9c9}',
-    '.tr-onground{font-size:12px;line-height:1.55;color:#c9c9c9}',
-    '.tr-src{margin-top:12px;padding-top:8px;border-top:1px solid var(--border);font-size:10px;color:#6f6f6f}',
-    /* crew transport board (#transportMount) — mirrors the checklist board */
-    '.tr-ov{padding:14px 16px 18px;border-top:1px solid #222;background:#121212;',
-    '  font-family:-apple-system,"Avenir Next","Helvetica Neue",sans-serif}',
-    '.tr-ov-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}',
-    '.tr-ov-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}',
-    '.tr-ov-sum{font-size:13px;font-weight:700;color:var(--text)}',
-    '.tr-ov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}',
-    '.tr-ov-card{display:block;width:100%;text-align:left;padding:11px 12px;border-radius:12px;',
-    '  border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;',
-    '  font:inherit;-webkit-tap-highlight-color:transparent}',
-    '.tr-ov-card:active{background:#232323}',
-    '.tr-ov-top{display:flex;align-items:baseline;gap:7px;min-width:0}',
-    '.tr-ov-cp{flex-shrink:0;font-size:13px;font-weight:800;color:var(--supporter);letter-spacing:.3px}',
-    '.tr-ov-name{font-size:15.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
-    '.tr-ov-row{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:7px}',
-    '.tr-ov-meta{font-size:11.5px;color:var(--muted);margin-top:6px}',
-    '.tr-ov-last{margin-top:8px;padding-top:8px;border-top:1px solid #232323;display:flex;',
-    '  flex-wrap:wrap;align-items:baseline;gap:6px}',
-    '.tr-ov-k{flex:1 1 100%;font-size:9.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--muted)}',
-    '.tr-ov-v{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.2px}',
-    '.tr-ov-none{color:#fca5a5}',
-    '.tr-ov-warn{margin-top:7px;font-size:11px;font-weight:700;color:#fca5a5}',
-    '.tr-ov-foot{margin-top:10px;font-size:11px;line-height:1.5;color:var(--muted)}'
-  ].join('');
+  function buildDrawerCrew(pt) {
+    var r = runnerFor(pt.key);
+    var box = h('div', 'dp-d');
+    box.appendChild(h('div', 'dp-d-head', 'Crew plan'));
 
-  function injectStyles() {
-    if (document.getElementById('tr-styles')) return;
-    var st = document.createElement('style');
-    st.id = 'tr-styles';
-    st.textContent = CSS;
-    (document.head || document.documentElement).appendChild(st);
-  }
+    if (r) {
+      var eta = h('div', 'dp-d-eta');
+      eta.appendChild(h('b', 'dp-eta-time', txt(r.eta)));
+      if (r.window) eta.appendChild(h('i', 'dp-eta-win', '±20 · ' + txt(r.window)));
+      box.appendChild(eta);
 
-  /* ─────────────────────────────────────────────────────────────────────────
-   * iOS: keep the drawer's notes textarea above the software keyboard.
-   *
-   * #dNotes belongs to drawer.js, which is not editable in this pass — and the
-   * transport block above it is what pushes the textarea down far enough for
-   * the keyboard to swallow it, so this module carries the fix. profile.js does
-   * the same for its own #sectionNotesTa.
-   * ───────────────────────────────────────────────────────────────────────── */
-  function keepTextareaVisible(el) {
-    if (!el || el._trKeyboardWired) return;
-    el._trKeyboardWired = true;
+      if (r.eatHere || r.handOver) {
+        var carbs = h('div', 'dp-d-carbs');
+        if (r.eatHere) carbs.appendChild(h('b', 'dp-carb-eat', 'Eats ' + txt(r.eatHere)));
+        if (r.handOver) carbs.appendChild(h('b', 'dp-carb-give', 'Hand over ' + txt(r.handOver)));
+        box.appendChild(carbs);
+      }
 
-    var timer = null;
-    function reveal() {
-      clearTimeout(timer);
-      /* The keyboard animates in after focus; scrolling immediately scrolls to
-       * a position that is wrong by the time it has finished. */
-      timer = setTimeout(function () {
-        if (document.activeElement !== el) return;
-        if (typeof el.scrollIntoView === 'function') {
-          try {
-            el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' });
-          } catch (err) {
-            el.scrollIntoView(false);
-          }
-        }
-      }, 300);
+      var tail = [];
+      if (r.cutoff) tail.push('Cutoff ' + txt(r.cutoff));
+      if (r.nextLeg) tail.push('Then ' + txt(r.nextLeg));
+      if (tail.length) box.appendChild(h('div', 'dp-d-next', tail.join(' · ')));
     }
 
-    el.addEventListener('focus', reveal);
-
-    /* iOS resizes the visual viewport when the keyboard opens or the accessory
-     * bar changes height; re-run then so the caret never ends up underneath it. */
-    if (window.visualViewport && typeof window.visualViewport.addEventListener === 'function') {
-      window.visualViewport.addEventListener('resize', function () {
-        if (document.activeElement === el) reveal();
-      });
+    var link = linkFor(pt.key);
+    if (link) {
+      var nav = mkLink(link.url, '📍 Navigate');
+      nav.title = txt(link.label);
+      nav.setAttribute('aria-label', 'Navigate to ' + txt(link.label));
+      box.appendChild(nav);
     }
+
+    var leg = legById(pt.leg);
+    if (leg) {
+      box.appendChild(h('div', 'dp-d-sub', txt(leg.title)));
+      if (isObj(leg.planA)) box.appendChild(buildPlanHalf(leg.planA, 'a'));
+      if (isObj(leg.planB)) box.appendChild(buildPlanHalf(leg.planB, 'b'));
+      if (Array.isArray(leg.steps) && leg.steps.length) box.appendChild(buildSteps(leg.steps));
+    }
+    return box;
   }
 
-  /* ─────────────────────────────────────────────────────────────────────────
-   * Wiring
-   * ───────────────────────────────────────────────────────────────────────── */
+  function buildDrawerOther(cpId) {
+    var box = h('div', 'dp-d dp-d-none');
+    box.appendChild(h('div', 'dp-d-head', 'Crew plan'));
 
-  injectStyles();
+    var legId = EXTRA_LEG_FOR_CP[cpId];
+    var leg = legId ? legById(legId) : null;
+    if (leg) {
+      box.appendChild(h('div', 'dp-d-sub', txt(leg.title)));
+      box.appendChild(buildSteps(leg.steps));
+    } else {
+      box.appendChild(h('p', 'dp-hint',
+        'Not a crew checkpoint — no assistance and no crew access here. ' +
+        'The crew works CP3, CP7, CP11 and CP13.'));
+    }
+    return box;
+  }
 
-  var booted = false;
+  function renderFor(cpId, containerEl) {
+    var el = typeof containerEl === 'string' ? document.getElementById(containerEl) : containerEl;
+    if (!el) return false;
+    el.textContent = '';
+    if (!cpId) return false;
 
-  /* Bring the module up from a bootstrap context. main.js calls this after
-   * checklist.js and before share.js. Idempotent — a second call with a
-   * richer context re-indexes and repaints rather than doubling anything.
-   * Also on UTMB.ready() so the module still comes up by itself. */
-  function initFromContext(ctx) {
-    ctx = ctx || {};
+    if (!plan) {
+      if (!loadFailed) return false;
+      var warn = h('div', 'dp-d dp-d-none');
+      warn.appendChild(h('div', 'dp-d-head', 'Crew plan'));
+      warn.appendChild(h('p', 'dp-hint', 'Day plan not cached on this device yet.'));
+      el.appendChild(warn);
+      return false;
+    }
 
-    /* Once shuttles.json is in hand, a later context cannot improve on it. */
-    if (booted && shuttles && !ctx.shuttles) return UTMB.transport;
+    var pt = crewFor(cpId);
+    el.appendChild(pt ? buildDrawerCrew(pt) : buildDrawerOther(cpId));
+    return true;
+  }
 
-    course = ctx.course || course || null;
-    shuttles = ctx.shuttles || shuttles || null;
-    idx = shuttles ? buildIndex(shuttles) : null;
-
-    if (!shuttles) console.warn('[UTMB] transport: shuttles.json unavailable, drawer will say so');
-
-    keepTextareaVisible(document.getElementById('dNotes'));
-
-    /* The board under the map/profile. index.html reserves #transportMount for
-     * exactly this and nothing else fills it. */
+  function renderAll() {
     renderOverview();
+    var active = (UTMB.drawer && typeof UTMB.drawer.activeCp === 'function') ? UTMB.drawer.activeCp() : null;
+    if (active) renderFor(active, 'drawerTransportMount');
+  }
 
-    /* The drawer may already be open (re-render, restored state) — paint it now. */
-    var openCp = UTMB.drawer && typeof UTMB.drawer.activeCp === 'function' ? UTMB.drawer.activeCp() : null;
-    if (openCp) renderFor(openCp, document.getElementById('drawerTransportMount'));
+  /* ─────────────────────────────────────────────────────────────────────────
+   * loading + wiring
+   * ───────────────────────────────────────────────────────────────────────── */
 
-    booted = true;
-    UTMB.emit('transport:ready', { shuttles: shuttles });
-    return UTMB.transport;
+  /* Relative path on purpose: the site is served from an unguessable
+   * subdirectory, so an absolute path would 404. */
+  function loadPlan() {
+    if (planPromise) return planPromise;
+    planPromise = fetch(PLAN_PATH, { credentials: 'same-origin' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status + ' for ' + PLAN_PATH);
+        return res.json();
+      })
+      .then(function (json) {
+        if (!isObj(json)) throw new Error(PLAN_PATH + ' is not an object');
+        plan = json;
+        loadFailed = false;
+        return json;
+      })
+      .catch(function (err) {
+        console.warn('[UTMB] day plan unavailable', err);
+        plan = null;
+        loadFailed = true;
+        planPromise = null;   /* let a later call retry */
+        return null;
+      });
+    return planPromise;
   }
 
   UTMB.on('cp:open', function (e) {
-    renderFor(e && e.id, document.getElementById('drawerTransportMount'));
+    renderFor(e && e.id, 'drawerTransportMount');
   });
 
   UTMB.on('cp:close', function () {
-    var mount = document.getElementById('drawerTransportMount');
-    /* Empty again so .mount:empty hides it and the next open starts clean. */
-    if (mount) mount.innerHTML = '';
+    var el = document.getElementById('drawerTransportMount');
+    if (el) el.textContent = '';
   });
+
+  /* sync.js lands a merged remote state and fires this. Repaint the bib —
+   * meta.bib is shared crew state like everything else. */
+  window.addEventListener('utmb:remote-update', function () {
+    renderBib();
+  });
+
+  function initFromContext(ctx) {
+    ctx = ctx || {};
+    if (ctx.course && !course) course = ctx.course;
+
+    if (booted) {
+      if (plan) renderAll();
+      return UTMB.transport;
+    }
+    booted = true;
+
+    loadPlan().then(function () {
+      renderAll();
+      UTMB.emit('transport:ready', { plan: plan });
+    });
+    return UTMB.transport;
+  }
 
   UTMB.transport = {
     init: initFromContext,
-    isReady: function () { return booted; },
-    renderFor: renderFor,
+    isReady: function () { return booted && !!plan; },
     renderOverview: renderOverview,
-    isCrewPoint: function (cpId) { return !!(idx && idx.crewPoints[cpId]); },
-    crewPointFor: function (cpId) { return (idx && idx.crewPoints[cpId]) || null; },
-    lineFor: lineFor,
-    data: function () { return shuttles; }
+    renderFor: renderFor,
+    render: renderAll,
+    renderBib: renderBib,
+    getBib: getBib,
+    setBib: function (v) { var out = setBib(v); renderBib(); return out; },
+    isCrewPoint: function (cpId) { return !!crewFor(cpId); },
+    crewPoints: function () { return CREW_POINTS.map(function (p) { return p.cp; }); },
+    legFor: function (cpId) {
+      var pt = crewFor(cpId);
+      return legById(pt ? pt.leg : EXTRA_LEG_FOR_CP[cpId]);
+    },
+    data: function () { return plan; },
+    TRACK_URL: TRACK_URL,
+    STORAGE: { meta: 'utmb_meta' }
   };
 
   UTMB.ready(initFromContext);
