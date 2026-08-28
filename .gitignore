@@ -8,3 +8,4 @@ transport/dist/adv-*.png
 transport/dist/vv-*.png
 transport/dist/smoke-*.png
 transport/dist/adv-backup-EN*
+.deploy-path

@@ -1,0 +1,18 @@
+# UTMB crew PWA — served from an unguessable subdirectory.
+AddType application/manifest+json .webmanifest
+AddType application/javascript .js
+AddType application/json .json
+
+# Belt-and-braces: tell crawlers to stay out (index.html also carries a noindex meta).
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow, noarchive"
+</IfModule>
+
+# The service worker must never be served stale, or cache-version bumps take a day to land.
+<IfModule mod_headers.c>
+  <FilesMatch "^(sw\.js|index\.html)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+Options -Indexes
