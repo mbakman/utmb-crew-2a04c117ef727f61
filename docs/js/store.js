@@ -296,6 +296,13 @@ window.UTMB = window.UTMB || {};
    * they ride along in this state object, so ticking "poles packed" on one
    * phone shows up on all of them.
    *
+   * SO ARE DELETES, as tombstones. A deleted item stays in `items` carrying
+   * {deleted:true, lastModified:<when>} and keeps its cp/phase/order so it
+   * still sorts sanely. The merge rule does not change: newer lastModified
+   * wins the whole item, so a delete beats an older edit and a newer edit
+   * resurrects the row. An item with no `deleted` field is live, which is what
+   * every document written before this build looks like.
+   *
    * First-run stamps: an item nobody has touched since sync existed gets 0
    * (oldest possible), so any real edit anywhere beats it. Items in a
    * checkpoint that already carried local edits get that blob's savedAt
@@ -339,13 +346,24 @@ window.UTMB = window.UTMB || {};
   }
 
   /* getContent() + getTicks() -> {itemId: {cp, phase, order, text, critical,
-   * draft, done, lastModified}}.
+   * draft, done, deleted, lastModified}}.
    *
    * lastModified is read straight off the item. checklist.js stamps every
-   * mutation it makes (tick, text, flags, move, add) and the stamp survives the
-   * localStorage round trip, so the item is the authority and the side table
-   * below is only a fallback for items that predate the field. Carrying it here
-   * is what stops the two from drifting apart. */
+   * mutation it makes (tick, text, flags, move, add, delete) and the stamp
+   * survives the localStorage round trip, so the item is the authority and the
+   * side table below is only a fallback for items that predate the field.
+   * Carrying it here is what stops the two from drifting apart.
+   *
+   * TOMBSTONES RIDE ALONG. checklist.js's getContent() deliberately still hands
+   * over items flagged `deleted`, because that flag plus its stamp IS the
+   * delete: sync.js merges it like any other item change and the other phones
+   * lose the row on their next poll.
+   *
+   * An item with no text and no tombstone never enters the shared state at all.
+   * That is the row "+ Add item" creates before anyone types into it. Keeping
+   * it out is what lets checklist.js hard-remove a cancelled draft instead of
+   * leaving a tombstone: the row provably never reached the server, so there is
+   * nothing to tell the crew about. */
   function flattenContent(content, ticks) {
     var flat = {};
     if (!content || typeof content !== 'object' || !content.checkpoints) return flat;
@@ -360,17 +378,22 @@ window.UTMB = window.UTMB || {};
         list.forEach(function (it, idx) {
           if (!it || typeof it !== 'object' || !it.id) return;
           var lm = Number(it.lastModified);
+          var deleted = !!it.deleted;
+          var text = typeof it.text === 'string' ? it.text : String(it.text === undefined ? '' : it.text);
+          if (!deleted && !text.replace(/^\s+|\s+$/g, '')) return;
           flat[it.id] = {
             cp: cpId,
             phase: phase,
             order: idx,
-            text: typeof it.text === 'string' ? it.text : String(it.text === undefined ? '' : it.text),
+            text: text,
             critical: !!it.critical,
             draft: !!it.draft,
             /* it.done is the item's own state; marks is the flat mirror. Either
              * one saying "ticked" is enough — a caller that only has the mirror
-             * (an older payload) still gets the right answer. */
-            done: !!it.done || !!marks[it.id],
+             * (an older payload) still gets the right answer. A tombstone is
+             * never ticked. */
+            done: !deleted && (!!it.done || !!marks[it.id]),
+            deleted: deleted,
             lastModified: (lm === lm && isFinite(lm) && lm > 0) ? lm : 0
           };
         });
@@ -382,7 +405,7 @@ window.UTMB = window.UTMB || {};
   function sameFlatItem(a, b) {
     return a.cp === b.cp && a.phase === b.phase && a.order === b.order &&
       a.text === b.text && a.critical === b.critical &&
-      a.draft === b.draft && a.done === b.done;
+      a.draft === b.draft && a.done === b.done && a.deleted === b.deleted;
   }
 
   function currentFlat() {
@@ -467,7 +490,7 @@ window.UTMB = window.UTMB || {};
     var items = {};
     Object.keys(snap.flat).forEach(function (id) {
       var e = snap.flat[id];
-      items[id] = {
+      var row = {
         cp: e.cp,
         phase: e.phase,
         order: e.order,
@@ -480,6 +503,11 @@ window.UTMB = window.UTMB || {};
          * belt-and-braces against any future caller reaching in here directly. */
         lastModified: e.lastModified > 0 ? e.lastModified : ((id in stamps) ? stamps[id] : 0)
       };
+      /* Written only when true. Absent means live, which is exactly how a
+       * document written by the previous build reads, so nothing special has to
+       * happen when one turns up. */
+      if (e.deleted) row.deleted = true;
+      items[id] = row;
     });
 
     return {
@@ -500,11 +528,14 @@ window.UTMB = window.UTMB || {};
     Object.keys(items).forEach(function (id) {
       var e = items[id];
       if (!e || typeof e !== 'object') return;
+      var deleted = !!e.deleted;
       var text = typeof e.text === 'string' ? e.text : String(e.text === undefined || e.text === null ? '' : e.text);
       /* checklist.js drops empty-text items on the way in and on every reload,
        * so one here is a half-typed row, not data. Skipping it keeps the two
-       * models from disagreeing about what exists. */
-      if (!text.replace(/^\s+|\s+$/g, '')) return;
+       * models from disagreeing about what exists. A TOMBSTONE is exempt: it is
+       * allowed to be empty, and dropping it here would undo the delete on the
+       * way back into the app. */
+      if (!deleted && !text.replace(/^\s+|\s+$/g, '')) return;
 
       var cp = (typeof e.cp === 'string' && e.cp) ? e.cp : 'unknown';
       /* An unknown phase (a device on a different checklists.json) lands in the
@@ -522,7 +553,8 @@ window.UTMB = window.UTMB || {};
         text: text,
         critical: !!e.critical,
         draft: !!e.draft,
-        done: !!e.done
+        done: !deleted && !!e.done,
+        deleted: deleted
       });
     });
 
@@ -547,7 +579,7 @@ window.UTMB = window.UTMB || {};
        * is what let a stale tick get replayed over a remote un-tick. */
       checkpoints[r.cp][r.phase].push({
         id: r.id, text: r.text, critical: r.critical, draft: r.draft,
-        done: r.done, lastModified: r.lm
+        done: r.done, lastModified: r.lm, deleted: r.deleted
       });
       if (r.done) ticks[r.id] = true;
     });
@@ -703,9 +735,13 @@ window.UTMB = window.UTMB || {};
     /* ── shared live state, consumed by js/sync.js ──────────────────────
      * getSharedState()      -> {v:1, meta:{bib,bibModified},
      *                           items:{id:{cp,phase,order,text,critical,
-     *                                      draft,done,lastModified}}}
+     *                                      draft,done,lastModified,
+     *                                      deleted?}}}
+     *                       `deleted:true` marks a tombstone and is written
+     *                       only when true; absent means live.
      * applyMergedState(s)   writes a merged state back through checklist.js
-     *                       without re-stamping. Returns false if it failed.
+     *                       without re-stamping, tombstones included. Returns
+     *                       false if it failed.
      * getBib() / setBib(v)  shared bib number; setBib fires the change event.
      * itemStamps()          clone of the {itemId: epochMs} side table.
      * isApplyingRemote()    true only inside applyMergedState().

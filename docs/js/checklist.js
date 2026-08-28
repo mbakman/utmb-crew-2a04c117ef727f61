@@ -20,9 +20,31 @@
  *   TICKS ARE NOW SHARED. A tick is a change to the ITEM (item.done), not a
  *   separate per-device map: someone ticks "poles packed" and the whole crew
  *   sees it. Every item carries `lastModified` (epoch ms), stamped on ANY
- *   change to that item — tick, text, critical/draft flag, add, move. sync.js
- *   merges item by item: union of both sides, newer lastModified wins the whole
- *   item, an item is NEVER dropped by an automatic merge.
+ *   change to that item — tick, text, critical/draft flag, add, move, DELETE.
+ *   sync.js merges item by item: union of both sides, newer lastModified wins
+ *   the whole item. No id is ever dropped by an automatic merge.
+ *
+ *   DELETES ARE SHARED TOO, and they are TOMBSTONES. Deleting an item does not
+ *   remove it from the document — it sets `deleted:true` and stamps it, so the
+ *   delete travels through exactly the same "newer lastModified wins" merge as
+ *   any other edit. A tombstone is invisible to everything a crew member can
+ *   see or touch: it does not render, does not count, is not in getTicks(), is
+ *   not exported into a share link, and findItem() will not return it. The one
+ *   place it is visible is getContent(), because that is the wire shape
+ *   store.js flattens into the shared state — and it has to carry the
+ *   tombstone or the delete could not propagate.
+ *
+ *   Consequences, all deliberate:
+ *     - A newer edit on another phone RESURRECTS the item (that edit is newer
+ *       than the delete, so it wins the whole item and it comes back live).
+ *     - A newer delete beats an older edit.
+ *     - Tombstones are never garbage-collected. This is one race weekend and a
+ *       few hundred items; a tombstone costs about 100 bytes.
+ *
+ *   The one hard delete left is a brand-new empty draft — the row created by
+ *   "+ Add item" that is cancelled before any text is typed. store.js does not
+ *   put an empty-text item into the shared state at all, so that row has
+ *   provably never left this phone and there is nothing to tell anyone about.
  *
  *   An item that has never been changed on this device carries lastModified 0,
  *   so any real edit from any device beats it. Nothing here ever stamps an item
@@ -44,8 +66,16 @@
  *                             checkpoints: { <cpId>: {
  *                               name, km, cutoff, support, edited,
  *                               before:[item], onArrival:[item], beforeLeaving:[item] } }}
- *                            item = {id, text, critical, draft, done, lastModified}.
+ *                            item = {id, text, critical, draft, done, lastModified,
+ *                                    deleted}.
+ *                            INCLUDES TOMBSTONES (deleted:true) — this is the
+ *                            sync wire shape. Use exportContent() for the
+ *                            human-facing view.
  *                            Deep clone: mutating the result changes nothing.
+ *   exportContent()       the same shape with tombstones filtered out. share.js
+ *                         picks this up automatically (it is first in its
+ *                         READ_ALIASES list), so a share link never carries a
+ *                         deleted row.
  *   setContent(obj)       accepts the getContent() shape OR a bare {cpId:{phases}} map;
  *                         replaces the edit overlay wholesale and returns getContent().
  *                         setContent(null) drops every edit back to checklists.json.
@@ -79,8 +109,8 @@
  * items(cpId), progress(cpId) -> {done,total,criticalOpen,drafts}, phaseOrder(),
  * phaseLabels(), isTicked(id), setTick(id,on), toggleTick(id), resetTicks(cpId),
  * addItem(cpId,phase,text,opts), updateItem(cpId,id,{text,critical,draft}),
- * removeItem(cpId,id), moveItem(cpId,id,delta), isEditMode(), setEditMode(on),
- * render(), STORAGE.
+ * removeItem(cpId,id) (tombstones it — see above), moveItem(cpId,id,delta),
+ * isEditMode(), setEditMode(on), render(), STORAGE.
  */
 window.UTMB = window.UTMB || {};
 
@@ -182,6 +212,7 @@ window.UTMB = window.UTMB || {};
 
   function normalizeItem(raw, cpId, phase, seen) {
     var text = '', id = '', critical = false, draft = false, done = false, stamp = 0;
+    var deleted = false;
     if (typeof raw === 'string') {
       text = raw;
     } else if (isObj(raw)) {
@@ -191,14 +222,26 @@ window.UTMB = window.UTMB || {};
       draft = !!raw.draft;
       done = !!raw.done;
       stamp = stampOf(raw.lastModified);
+      /* Absent means live. An older server document, or a phone still running
+       * the previous build, simply has no such field. */
+      deleted = !!raw.deleted;
     } else {
       return null;
     }
     text = text.replace(/\s+$/, '');
-    if (!text) return null;
+    /* Empty text is a half-typed row, not data — EXCEPT on a tombstone, whose
+     * whole job is to exist without content. Dropping those here would delete
+     * the delete and the item would come straight back on the next merge. */
+    if (!text && !deleted) return null;
     if (!id || seen[id]) id = mintId(cpId, phase);
     seen[id] = true;
-    return { id: id, text: text, critical: critical, draft: draft, done: done, lastModified: stamp };
+    /* A tombstone is never ticked: getTicks() cannot see it, so a stale done
+     * would only ever be noise on the wire. */
+    if (deleted) done = false;
+    return {
+      id: id, text: text, critical: critical, draft: draft,
+      done: done, lastModified: stamp, deleted: deleted
+    };
   }
 
   function normalizePhases(cpId, raw) {
@@ -223,7 +266,8 @@ window.UTMB = window.UTMB || {};
       critical: !!it.critical,
       draft: !!it.draft,
       done: !!it.done,
-      lastModified: stampOf(it.lastModified)
+      lastModified: stampOf(it.lastModified),
+      deleted: !!it.deleted
     };
   }
 
@@ -231,6 +275,25 @@ window.UTMB = window.UTMB || {};
     var out = {};
     phaseOrder.forEach(function (phase) {
       out[phase] = (phases[phase] || []).map(cloneItem);
+    });
+    return out;
+  }
+
+  /* ── tombstones ──────────────────────────────────────────────────────────
+   * A deleted item stays in the array, flagged. `live` is the filter every
+   * read path that a crew member can see goes through; the raw array is only
+   * touched by persistence, getContent() (the sync wire shape) and the
+   * mutations that have to keep the tombstone's position. */
+  function isLive(it) { return !!it && !it.deleted; }
+
+  function liveIn(phases, phase) {
+    return (phases && Array.isArray(phases[phase]) ? phases[phase] : []).filter(isLive);
+  }
+
+  function livePhases(phases) {
+    var out = {};
+    phaseOrder.forEach(function (phase) {
+      out[phase] = liveIn(phases, phase).map(cloneItem);
     });
     return out;
   }
@@ -297,14 +360,19 @@ window.UTMB = window.UTMB || {};
     return ids;
   }
 
+  /* Live items only. Everything that counts, renders or projects ticks starts
+   * here, so a tombstone can never reach the screen or a total. */
   function itemsOf(cpId) {
     var phases = effective(cpId);
     if (!phases) return [];
     var out = [];
-    phaseOrder.forEach(function (p) { out = out.concat(phases[p] || []); });
+    phaseOrder.forEach(function (p) { out = out.concat(liveIn(phases, p)); });
     return out;
   }
 
+  /* `index` is the position in the RAW array — tombstones included — because
+   * that is what removeItem() and moveItem() splice against. A tombstone is
+   * never returned: to the rest of the module the item is gone. */
   function findItem(cpId, itemId) {
     var phases = effective(cpId);
     if (!phases) return null;
@@ -312,7 +380,9 @@ window.UTMB = window.UTMB || {};
       var phase = phaseOrder[i];
       var list = phases[phase] || [];
       for (var j = 0; j < list.length; j++) {
-        if (list[j].id === itemId) return { phase: phase, index: j, item: list[j] };
+        if (list[j].id === itemId) {
+          return isLive(list[j]) ? { phase: phase, index: j, item: list[j] } : null;
+        }
       }
     }
     return null;
@@ -347,8 +417,7 @@ window.UTMB = window.UTMB || {};
   }
 
   function phaseProgress(cpId, phase) {
-    var phases = effective(cpId);
-    var list = (phases && phases[phase]) || [];
+    var list = liveIn(effective(cpId), phase);
     var done = 0;
     list.forEach(function (it) { if (it.done) done += 1; });
     return { done: done, total: list.length };
@@ -552,12 +621,31 @@ window.UTMB = window.UTMB || {};
     return true;
   }
 
+  /* DELETE = TOMBSTONE. The row leaves the screen, but the id stays in the
+   * document flagged `deleted` and freshly stamped, so sync.js carries the
+   * delete to the other phones through the same "newer lastModified wins"
+   * rule as any other edit. Hard-removing it here instead would leave the
+   * other phones holding a live copy with an older stamp, and the union merge
+   * would seed it straight back.
+   *
+   * The single exception is a row that has provably never left this phone: an
+   * empty-text item, which store.js keeps out of the shared state entirely.
+   * That is the "+ Add item" row someone opened and cancelled, and there is
+   * nobody to tell about it. */
   function removeItem(cpId, itemId, opts) {
     if (!findItem(cpId, itemId)) return false;
     ensureOverride(cpId);
     var hit = findItem(cpId, itemId);
     if (!hit) return false;
-    overrides[cpId][hit.phase].splice(hit.index, 1);
+
+    if (!trim(hit.item.text)) {
+      overrides[cpId][hit.phase].splice(hit.index, 1);
+    } else {
+      hit.item.deleted = true;
+      hit.item.done = false;
+      hit.item.lastModified = now();
+    }
+
     /* The tick went with the item — it lives on the item now. Drop the stale
      * mirror entry so the boot migration cannot resurrect it. */
     if (legacyTicks[itemId]) delete legacyTicks[itemId];
@@ -566,17 +654,35 @@ window.UTMB = window.UTMB || {};
     return true;
   }
 
+  /* Swap with the item `delta` places away among the LIVE items — tombstones
+   * hold their slot and are stepped over, so a deleted row between two live
+   * ones cannot swallow a tap on ▲/▼. Both items moved, so both are stamped:
+   * stamping only one would let the other's older copy win the next merge and
+   * put the pair back the way they were. */
   function moveItem(cpId, itemId, delta) {
     var hit = findItem(cpId, itemId);
     if (!hit) return false;
     ensureOverride(cpId);
     hit = findItem(cpId, itemId);
+    if (!hit) return false;
     var list = overrides[cpId][hit.phase];
-    var next = hit.index + delta;
-    if (next < 0 || next >= list.length) return false;
-    var moved = list.splice(hit.index, 1)[0];
-    list.splice(next, 0, moved);
-    moved.lastModified = now();
+    var step = delta < 0 ? -1 : 1;
+    var remaining = Math.abs(delta);
+    if (!remaining) return false;
+
+    var next = hit.index;
+    while (remaining > 0) {
+      do { next += step; } while (next >= 0 && next < list.length && !isLive(list[next]));
+      if (next < 0 || next >= list.length) return false;
+      remaining -= 1;
+    }
+
+    var stamp = now();
+    var moved = list[hit.index];
+    list[hit.index] = list[next];
+    list[next] = moved;
+    moved.lastModified = stamp;
+    list[hit.index].lastModified = stamp;
     afterContentChange('item:move', cpId);
     return true;
   }
@@ -614,7 +720,10 @@ window.UTMB = window.UTMB || {};
   /* ═══════════════════════════════════════════════════════════════════════
    * public API surface
    * ═══════════════════════════════════════════════════════════════════════ */
-  function getContent() {
+  /* The SYNC wire shape: tombstones included. store.js flattens this into the
+   * shared state, so leaving a tombstone out here would mean the delete never
+   * leaves the phone. Anything human-facing wants exportContent() instead. */
+  function contentShape(project) {
     var out = {
       version: seed.version || '1.0.0',
       updated: seed.updated || '',
@@ -629,7 +738,7 @@ window.UTMB = window.UTMB || {};
       var phases = effective(cpId);
       if (!phases) return;
       var m = meta(cpId);
-      var entry = clonePhases(phases);
+      var entry = project(phases);
       entry.name = m.name;
       entry.km = m.km;
       entry.cutoff = m.cutoff;
@@ -640,12 +749,86 @@ window.UTMB = window.UTMB || {};
     return out;
   }
 
+  function getContent() { return contentShape(clonePhases); }
+
+  /* The same document with the tombstones taken out — what a share link, a
+   * file export or any other human-facing consumer should see. share.js tries
+   * exportContent() before getContent(), so it picks this up on its own. */
+  function exportContent() { return contentShape(livePhases); }
+
+  /* Every tombstone in the document right now, by id, with where it sat. */
+  function tombstoneIndex() {
+    var out = Object.create(null);
+    Object.keys(overrides).forEach(function (cpId) {
+      phaseOrder.forEach(function (phase) {
+        (overrides[cpId][phase] || []).forEach(function (it) {
+          if (it && it.deleted && it.id) {
+            out[it.id] = { cpId: cpId, phase: phase, item: cloneItem(it) };
+          }
+        });
+      });
+    });
+    return out;
+  }
+
+  /* Raw lookup across the whole overlay — tombstones included, unlike
+   * findItem(). Only carryTombstones() needs this. */
+  function findRawAnywhere(itemId) {
+    var cps = Object.keys(overrides);
+    for (var i = 0; i < cps.length; i++) {
+      for (var p = 0; p < phaseOrder.length; p++) {
+        var list = overrides[cps[i]][phaseOrder[p]] || [];
+        for (var j = 0; j < list.length; j++) {
+          if (list[j].id === itemId) {
+            return { cpId: cps[i], phase: phaseOrder[p], index: j, item: list[j] };
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /* Re-apply the tombstones a replacement document did not account for.
+   *
+   * Replacing the overlay wholesale is how a merged state, an accepted share
+   * link and a reset-to-defaults all land, and the seed underneath the overlay
+   * still contains every row the crew deleted. Without this, any of those
+   * would quietly un-delete those rows — and then push the resurrection to the
+   * whole crew, because a POST replaces the entire server document rather than
+   * merging into it.
+   *
+   * The test is the app's one rule, newer lastModified wins: an incoming copy
+   * stamped LATER than the delete is a genuine un-delete and is left alone
+   * (that is how a newer edit on another phone brings a row back). Anything
+   * older — seed content stamped 0, an unchanged share-link row — loses and is
+   * put back under its tombstone. */
+  function carryTombstones(index) {
+    Object.keys(index).forEach(function (id) {
+      var rec = index[id];
+      ensureOverride(rec.cpId);
+      var hit = findRawAnywhere(id);
+      if (hit) {
+        if (stampOf(hit.item.lastModified) > rec.item.lastModified) return;
+        hit.item.deleted = true;
+        hit.item.done = false;
+        hit.item.lastModified = rec.item.lastModified;
+        return;
+      }
+      var phases = overrides[rec.cpId];
+      var phase = phaseOrder.indexOf(rec.phase) >= 0 ? rec.phase : phaseOrder[0];
+      if (!Array.isArray(phases[phase])) phases[phase] = [];
+      phases[phase].push(rec.item);
+    });
+  }
+
   /* Accepts either the full getContent() shape or a bare {cpId: {phases}} map.
    * Replaces the edit overlay wholesale. setContent(null) drops every edit and
-   * falls back to checklists.json. Ticks are untouched — they are not content. */
+   * falls back to checklists.json. Ticks are untouched — they are not content.
+   * Tombstones survive: see carryTombstones() above. */
   function setContent(next) {
     var src = null;
     if (isObj(next)) src = isObj(next.checkpoints) ? next.checkpoints : next;
+    var carried = tombstoneIndex();
     var fresh = Object.create(null);
     if (src) {
       Object.keys(src).forEach(function (cpId) {
@@ -653,6 +836,7 @@ window.UTMB = window.UTMB || {};
       });
     }
     overrides = fresh;
+    carryTombstones(carried);
     editing = null;
     confirming = null;
     afterContentChange('content:set', null);
@@ -694,16 +878,21 @@ window.UTMB = window.UTMB || {};
     return getTicks();
   }
 
-  /* One checkpoint's content, cloned. null when it has no checklist. */
+  /* One checkpoint's LIVE content, cloned. null when it has no checklist.
+   * Tombstones are filtered: this is a consumer-facing read, not the sync
+   * wire shape (that is getContent()). */
   function getCheckpoint(cpId) {
     var phases = effective(cpId);
-    return phases ? clonePhases(phases) : null;
+    return phases ? livePhases(phases) : null;
   }
 
   /* Replace one checkpoint's content. setCheckpoint(cpId, null) drops the edit
-   * overlay for it, so it falls back to checklists.json. */
+   * overlay for it, so it falls back to checklists.json — but not so far back
+   * that the seed's copy of a deleted row comes with it, so this carries the
+   * tombstones the same way setContent() does. */
   function setCheckpoint(cpId, phases) {
     if (!cpId) return null;
+    var carried = tombstoneIndex();
     if (phases === null) {
       delete overrides[cpId];
     } else if (isObj(phases)) {
@@ -713,6 +902,7 @@ window.UTMB = window.UTMB || {};
     } else {
       return null;
     }
+    carryTombstones(carried);
     editing = null;
     confirming = null;
     afterContentChange('checkpoint:set', cpId);
@@ -1073,7 +1263,9 @@ window.UTMB = window.UTMB || {};
 
     /* ── phases ── */
     phaseOrder.forEach(function (phase) {
-      var list = phases[phase] || [];
+      /* Live only: a tombstone holds its slot in the stored array so the merge
+       * stays stable, but it must never reach the screen. */
+      var list = liveIn(phases, phase);
       var sec = h('section', 'ck-phase');
       sec.setAttribute('data-phase', phase);
 
@@ -1354,6 +1546,9 @@ window.UTMB = window.UTMB || {};
     isReady: function () { return booted; },
 
     /* --- what share.js consumes --- */
+    /* exportContent() is FIRST in share.js's READ_ALIASES, so the share-link
+     * path gets the tombstone-free view without knowing this file changed. */
+    exportContent: exportContent,
     getContent: getContent,
     setContent: setContent,
     getTicks: getTicks,

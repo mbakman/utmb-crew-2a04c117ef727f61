@@ -16,20 +16,31 @@
  *   { v:1,
  *     meta:  { bib:"", bibModified:0 },
  *     items: { "<itemId>": { cp, phase, order, text, critical, draft,
- *                            done, lastModified } } }
+ *                            done, lastModified, deleted? } } }
  *   Flat by item id, because that is the granularity the merge works at.
  *   "done" is in there: tick state is SHARED now, not per device.
+ *   "deleted" is a TOMBSTONE and is present only when true; an item without it
+ *   is live, which is exactly how a document written by an older build reads.
  *
  * MERGE RULE (silent, never prompts)
  *   Union of both item sets. An item on one side only is kept as is. An item on
  *   both sides is taken WHOLE from whichever side has the newer lastModified —
  *   no field-level interleaving, so an item can never end up half from one
- *   phone and half from another. Nothing is ever dropped by an automatic merge.
+ *   phone and half from another. No id is ever dropped by an automatic merge.
  *
- *   Consequence, deliberate and documented: deleting an item does not
- *   propagate. Another device still holding it re-seeds it on the next poll.
- *   On race day a resurrected line is a nuisance; a silently vanished one is a
- *   missed bottle swap. Use the share-link flow for a real content purge.
+ *   DELETES PROPAGATE, through that same rule and nothing else. Deleting a row
+ *   does not remove its id; it replaces the item with a tombstone stamped at
+ *   the moment of the delete, so:
+ *
+ *     - a delete beats an older edit           (the row disappears everywhere)
+ *     - a newer edit beats a delete            (the row comes back, edited)
+ *     - a phone that never had the item cannot delete it: a wholesale local
+ *       wipe produces no tombstones, so the union puts everything back. Only
+ *       an explicit per-item delete travels.
+ *
+ *   Tombstones are never garbage-collected. One race weekend, a few hundred
+ *   items, ~100 bytes each — a GC pass could only ever risk resurrecting a row
+ *   from a phone that had been offline across it.
  *
  *   Equal timestamps resolve to the SERVER copy. That is what makes the crew
  *   converge in one round instead of two phones ping-ponging their own copies
@@ -293,6 +304,9 @@
         critical: !!it.critical,
         draft: !!it.draft,
         done: !!it.done,
+        /* Absent means live: that is what every pre-tombstone document, and
+         * every phone still running the previous build, sends. */
+        deleted: !!it.deleted,
         lastModified: num(it.lastModified)
       };
     });
@@ -302,12 +316,18 @@
   function sameItem(a, b) {
     return a.cp === b.cp && a.phase === b.phase && a.order === b.order &&
       a.text === b.text && a.critical === b.critical && a.draft === b.draft &&
-      a.done === b.done && a.lastModified === b.lastModified;
+      a.done === b.done && a.deleted === b.deleted &&
+      a.lastModified === b.lastModified;
   }
 
   /* Order-independent fingerprint. Object key order differs between a freshly
    * built local state and a JSON payload off the wire, so JSON.stringify is not
-   * usable for equality here. */
+   * usable for equality here.
+   *
+   * `deleted` is part of the fingerprint, and it has to be: without it a
+   * tombstone reads as identical to the live item it replaced, the
+   * already-pushed check below would decide the delete was "already up there,
+   * byte for byte", and it would never leave the phone. */
   function canon(s) {
     var parts = ['bib' + SEP_FIELD + s.meta.bib + SEP_FIELD + s.meta.bibModified];
     Object.keys(s.items).sort().forEach(function (id) {
@@ -316,6 +336,7 @@
         id + SEP_FIELD + it.cp + SEP_FIELD + it.phase + SEP_FIELD + it.order +
         SEP_FIELD + it.text +
         SEP_FIELD + (it.critical ? 1 : 0) + (it.draft ? 1 : 0) + (it.done ? 1 : 0) +
+        (it.deleted ? 1 : 0) +
         SEP_FIELD + it.lastModified
       );
     });
@@ -327,7 +348,12 @@
   }
 
   /* The merge. `theirs` is the server side — it wins ties, which is what makes
-   * the crew converge instead of oscillating. */
+   * the crew converge instead of oscillating.
+   *
+   * Tombstones need no case of their own here. A tombstone IS the item, with a
+   * newer stamp than the edit it replaced, so "newer lastModified wins the
+   * whole item" already carries the delete — and already lets a genuinely
+   * newer edit from another phone undo it. */
   function merge(mine, theirs) {
     var a = normState(mine);
     var b = normState(theirs);

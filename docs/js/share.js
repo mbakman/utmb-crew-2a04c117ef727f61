@@ -726,6 +726,10 @@ window.UTMB = window.UTMB || {};
   /* ── normalising ─────────────────────────────────────────────────────── */
 
   function normalizeItem(raw, cpId, phase, index, usedIds) {
+    /* Tombstoned rows must never enter a share payload — the raw storage
+     * fallback below reads the slot that still carries them. */
+    if (isPlainObject(raw) && raw.deleted) return null;
+
     var item = { id: '', text: '', critical: false, draft: false };
 
     if (typeof raw === 'string') {
@@ -898,7 +902,13 @@ window.UTMB = window.UTMB || {};
    * place that knows an item's tick and its lastModified stamp. The share
    * payload carries neither (a link is a CONTENT transfer; ticks are shared
    * through sync.js instead), so toFileShape() has to put them back by hand or
-   * setContent() writes done=false / lastModified=0 over the lot. */
+   * setContent() writes done=false / lastModified=0 over the lot.
+   *
+   * LIVE, so tombstones are skipped: getContent() is the sync wire shape and
+   * includes deleted rows. If an incoming link re-adds something this phone
+   * deleted, that has to look "new to this phone" and get a fresh stamp, or the
+   * accepted re-add would carry the deletion's own timestamp and lose to the
+   * tombstone still sitting on the server. */
   function localItemIndex() {
     var idx = Object.create(null);
     var api = isPlainObject(UTMB.checklist) ? UTMB.checklist : null;
@@ -916,7 +926,7 @@ window.UTMB = window.UTMB || {};
         var arr = cp[phase];
         if (!Array.isArray(arr)) return;
         arr.forEach(function (it) {
-          if (isPlainObject(it) && it.id) idx[it.id] = it;
+          if (isPlainObject(it) && it.id && !it.deleted) idx[it.id] = it;
         });
       });
     });

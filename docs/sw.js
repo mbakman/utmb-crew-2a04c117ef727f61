@@ -48,7 +48,16 @@
  * ------------------------------------------------------------------ */
 
 var CACHE_PREFIX = 'utmb-crew';
-/* v4: live crew sync, in one bump. v3 is what is deployed and this is the next
+/* v5: deletes propagate. Deleting a checklist item used to be local-only — the
+ * union merge in js/sync.js re-seeded it from any phone that still held it,
+ * which the crew asked to have fixed. A delete is now a TOMBSTONE on the item
+ * ({deleted:true} plus a fresh lastModified), so it travels through the
+ * existing "newer lastModified wins the whole item" rule: a delete beats an
+ * older edit, a newer edit resurrects the row, and a phone that never held the
+ * items still cannot wipe them. Touches js/checklist.js, js/store.js,
+ * js/sync.js and js/share.js.
+ *
+ * v4: live crew sync, in one bump. v3 is what is deployed and this is the next
  * version anyone receives, so everything below ships together under the one
  * string — there is no intermediate release for a second number to name.
  *
@@ -70,7 +79,7 @@ var CACHE_PREFIX = 'utmb-crew';
  * The app is already live and this worker serves cache-first, so a phone that
  * installed v3 keeps serving v3 until this string changes — bumping it is what
  * makes an update reach anyone. */
-var CACHE_VERSION = 'v4';
+var CACHE_VERSION = 'v5';
 var CACHE_NAME = CACHE_PREFIX + '-' + CACHE_VERSION;
 
 /* Everything is resolved against the directory this worker lives in, so the
