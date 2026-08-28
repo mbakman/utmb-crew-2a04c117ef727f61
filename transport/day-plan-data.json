@@ -363,10 +363,5 @@
       "detail": "from 05:00 · every 30 min on :00/:30 · ride 30 min"
     }
   ],
-  "rules": [
-    "All shuttles need the pre-booked follower pass (France/Italy/Switzerland zones). Passes are bought.",
-    "Roads/parking CLOSED to private cars at Les Contamines, Courmayeur, Champex, Trient, Vallorcine — the bus is the only way in.",
-    "No UTMB shuttle runs Chamonix → Les Houches. The car in Chamonix is the night ride home.",
-    "Phones: offline maps of the valley downloaded; power banks charged; this PDF saved to phone."
-  ]
+  "rules": []
 }
