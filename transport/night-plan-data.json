@@ -1,0 +1,68 @@
+{
+  "meta": {
+    "title": "UTMB 2026 — Night Plan",
+    "subtitle": "CP11 → CP13 → Finish · Sat 29 → Sun 30 Aug · decide A/B/C by ~18:00 Sat",
+    "liveTracking": { "label": "TRACK SUHA — bib 1056", "url": "https://live.utmb.world/utmb/2026/runners/1056" }
+  },
+  "etaChips": [
+    { "label": "CP11 Champex-Lac", "eta": "SAT 18:37", "window": "18:17–18:57", "accent": "ch" },
+    { "label": "CP13 Vallorcine", "eta": "SUN 00:35", "window": "00:15–00:55", "accent": "fr" },
+    { "label": "FINISH Chamonix", "eta": "SUN ~04:39", "window": "be there 04:15", "accent": "finish" }
+  ],
+  "links": {
+    "cp11":  { "label": "CP11 Champex-Lac", "url": "https://www.google.com/maps/dir/?api=1&destination=46.02608%2C7.12109" },
+    "cp13":  { "label": "CP13 Vallorcine", "url": "https://www.google.com/maps/dir/?api=1&destination=46.0324%2C6.93196" },
+    "finish":{ "label": "Finish — Chamonix centre", "url": "https://www.google.com/maps/dir/?api=1&destination=45.9236%2C6.86912" },
+    "grepon":{ "label": "Parking du Grépon", "url": "https://www.google.com/maps/dir/?api=1&destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" },
+    "base":  { "label": "Base — Les Houches", "url": "https://www.google.com/maps/dir/?api=1&destination=100+Route+de+la+Gare%2C+Les+Houches" }
+  },
+  "cp11Table": {
+    "title": "Getting to CP11 — pick a row by his pace (watch tracker from ~14:00)",
+    "columns": ["Leave base", "Bus M. Nordique → Orsières", "At Orsières", "Connect", "At Champex", "Buffer"],
+    "rows": [
+      ["14:00", "14:30", "15:50", "16:00", "16:25", "2h12"],
+      ["14:45", "15:15", "16:35", "17:00", "17:25", "1h12"],
+      ["15:30", "16:00", "17:20", "17:30", "17:55", "0h42 — only if he is ≥45 min late"]
+    ],
+    "note": "He is +N min at the last timing point → leave N min later. Keep ≥1 h buffer. At CP11 he eats 80 g — hand over 260 g carbs."
+  },
+  "optionsTitle": "CP11 → CP13 — pick ONE (crew leaves Champex ~19:15 after he goes)",
+  "options": [
+    { "id": "A", "label": "Plan A — via home", "tag": "shower + full repack · TIGHT",
+      "steps": [
+        ["19:15", "Champex → Orsières bus (25 min)"],
+        ["19:45", "Orsières → Chamonix bus (80 min)"],
+        ["21:20", "Car → base. 1h20 at home."],
+        ["22:45", "Drive back to Chamonix, park"],
+        ["23:00", "Bus → Vallorcine, arrive 23:30"]
+      ],
+      "risk": "3.5 h transit for 1h20 at home. If he slips +1 h, home window ≈ 20 min → flip to C." },
+    { "id": "B", "label": "Plan B — direct, skip Chamonix", "tag": "zero stress · no comforts",
+      "steps": [
+        ["19:15", "Champex → Orsières bus (25 min)"],
+        ["19:45", "Orsières → Trient bus (45 min)"],
+        ["20:45", "Trient → Vallorcine bus (15 min)"],
+        ["21:00", "In Vallorcine — 3.5 h early. Dinner near the station (kitchens close early). Cold after midnight — pack layers."]
+      ],
+      "risk": "CP13 bag rides with you from base at 14:45 — 190 g carbs + his kit in your pack all day." },
+    { "id": "C", "label": "Plan C — via Chamonix, not home", "tag": "RECOMMENDED if CP13 bag is in the car",
+      "steps": [
+        ["19:15", "Champex → Orsières bus (25 min)"],
+        ["19:45", "Orsières → Chamonix bus (80 min)"],
+        ["21:10", "Dinner in Chamonix. Repack from the car at Grépon."],
+        ["23:00", "Bus → Vallorcine, arrive 23:30 (23:30 → 00:00 also OK)"]
+      ],
+      "risk": "Hot food + bag from the car, no home round-trip, one connection. Leave the CP13 bag in the car Saturday morning." }
+  ],
+  "cp13Band": "00:35 SUHA at CP13 Vallorcine — window 00:15–00:55. He eats 30 g, hand over 190 g carbs. Last leg: 4h04 to the finish. Cutoff SUN 13:15 — huge margin.",
+  "finish": {
+    "title": "CP13 → Finish",
+    "steps": [
+      ["~01:00", "He leaves ~00:55–01:05. Bus Vallorcine → Chamonix (every 30 min, runs until 12:30 Sun), arrive 01:30/02:00"],
+      ["02:00–04:00", "Nap in the car at Grépon — set TWO alarms. Do not drive home for 1.5 h of sleep."],
+      ["04:15", "Be at the finish line, Chamonix centre. He finishes ~04:39."],
+      ["~05:00", "Drive home to base."]
+    ]
+  },
+  "footer": "If he slips late, everything gets easier — buses run into Sunday noon. Passes: Swiss pass for Orsières/Champex/Trient legs; France pass for Vallorcine."
+}

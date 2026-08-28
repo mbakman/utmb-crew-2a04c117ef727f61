@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UTMB 2026 — Night Plan</title>
+<style>
+/* ============================================================
+   UTMB 2026 — NIGHT PLAN
+   EXACTLY ONE page, A4 PORTRAIT. Self-contained: no external
+   assets, no webfonts, no network, no JavaScript.
+   Every time / label / step / URL is copied verbatim from
+   transport/night-plan-data.json. Nothing here is recomputed.
+   Accents: CP11 Switzerland #f5b52e · CP13 France #2dd4bf ·
+            finish mint #5eead4 · plan cards sky #38bdf8
+   ============================================================ */
+
+@page { size: A4 portrait; margin: 0; }
+
+:root{
+  --bg:#0d1230;
+  --card:#151b3d;
+  --card2:#1a2149;
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(255,255,255,.17);
+  --ink:#f4f6ff;
+  --ink70:rgba(244,246,255,.72);
+  --ink55:rgba(244,246,255,.58);
+
+  --fr:#2dd4bf;    /* France      — CP13   */
+  --ch:#f5b52e;    /* Switzerland — CP11   */
+  --sky:#38bdf8;   /* plan A / B cards     */
+  --mint:#5eead4;  /* finish / plan C      */
+  --dark:#06231f;  /* ink on mint + teal   */
+  --warn:#fb923c;
+  --warnbg:rgba(251,146,60,.13);
+  --warnink:#ffd7b0;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ background:#05081a; }
+
+body{
+  font-family:-apple-system,"Avenir Next","Helvetica Neue",sans-serif;
+  color:var(--ink);
+  font-size:11.5px;
+  line-height:1.3;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
+}
+
+/* The single sheet. overflow:hidden is the hard guarantee that nothing
+   spills onto a phantom second page. */
+.page{
+  width:210mm;
+  height:297mm;
+  background:
+    radial-gradient(115% 52% at 84% -8%, rgba(45,212,191,.13) 0%, rgba(45,212,191,0) 62%),
+    radial-gradient(95% 46% at 6% 106%, rgba(56,189,248,.10) 0%, rgba(56,189,248,0) 62%),
+    var(--bg);
+  padding:7mm 6.5mm 5.5mm;
+  display:flex;
+  flex-direction:column;
+  gap:4mm;
+  position:relative;
+  overflow:hidden;
+}
+
+@media screen{
+  body{ display:flex; flex-direction:column; align-items:center; padding:6mm 0; }
+  .page{ box-shadow:0 10px 40px rgba(0,0,0,.6); }
+}
+
+.num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+b,strong{ font-weight:800; }
+
+/* ---------------------------------------------------------- header ---- */
+.mast{
+  flex:0 0 auto;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:5mm;
+  padding-bottom:2.6mm;
+  border-bottom:1.5px solid var(--line2);
+}
+/* min-width:0 lets the title block absorb the squeeze instead of shoving the
+   live pill past the 6.5 mm right margin, where .page overflow:hidden would
+   silently guillotine it. */
+.mast__l{ min-width:0; flex:1 1 auto; }
+.mast__kick{
+  font-size:10.8px; letter-spacing:.24em; font-weight:800;
+  text-transform:uppercase; color:var(--fr); margin-bottom:1.4mm;
+}
+.mast__title{ font-size:26px; line-height:.98; font-weight:800; letter-spacing:-.018em; }
+.mast__title em{ font-style:normal; color:var(--fr); }
+.mast__sub{ font-size:11.8px; color:var(--ink70); margin-top:1.5mm; font-weight:600; }
+
+/* live tracking cta — real link, opens the runner page */
+.live{
+  flex:0 0 auto;
+  display:flex; align-items:center; gap:2.2mm;
+  text-decoration:none; color:var(--dark);
+  background:linear-gradient(96deg,#2dd4bf 0%,#5eead4 58%,#38bdf8 100%);
+  border-radius:13px;
+  padding:2.4mm 3mm;
+  box-shadow:0 2px 0 rgba(255,255,255,.22) inset;
+}
+.live__dot{
+  width:9px; height:9px; border-radius:50%; background:#b91c1c;
+  box-shadow:0 0 0 3.5px rgba(185,28,28,.28); flex:0 0 auto;
+}
+.live__t{ flex:1 1 auto; min-width:0; }
+.live__l{ display:block; font-size:12.5px; font-weight:800; line-height:1.1; letter-spacing:.01em; white-space:nowrap; }
+.live__l i{ font-style:normal; letter-spacing:0; }
+.live__u{ display:block; font-size:10.8px; font-weight:700; opacity:.78; margin-top:.6mm; white-space:nowrap; }
+
+/* ------------------------------------------------------- eta chips ---- */
+.chips{ flex:0 0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:2.6mm; }
+.chip{
+  display:block; text-decoration:none; color:inherit;
+  border:1.6px solid var(--acc);
+  border-radius:14px;
+  background:color-mix(in srgb, var(--acc) 9%, transparent);
+  padding:2.3mm 2.4mm 2.5mm;
+  text-align:center;
+}
+.chip__k{ display:block; font-size:11px; letter-spacing:.10em; font-weight:800; text-transform:uppercase; color:var(--acc); }
+.chip__v{ display:block; font-size:20px; font-weight:800; line-height:1.04; margin-top:1.1mm; letter-spacing:0; }
+.chip__w{ display:block; font-size:11.4px; color:var(--ink70); margin-top:.9mm; font-weight:700; }
+.chip__go{ display:block; font-size:10.8px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--acc); opacity:.85; margin-top:1mm; }
+.chip--fill{ background:var(--acc); border-color:var(--acc); }
+.chip--fill .chip__k{ color:rgba(6,35,31,.74); }
+.chip--fill .chip__v{ color:var(--dark); }
+.chip--fill .chip__w{ color:rgba(6,35,31,.80); }
+.chip--fill .chip__go{ color:rgba(6,35,31,.74); opacity:1; }
+
+/* -------------------------------------------------- section headers --- */
+.sec{ flex:0 0 auto; }
+.sec__h{ display:flex; align-items:center; gap:2.6mm; margin-bottom:2mm; }
+.sec__t{ flex:0 0 auto; font-size:13.4px; font-weight:800; letter-spacing:-.008em; line-height:1.16; color:#fff; }
+.sec__h::after{ content:""; order:2; flex:1 1 auto; height:1px; background:var(--line2); }
+.sec__h .nav{ order:3; }
+
+/* navigate pill — label verbatim from links.*.label */
+.nav{
+  flex:0 0 auto;
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:10.9px; font-weight:800; letter-spacing:.01em;
+  text-decoration:none; white-space:nowrap;
+  color:var(--acc,var(--fr));
+  background:color-mix(in srgb, var(--acc,var(--fr)) 14%, transparent);
+  border:1.2px solid color-mix(in srgb, var(--acc,var(--fr)) 48%, transparent);
+  border-radius:999px; padding:1.5px 7px 2px;
+}
+.nav--dark{ color:var(--dark); background:rgba(6,35,31,.14); border-color:rgba(6,35,31,.42); }
+
+/* ------------------------------------------------------ cp11 table ---- */
+.tbl{
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:1.8mm 2.6mm 2mm;
+}
+.tbl table{ width:100%; border-collapse:collapse; }
+.tbl th{
+  text-align:left; font-size:11px; letter-spacing:.085em; font-weight:800;
+  text-transform:uppercase; color:var(--ch);
+  padding:1mm .8mm 1.4mm; border-bottom:1.4px solid rgba(245,181,46,.42);
+  line-height:1.16; vertical-align:bottom;
+}
+.tbl td{
+  padding:1.7mm .8mm; border-bottom:1px solid rgba(255,255,255,.085);
+  font-size:12.4px; font-weight:800; color:#fff; line-height:1.15;
+  vertical-align:middle;
+}
+.tbl tr:last-child td{ border-bottom:0; }
+.tbl td.buf{ font-size:11.4px; font-weight:700; color:var(--ink70); }
+.tbl td.buf b{ color:#fff; font-size:12.4px; }
+.tbl .c1{ width:20mm; } .tbl .c2{ width:39mm; } .tbl .c3{ width:21mm; }
+.tbl .c4{ width:20mm; } .tbl .c5{ width:22mm; }
+
+/* amber note under the table — the 260 g hand-over lives here */
+.note{
+  display:flex; gap:2mm; align-items:flex-start;
+  margin-top:2.4mm;
+  background:var(--warnbg);
+  border:1px solid rgba(251,146,60,.42);
+  border-left:3.5px solid var(--warn);
+  border-radius:10px;
+  padding:1.6mm 2.4mm;
+  font-size:11.8px; line-height:1.3; color:var(--warnink);
+}
+.note__i{ flex:0 0 auto; color:var(--warn); font-weight:800; font-size:12px; line-height:1.2; }
+.note b{ color:#fff; }
+
+/* ------------------------------------------------------ plan cards ---- */
+.opts{ display:grid; grid-template-columns:repeat(3,1fr); gap:2.6mm; align-items:stretch; }
+.opt{
+  --acc:var(--sky);
+  display:flex; flex-direction:column;
+  background:linear-gradient(180deg,var(--card2) 0%,var(--card) 100%);
+  border:1px solid var(--line);
+  border-top:3.5px solid var(--acc);
+  border-radius:14px;
+  padding:2.1mm 2mm 2.1mm;
+}
+.opt--rec{
+  --acc:var(--mint);
+  border:1.6px solid var(--mint);
+  border-top:3.5px solid var(--mint);
+  background:linear-gradient(180deg,rgba(94,234,212,.13) 0%,var(--card) 62%);
+  box-shadow:0 0 0 2.6px rgba(94,234,212,.14);
+}
+.opt__h{ display:flex; align-items:center; gap:1.9mm; }
+.opt__id{
+  flex:0 0 auto; width:6.6mm; height:6.6mm; border-radius:8px;
+  background:var(--acc); color:var(--dark);
+  font-size:14.5px; font-weight:800; line-height:6.6mm; text-align:center;
+}
+.opt__l{ flex:1 1 auto; font-size:12.4px; font-weight:800; line-height:1.14; color:#fff; }
+.opt__tag{
+  font-size:11.2px; font-weight:700; line-height:1.22; color:var(--ink70);
+  margin:1.3mm 0 1.6mm; padding-bottom:1.4mm;
+  border-bottom:1px dashed var(--line2);
+}
+.opt__tag b{ color:var(--mint); letter-spacing:.05em; }
+
+/* ---------------------------------------------------------- steps ----- */
+.steps{ position:relative; padding-left:11.5px; display:flex; flex-direction:column; }
+.steps::before{
+  content:""; position:absolute; left:3px; top:10px; bottom:10px;
+  border-left:1.5px dotted rgba(255,255,255,.26);
+}
+.step{
+  position:relative;
+  display:grid; grid-template-columns:12mm 1fr;
+  gap:0 1.5mm; align-items:start;
+  padding:1.25mm 0;
+}
+.step::before{
+  content:""; position:absolute; left:-11.5px; top:8.5px;
+  width:6px; height:6px; border-radius:50%;
+  background:var(--bg); border:1.5px solid var(--acc);
+}
+.t{
+  justify-self:stretch; text-align:center;
+  font-size:11px; font-weight:800; line-height:1.16;
+  font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;
+  color:var(--acc);
+  background:color-mix(in srgb, var(--acc) 15%, transparent);
+  border:1px solid color-mix(in srgb, var(--acc) 42%, transparent);
+  border-radius:7px; padding:1.7px 3px;
+  white-space:nowrap;
+}
+.tx{ font-size:11.1px; line-height:1.26; padding-top:1.6px; }
+.nb{ white-space:nowrap; }
+.tx b{ color:#fff; }
+
+/* amber risk line, pinned to the bottom of every card so all three align */
+.risk{
+  margin-top:auto;
+  display:flex; gap:1.7mm; align-items:flex-start;
+  background:var(--warnbg);
+  border:1px solid rgba(251,146,60,.42);
+  border-left:3.5px solid var(--warn);
+  border-radius:9px;
+  padding:1.6mm 1.9mm;
+  font-size:11px; line-height:1.28; color:var(--warnink);
+}
+.risk--good{
+  background:rgba(94,234,212,.13);
+  border:1px solid rgba(94,234,212,.40);
+  border-left:3.5px solid var(--mint);
+  color:#c9fff4;
+}
+.risk__i{ flex:0 0 auto; font-weight:800; font-size:11px; line-height:1.24; color:var(--warn); }
+.risk--good .risk__i{ color:var(--mint); }
+.risk b{ color:#fff; }
+.opt .steps{ margin-bottom:2.1mm; }
+
+/* -------------------------------------------------------- cp13 band --- */
+.band{
+  flex:0 0 auto;
+  display:flex; align-items:center; gap:3.4mm;
+  background:linear-gradient(96deg,#2dd4bf 0%,#4fe3d0 55%,#5eead4 100%);
+  border-radius:15px;
+  padding:2.5mm 3.2mm;
+  color:var(--dark);
+  box-shadow:0 2px 0 rgba(255,255,255,.22) inset;
+}
+.band__t{
+  flex:0 0 auto; font-size:25px; font-weight:800; line-height:1;
+  letter-spacing:-.025em;
+}
+.band__x{ flex:1 1 auto; font-size:12.3px; line-height:1.28; font-weight:600; }
+.band__x b{ font-weight:800; }
+
+/* ------------------------------------------------------ finish strip -- */
+.fin{ --acc:var(--mint); }
+.fin .sec__t{ color:var(--mint); }
+.fin .sec__h::after{ background:rgba(94,234,212,.30); }
+.fin__box{
+  background:rgba(94,234,212,.07);
+  border:1px solid rgba(94,234,212,.26);
+  border-radius:14px;
+  padding:1.7mm 2.7mm 1.9mm;
+}
+.fin .step{ grid-template-columns:24.5mm 1fr auto; gap:0 2.2mm; padding:1.3mm 0; }
+.fin .t{ font-size:11.9px; padding:2px 4px; }
+.fin .tx{ font-size:11.9px; line-height:1.26; }
+.fin .nav{ justify-self:end; align-self:start; margin-top:.6px; }
+
+/* ---------------------------------------------------------- footer ---- */
+.foot{
+  flex:0 0 auto; margin-top:auto;
+  display:flex; gap:2mm; align-items:flex-start;
+  border-top:1px solid var(--line2);
+  padding-top:2.8mm;
+  font-size:11.6px; line-height:1.3; color:var(--ink70);
+}
+.foot__i{ flex:0 0 auto; color:var(--fr); font-weight:800; }
+.foot b{ color:#fff; }
+</style>
+</head>
+<body>
+
+<section class="page">
+
+  <!-- ================================================== 1 · header === -->
+  <header class="mast">
+    <div class="mast__l">
+      <div class="mast__kick">Night shift</div>
+      <h1 class="mast__title">UTMB 2026 — <em>Night Plan</em></h1>
+      <div class="mast__sub">CP11 → CP13 → Finish · Sat 29 → Sun 30 Aug · decide A/B/C by ~18:00 Sat</div>
+    </div>
+    <a class="live" href="https://live.utmb.world/utmb/2026/runners/1056" title="TRACK SUHA — bib 1056">
+      <span class="live__dot"></span>
+      <span class="live__t">
+        <span class="live__l">TRACK SUHA — bib 1056<i> ↗</i></span>
+        <span class="live__u">live.utmb.world/utmb/2026/runners/1056</span>
+      </span>
+    </a>
+  </header>
+
+  <!-- =============================================== 2 · eta chips === -->
+  <div class="chips">
+    <a class="chip" style="--acc:var(--ch)" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.02608%2C7.12109" title="CP11 Champex-Lac">
+      <span class="chip__k">CP11 Champex-Lac</span>
+      <span class="chip__v num">SAT 18:37</span>
+      <span class="chip__w num">18:17–18:57</span>
+      <span class="chip__go">Navigate ↗</span>
+    </a>
+    <a class="chip" style="--acc:var(--fr)" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.0324%2C6.93196" title="CP13 Vallorcine">
+      <span class="chip__k">CP13 Vallorcine</span>
+      <span class="chip__v num">SUN 00:35</span>
+      <span class="chip__w num">00:15–00:55</span>
+      <span class="chip__go">Navigate ↗</span>
+    </a>
+    <a class="chip chip--fill" style="--acc:var(--mint)" href="https://www.google.com/maps/dir/?api=1&amp;destination=45.9236%2C6.86912" title="Finish — Chamonix centre">
+      <span class="chip__k">FINISH Chamonix</span>
+      <span class="chip__v num">SUN ~04:39</span>
+      <span class="chip__w">be there 04:15</span>
+      <span class="chip__go">Navigate ↗</span>
+    </a>
+  </div>
+
+  <!-- =============================================== 3 · cp11 table === -->
+  <section class="sec" style="--acc:var(--ch)">
+    <div class="sec__h">
+      <h2 class="sec__t">Getting to CP11 — pick a row by his pace (watch tracker from ~14:00)</h2>
+      <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.02608%2C7.12109" title="CP11 Champex-Lac">📍 CP11 Champex-Lac</a>
+    </div>
+
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th class="c1">Leave base</th>
+            <th class="c2">Bus M. Nordique → Orsières</th>
+            <th class="c3">At Orsières</th>
+            <th class="c4">Connect</th>
+            <th class="c5">At Champex</th>
+            <th>Buffer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num">14:00</td><td class="num">14:30</td><td class="num">15:50</td>
+            <td class="num">16:00</td><td class="num">16:25</td><td class="buf num"><b>2h12</b></td>
+          </tr>
+          <tr>
+            <td class="num">14:45</td><td class="num">15:15</td><td class="num">16:35</td>
+            <td class="num">17:00</td><td class="num">17:25</td><td class="buf num"><b>1h12</b></td>
+          </tr>
+          <tr>
+            <td class="num">15:30</td><td class="num">16:00</td><td class="num">17:20</td>
+            <td class="num">17:30</td><td class="num">17:55</td><td class="buf"><b>0h42</b> — only if he is ≥45 min late</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <span class="note__i">▲</span>
+      <span>He is +N min at the last timing point → leave N min later. Keep ≥1 h buffer. At CP11 he eats 80 g — <b>hand over 260 g carbs</b>.</span>
+    </div>
+  </section>
+
+  <!-- ================================================= 4 · options === -->
+  <section class="sec">
+    <div class="sec__h">
+      <h2 class="sec__t">CP11 → CP13 — pick ONE (crew leaves Champex ~19:15 after he goes)</h2>
+    </div>
+
+    <div class="opts">
+
+      <!-- ---- Plan A ---- -->
+      <article class="opt">
+        <div class="opt__h">
+          <span class="opt__id">A</span>
+          <span class="opt__l">Plan A — via home</span>
+        </div>
+        <div class="opt__tag">shower + full repack · TIGHT</div>
+        <div class="steps">
+          <div class="step"><span class="t num">19:15</span><span class="tx">Champex → Orsières bus <span class="nb">(25 min)</span></span></div>
+          <div class="step"><span class="t num">19:45</span><span class="tx">Orsières → Chamonix bus <span class="nb">(80 min)</span></span></div>
+          <div class="step"><span class="t num">21:20</span><span class="tx">Car → base. 1h20 at home.</span></div>
+          <div class="step"><span class="t num">22:45</span><span class="tx">Drive back to Chamonix, park</span></div>
+          <div class="step"><span class="t num">23:00</span><span class="tx">Bus → Vallorcine, arrive 23:30</span></div>
+        </div>
+        <div class="risk">
+          <span class="risk__i">▲</span>
+          <span>3.5 h transit for 1h20 at home. If he slips +1 h, home window ≈ 20 min → <b>flip to C</b>.</span>
+        </div>
+      </article>
+
+      <!-- ---- Plan B ---- -->
+      <article class="opt">
+        <div class="opt__h">
+          <span class="opt__id">B</span>
+          <span class="opt__l">Plan B — direct, skip Chamonix</span>
+        </div>
+        <div class="opt__tag">zero stress · no comforts</div>
+        <div class="steps">
+          <div class="step"><span class="t num">19:15</span><span class="tx">Champex → Orsières bus <span class="nb">(25 min)</span></span></div>
+          <div class="step"><span class="t num">19:45</span><span class="tx">Orsières → Trient bus <span class="nb">(45 min)</span></span></div>
+          <div class="step"><span class="t num">20:45</span><span class="tx">Trient → Vallorcine bus <span class="nb">(15 min)</span></span></div>
+          <div class="step"><span class="t num">21:00</span><span class="tx">In Vallorcine — 3.5 h early. Dinner near the station (kitchens close early). Cold after midnight — pack layers.</span></div>
+        </div>
+        <div class="risk">
+          <span class="risk__i">▲</span>
+          <span>CP13 bag rides with you from base at 14:45 — <b>190 g carbs</b> + his kit in your pack all day.</span>
+        </div>
+      </article>
+
+      <!-- ---- Plan C — recommended ---- -->
+      <article class="opt opt--rec">
+        <div class="opt__h">
+          <span class="opt__id">C</span>
+          <span class="opt__l">Plan C — via Chamonix, not home</span>
+        </div>
+        <div class="opt__tag"><b>RECOMMENDED</b> if CP13 bag is in the car</div>
+        <div class="steps">
+          <div class="step"><span class="t num">19:15</span><span class="tx">Champex → Orsières bus <span class="nb">(25 min)</span></span></div>
+          <div class="step"><span class="t num">19:45</span><span class="tx">Orsières → Chamonix bus <span class="nb">(80 min)</span></span></div>
+          <div class="step"><span class="t num">21:10</span><span class="tx">Dinner in Chamonix. Repack from the car at Grépon.</span></div>
+          <div class="step"><span class="t num">23:00</span><span class="tx">Bus → Vallorcine, arrive 23:30 (23:30 → 00:00 also OK)</span></div>
+        </div>
+        <div class="risk risk--good">
+          <span class="risk__i">★</span>
+          <span>Hot food + bag from the car, no home round-trip, one connection. <b>Leave the CP13 bag in the car Saturday morning.</b></span>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- =============================================== 5 · cp13 band === -->
+  <section class="band">
+    <span class="band__t num">00:35</span>
+    <span class="band__x">SUHA at CP13 Vallorcine — window 00:15–00:55. He eats 30 g, <b>hand over 190 g carbs</b>. Last leg: 4h04 to the finish. Cutoff SUN 13:15 — huge margin.</span>
+    <a class="nav nav--dark" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.0324%2C6.93196" title="CP13 Vallorcine">📍 CP13 Vallorcine</a>
+  </section>
+
+  <!-- ==================================================== 6 · finish = -->
+  <section class="sec fin">
+    <div class="sec__h">
+      <h2 class="sec__t">CP13 → Finish</h2>
+    </div>
+    <div class="fin__box">
+      <div class="steps">
+        <div class="step">
+          <span class="t num">~01:00</span>
+          <span class="tx">He leaves ~00:55–01:05. Bus Vallorcine → Chamonix (every 30 min, runs until 12:30 Sun), arrive 01:30/02:00</span>
+        </div>
+        <div class="step">
+          <span class="t num">02:00–04:00</span>
+          <span class="tx">Nap in the car at Grépon — <b>set TWO alarms</b>. Do not drive home for 1.5 h of sleep.</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon">📍 Parking du Grépon</a>
+        </div>
+        <div class="step">
+          <span class="t num">04:15</span>
+          <span class="tx">Be at the finish line, Chamonix centre. He finishes ~04:39.</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=45.9236%2C6.86912" title="Finish — Chamonix centre">📍 Finish — Chamonix centre</a>
+        </div>
+        <div class="step">
+          <span class="t num">~05:00</span>
+          <span class="tx">Drive home to base.</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — Les Houches">📍 Base — Les Houches</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================================================== 7 · footer = -->
+  <div class="foot">
+    <span class="foot__i">i</span>
+    <span>If he slips late, everything gets easier — buses run into Sunday noon. Passes: <b>Swiss pass</b> for Orsières/Champex/Trient legs; <b>France pass</b> for Vallorcine.</span>
+  </div>
+
+</section>
+
+</body>
+</html>
