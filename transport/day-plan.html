@@ -77,14 +77,25 @@ body{
 
 /* Page 2 carries four legs plus the footer checklist: same type sizes,
    tighter gutters. Every type size on both pages is >= 10.8px (8.1pt),
-   so the room for that floor is bought here, in the gutters. */
-.page--two{ padding-top:6mm; }
-.page--two .leg{ padding-top:.9mm; padding-bottom:.9mm; }
-.page--two .step{ padding:1px 0; }
-.page--two .plan .step{ padding:.8px 0; }
-.page--two .leg__h{ margin-bottom:.9mm; }
-.page--two .foot{ margin-top:1.2mm; }
-.page--two .stack--tight{ gap:1.1mm; }
+   so the room for that floor is bought here, in the gutters.
+   The 19:45 re-time lengthened three warn strips, both cutoff sentences
+   and the accuracy footnote; the ~14 mm that costs is reclaimed from the
+   gutters below — never from the type scale. */
+.page--two{ padding-top:5mm; padding-bottom:4mm; }
+.page--two .leg{ padding-top:.6mm; padding-bottom:.6mm; }
+.page--two .step{ padding:.4px 0; }
+.page--two .plan .step{ padding:.4px 0; }
+.page--two .leg__h{ margin-bottom:.6mm; }
+.page--two .foot{ margin-top:.9mm; }
+.page--two .stack--tight{ gap:.85mm; }
+.page--two .step.eta{ padding:.9mm 1.7mm; margin:.35mm 0 .3mm; }
+.page--two .eta__b{ margin-top:.45mm; }
+.page--two .warn{ margin:.8mm 0 .35mm; padding:.9mm 1.6mm; }
+.page--two .step.eta .warn{ margin:1mm 0 0; }
+.page--two .pick{ margin:.1mm 0 .5mm; }
+.page--two .plan{ padding:1mm 1.6mm .8mm; }
+.page--two .rules{ gap:.6mm 3mm; }
+.page--two .fine{ margin-top:.9mm; padding-top:.8mm; }
 
 @media screen{
   body{ display:flex; flex-direction:column; align-items:center; gap:6mm; padding:6mm 0; }
@@ -414,11 +425,11 @@ b,strong{ font-weight:800; }
     <div>
       <div class="mast__kick">Friday 28 → Sunday 30 August 2026</div>
       <h1 class="mast__title">UTMB 2026 — <em>Crew Day Plan</em></h1>
-      <div class="mast__sub">Suha's crew · Les Houches base · Fri 28 – Sun 30 Aug 2026</div>
+      <div class="mast__sub">Suha's crew · Les Houches base · Fri 28 – Sun 30 Aug 2026 · <b>START DELAYED TO 19:45</b></div>
     </div>
     <div class="mast__pg">
       <div class="mast__pgn">1<span style="opacity:.35">/2</span></div>
-      <div class="mast__pgl">Fri 28</div>
+      <div class="mast__pgl">Fri 28 → Sat</div>
     </div>
   </header>
 
@@ -433,7 +444,7 @@ b,strong{ font-weight:800; }
 
   <div class="note">
     <span class="note__i">⏱</span>
-    <span>Runner ETAs from pace plan, ±20 min windows. If he is +N min late at the last timing point, shift your departure by N. Always keep ≥1 h buffer.</span>
+    <span><b>START DELAYED +2h → 19:45.</b> All runner times below are already shifted +2h. Shuttle CLOCK times are the published ones — UTMB may or may not shift them: <b>CONFIRM AT THE FIRST BUS STOP TONIGHT.</b> If he is +N min late at the last timing point, shift your departure by N. Keep ≥1 h buffer.</span>
   </div>
 
   <section class="ov">
@@ -446,27 +457,27 @@ b,strong{ font-weight:800; }
     <div class="ov__grid">
       <div class="chip" style="--acc:var(--fr)">
         <div class="chip__k">CP3</div>
-        <div class="chip__v num">FRI 22:31</div>
-        <div class="chip__w num">22:11–22:51</div>
+        <div class="chip__v num">SAT 00:31</div>
+        <div class="chip__w num">00:11–00:51</div>
       </div>
       <div class="chip" style="--acc:var(--it)">
         <div class="chip__k">CP7</div>
-        <div class="chip__v num">SAT 07:32</div>
-        <div class="chip__w num">07:12–07:52</div>
+        <div class="chip__v num">SAT 09:32</div>
+        <div class="chip__w num">09:12–09:52</div>
       </div>
       <div class="chip" style="--acc:var(--ch)">
         <div class="chip__k">CP11</div>
-        <div class="chip__v num">SAT 16:37</div>
-        <div class="chip__w num">16:17–16:57</div>
+        <div class="chip__v num">SAT 18:37</div>
+        <div class="chip__w num">18:17–18:57</div>
       </div>
       <div class="chip" style="--acc:var(--fr)">
         <div class="chip__k">CP13</div>
-        <div class="chip__v num">SAT 22:35</div>
-        <div class="chip__w num">22:15–22:55</div>
+        <div class="chip__v num">SUN 00:35</div>
+        <div class="chip__w num">00:15–00:55</div>
       </div>
       <div class="chip chip--fin" style="--acc:var(--fr)">
         <div class="chip__k">Finish</div>
-        <div class="chip__v num">SUN ~02:39</div>
+        <div class="chip__v num">SUN ~04:39</div>
         <div class="chip__w">Chamonix</div>
       </div>
     </div>
@@ -478,36 +489,32 @@ b,strong{ font-weight:800; }
     <article class="leg leg--fr">
       <div class="leg__h">
         <span class="leg__day">FRI 28</span>
-        <h2 class="leg__t">Start + Les Houches pass</h2>
+        <h2 class="leg__t">Start (delayed 19:45) + the Les Houches decision</h2>
         <span class="leg__c">France</span>
       </div>
       <div class="steps">
 
         <div class="step">
-          <span class="t num">16:00</span>
+          <span class="t num">18:00</span>
           <span class="tx">Drop Suha at the start, Chamonix.</span>
         </div>
 
         <div class="step">
-          <span class="t num">16:10</span>
+          <span class="t num">18:10</span>
           <span class="tx">Park + charge the car at Réseau eborn charging station.</span>
           <a class="nav" href="https://maps.app.goo.gl/DRy7772zP2xyWsrr6" title="Réseau eborn charger (park+charge)">📍 Réseau eborn charger (park+charge)</a>
         </div>
 
         <div class="step">
-          <span class="t num">17:45</span>
+          <span class="t num">19:45</span>
           <span class="tx">Watch the start.</span>
         </div>
 
         <div class="step">
-          <span class="t num">18:00</span>
-          <span class="tx">Drive back to base, Les Houches (15 min).</span>
-          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — 100 Rte de la Gare, Les Houches">📍 Base — 100 Rte de la Gare, Les Houches</a>
-        </div>
-
-        <div class="step">
-          <span class="t t--w num">18:30–19:15</span>
-          <span class="tx">Suha passes Les Houches (km 9.1). Water point only — no assistance allowed.</span>
+          <span class="t num">19:55</span>
+          <span class="tx">Go straight to the Grépon bus stop — do NOT drive back to Les Houches.</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon, Chamonix">📍 Parking du Grépon, Chamonix</a>
+          <div class="warn"><span class="warn__i">⚠</span><span>He passes Les Houches ~20:30–21:15, but the <b>LAST published bus to Contamines leaves Grépon 20:30</b>. You cannot do both. <b>Default: skip Les Houches, take the 20:15 bus.</b> ONLY if a driver confirms shuttles are shifted +2h tonight: watch Les Houches (water point only — NO assistance allowed there), then take the (new) ~22:30 last bus.</span></div>
         </div>
 
       </div>
@@ -516,22 +523,16 @@ b,strong{ font-weight:800; }
     <!-- ------------------------------------------------- fri-cp3 ----- -->
     <article class="leg leg--fr">
       <div class="leg__h">
-        <span class="leg__day">FRI 28</span>
-        <h2 class="leg__t">CP3 · Les Contamines — runner 22:31 ±20</h2>
+        <span class="leg__day">FRI 28 → SAT</span>
+        <h2 class="leg__t">CP3 · Les Contamines — runner SAT 00:31 ±20</h2>
         <span class="leg__c">France</span>
       </div>
       <div class="steps">
 
         <div class="step">
-          <span class="t num">19:30</span>
-          <span class="tx">Drive base → Chamonix, park at Parking du Grépon.</span>
-          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon, Chamonix">📍 Parking du Grépon, Chamonix</a>
-        </div>
-
-        <div class="step">
           <span class="t num">20:00</span>
           <span class="tx">Be AT the Grépon bus stop. Aim for the 20:15 bus.</span>
-          <div class="warn"><span class="warn__i">⚠</span><span>20:30 is the LAST bus of the day on this line — treat it as gone. Do not cut it close.</span></div>
+          <div class="warn"><span class="warn__i">⚠</span><span>20:30 is the <b>LAST published bus</b> on this line — treat it as gone. Do not cut it close.</span></div>
         </div>
 
         <div class="step">
@@ -541,31 +542,26 @@ b,strong{ font-weight:800; }
 
         <div class="step">
           <span class="t num">~21:05</span>
-          <span class="tx">At CP3 Les Contamines. Set up: he eats 30 g here, hand over 440 g carbs for the 9-hour leg to Courmayeur.</span>
+          <span class="tx">At CP3 Les Contamines — long wait (~3.5 h). Set up: he eats 30&nbsp;g here, hand over 440&nbsp;g carbs for the 9-hour leg to Courmayeur.</span>
           <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=45.82254%2C6.72586" title="CP3 Les Contamines (km 32.5)">📍 CP3 Les Contamines (km 32.5)</a>
         </div>
 
         <div class="step eta">
           <div class="eta__row">
-            <span class="eta__t">22:31</span>
-            <span class="eta__x"><b>SUHA</b> — window 22:11–22:51. Cutoff SAT 00:00.</span>
+            <span class="eta__t">00:31</span>
+            <span class="eta__x"><b>SUHA</b> — window 00:11–00:51. Cutoff SAT 02:00 (if shifted, unverified).</span>
           </div>
           <div class="eta__b">
-            <span><i>Eats here</i><b>30 g</b></span>
-            <span><i>Hand over</i><b>440 g carbs</b></span>
+            <span><i>Eats here</i><b>30&nbsp;g</b></span>
+            <span><i>Hand over</i><b>440&nbsp;g&nbsp;carbs</b></span>
             <span><i>Next leg</i><b>9h01 to Courmayeur</b></span>
           </div>
+          <div class="warn"><span class="warn__i">⚠</span><span><b>RETURN PINCH:</b> his window overlaps the last verified bus out (00:30 from NDG; the printed 01:00 is unverified). <b>ASK A DRIVER TONIGHT</b> whether shuttles run +2h late. If NOT shifted, decide by 00:15: leave on the last bus without seeing him, or stay and be stranded (no listed service after ~01:00 — taxi only).</span></div>
         </div>
 
         <div class="step">
-          <span class="t num">~23:00</span>
-          <span class="tx">Return bus Contamines/NDG → Chamonix (every 30 min, ride 55 min). Buses ~23:00 / 23:30 / 00:00 / 00:30.</span>
-          <div class="warn"><span class="warn__i">⚠</span><span>Plan for the 00:30 bus as the LAST one out. The printed 01:00 is unverified as a departure — ask a driver.</span></div>
-        </div>
-
-        <div class="step">
-          <span class="t num">~00:00</span>
-          <span class="tx">Chamonix ~23:55–00:25 → car at Grépon → base ~00:15–00:45. Sleep fast.</span>
+          <span class="t num">~00:45</span>
+          <span class="tx">If buses shifted +2h: relaxed — buses to ~02:30. If not: you are on the 00:30/01:00 bus, Chamonix ~01:25–01:55 → car → base ~02:15. Sleep fast.</span>
           <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — 100 Rte de la Gare, Les Houches">📍 Base — 100 Rte de la Gare, Les Houches</a>
         </div>
 
@@ -651,44 +647,44 @@ b,strong{ font-weight:800; }
     <article class="leg leg--it">
       <div class="leg__h">
         <span class="leg__day">SAT 29</span>
-        <h2 class="leg__t">CP7 · Courmayeur — runner 07:32 ±20</h2>
+        <h2 class="leg__t">CP7 · Courmayeur — runner 09:32 ±20</h2>
         <span class="leg__c">Italy</span>
       </div>
       <div class="steps">
 
         <div class="step">
-          <span class="t num">05:00</span>
+          <span class="t num">07:00</span>
           <span class="tx">Drive base → Chamonix, park (Grépon).</span>
           <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon, Chamonix">📍 Parking du Grépon, Chamonix</a>
         </div>
 
         <div class="step">
-          <span class="t num">05:30</span>
+          <span class="t num">07:30</span>
           <span class="tx">Bus Maison Nordique → Courmayeur (45 min, every 30 min on :00/:30).</span>
           <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=La+Maison+Nordique%2C+Chamonix" title="Maison Nordique bus stop, Chamonix">📍 Maison Nordique bus stop, Chamonix</a>
         </div>
 
         <div class="step">
-          <span class="t num">06:15</span>
-          <span class="tx">At CP7 Courmayeur Sport Center — 1h17 buffer. (06:00 bus → 06:45 also works.)</span>
+          <span class="t num">08:15</span>
+          <span class="tx">At CP7 Courmayeur Sport Center — 1h17 buffer. (08:00 bus → 08:45 also works.)</span>
           <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=45.79492%2C6.96442" title="CP7 Courmayeur Sport Center (km 83.4)">📍 CP7 Courmayeur Sport Center (km 83.4)</a>
         </div>
 
         <div class="step eta">
           <div class="eta__row">
-            <span class="eta__t">07:32</span>
-            <span class="eta__x"><b>SUHA</b> — window 07:12–07:52. He eats 80 g here, hand over 400 g carbs. Cutoff SAT 13:15.</span>
+            <span class="eta__t">09:32</span>
+            <span class="eta__x"><b>SUHA</b> — window 09:12–09:52. He eats 80&nbsp;g here, hand over 400&nbsp;g carbs. Cutoff SAT 15:15 (if shifted, unverified).</span>
           </div>
           <div class="eta__b">
-            <span><i>Eats here</i><b>80 g</b></span>
-            <span><i>Hand over</i><b>400 g carbs</b></span>
+            <span><i>Eats here</i><b>80&nbsp;g</b></span>
+            <span><i>Hand over</i><b>400&nbsp;g&nbsp;carbs</b></span>
             <span><i>Next leg</i><b>9h05 to Champex-Lac</b></span>
           </div>
         </div>
 
         <div class="step">
-          <span class="t num">~08:30</span>
-          <span class="tx">Return bus Courmayeur → Chamonix (every 30 min) → Chamonix ~09:15 → car → base. REST.</span>
+          <span class="t num">~10:30</span>
+          <span class="tx">Return bus Courmayeur → Chamonix (every 30 min) → Chamonix ~11:15 → car → base. REST.</span>
           <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — 100 Rte de la Gare, Les Houches">📍 Base — 100 Rte de la Gare, Les Houches</a>
         </div>
 
@@ -699,45 +695,45 @@ b,strong{ font-weight:800; }
     <article class="leg leg--ch">
       <div class="leg__h">
         <span class="leg__day">SAT 29</span>
-        <h2 class="leg__t">CP11 · Champex-Lac — runner 16:37 ±20 · HARDEST LEG</h2>
+        <h2 class="leg__t">CP11 · Champex-Lac — runner 18:37 ±20 · HARDEST LEG</h2>
         <span class="leg__c">Switzerland</span>
       </div>
       <div class="steps">
 
         <div class="step">
-          <span class="t num">12:30</span>
-          <span class="tx">Drive base → Chamonix, park. (Recommended — earlier than the 13:00 you planned.)</span>
+          <span class="t num">14:45</span>
+          <span class="tx">Drive base → Chamonix, park.</span>
           <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon, Chamonix">📍 Parking du Grépon, Chamonix</a>
         </div>
 
         <div class="step">
-          <span class="t num">13:00</span>
-          <span class="tx">Bus Maison Nordique → Orsières (80 min, every 45 min: 12:15 / 13:00 / 13:45). Swiss pass needed.</span>
+          <span class="t num">15:15</span>
+          <span class="tx">Bus Maison Nordique → Orsières (80 min, published grid every 45 min: 14:30 / 15:15 / 16:00). Swiss pass needed.</span>
           <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=La+Maison+Nordique%2C+Chamonix" title="Maison Nordique bus stop, Chamonix">📍 Maison Nordique bus stop, Chamonix</a>
         </div>
 
         <div class="step">
-          <span class="t num">14:20</span>
-          <span class="tx">Orsières — connect to Champex-Lac bus (~14:30, every 30 min, 25 min ride).</span>
+          <span class="t num">16:35</span>
+          <span class="tx">Orsières — connect to Champex-Lac bus (~17:00, every 30 min, 25 min ride).</span>
         </div>
 
         <div class="step">
-          <span class="t num">14:55</span>
-          <span class="tx">At CP11 Champex-Lac — 1h42 buffer. (Your 13:45-bus plan lands 15:55 = only 42 min buffer.)</span>
+          <span class="t num">17:25</span>
+          <span class="tx">At CP11 Champex-Lac — 1h12 buffer. (Earlier 14:30 bus → arrive 16:25 = 2h12 buffer if you want slack.)</span>
           <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.02608%2C7.12109" title="CP11 Champex-Lac (km 130.5)">📍 CP11 Champex-Lac (km 130.5)</a>
         </div>
 
         <div class="step eta">
           <div class="eta__row">
-            <span class="eta__t">16:37</span>
-            <span class="eta__x"><b>SUHA</b> — window 16:17–16:57. He eats 80 g here, hand over 260 g carbs. Cutoff SUN 02:30.</span>
+            <span class="eta__t">18:37</span>
+            <span class="eta__x"><b>SUHA</b> — window 18:17–18:57. He eats 80&nbsp;g here, hand over 260&nbsp;g carbs. Cutoff SUN 04:30 (if shifted, unverified).</span>
           </div>
           <div class="eta__b">
-            <span><i>Eats here</i><b>80 g</b></span>
-            <span><i>Hand over</i><b>260 g carbs</b></span>
+            <span><i>Eats here</i><b>80&nbsp;g</b></span>
+            <span><i>Hand over</i><b>260&nbsp;g&nbsp;carbs</b></span>
             <span><i>Next leg</i><b>5h58 to Vallorcine</b></span>
           </div>
-          <div class="warn"><span class="warn__i">⚠</span><span>Watch live tracking from noon. If he is +N min at Courmayeur/Grand Col Ferret, leave N min later — never shrink the buffer below 1 h.</span></div>
+          <div class="warn"><span class="warn__i">⚠</span><span>Watch live tracking from ~14:00. If he is +N min at Courmayeur/Grand Col Ferret, leave N min later — never shrink the buffer below 1 h.</span></div>
         </div>
 
       </div>
@@ -746,8 +742,8 @@ b,strong{ font-weight:800; }
     <!-- ------------------------------------------------ sat-cp13 ----- -->
     <article class="leg leg--fr">
       <div class="leg__h">
-        <span class="leg__day">SAT 29</span>
-        <h2 class="leg__t">CP11 → CP13 · Vallorcine — runner 22:35 ±20 · pick ONE</h2>
+        <span class="leg__day">SAT 29 → SUN</span>
+        <h2 class="leg__t">CP11 → CP13 · Vallorcine — runner SUN 00:35 ±20 · pick ONE</h2>
         <span class="leg__c">CH → France</span>
       </div>
 
@@ -758,26 +754,26 @@ b,strong{ font-weight:800; }
           <div class="plan__h">Plan A — via home (tight: ~1h20 at base)</div>
           <div class="steps">
             <div class="step">
-              <span class="t num">~17:15</span>
+              <span class="t num">~19:15</span>
               <span class="tx">Champex → Orsières bus (25 min, every 30).</span>
             </div>
             <div class="step">
-              <span class="t num">~17:45</span>
+              <span class="t num">~19:45</span>
               <span class="tx">Orsières → Chamonix bus (80 min, every 45).</span>
             </div>
             <div class="step">
-              <span class="t num">~19:10</span>
+              <span class="t num">~21:10</span>
               <span class="tx">Chamonix → car → base. Eat, repack.</span>
               <a class="nav nav--sm" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — 100 Rte de la Gare, Les Houches">📍 Base — 100 Rte de la Gare, Les Houches</a>
             </div>
             <div class="step">
-              <span class="t num">20:45</span>
+              <span class="t num">22:45</span>
               <span class="tx">Drive back to Chamonix, park.</span>
               <a class="nav nav--sm" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon, Chamonix">📍 Parking du Grépon, Chamonix</a>
             </div>
             <div class="step">
-              <span class="t num">21:00</span>
-              <span class="tx">Bus Maison Nordique → Vallorcine (30 min, every 30). Arrive 21:30.</span>
+              <span class="t num">23:00</span>
+              <span class="tx">Bus Maison Nordique → Vallorcine (30 min, every 30). Arrive 23:30.</span>
               <a class="nav nav--sm" href="https://www.google.com/maps/dir/?api=1&amp;destination=La+Maison+Nordique%2C+Chamonix" title="Maison Nordique bus stop, Chamonix">📍 Maison Nordique bus stop, Chamonix</a>
             </div>
           </div>
@@ -787,16 +783,16 @@ b,strong{ font-weight:800; }
           <div class="plan__h">Plan B — direct, skip Chamonix (relaxed; dinner in Vallorcine; car stays in Chamonix)</div>
           <div class="steps">
             <div class="step">
-              <span class="t num">~17:15</span>
+              <span class="t num">~19:15</span>
               <span class="tx">Champex → Orsières bus (25 min).</span>
             </div>
             <div class="step">
-              <span class="t num">~17:45</span>
+              <span class="t num">~19:45</span>
               <span class="tx">Orsières → Trient bus (45 min, every 30).</span>
             </div>
             <div class="step">
-              <span class="t num">~18:45</span>
-              <span class="tx">Trient → Vallorcine bus (15 min, every 30). Arrive ~19:00.</span>
+              <span class="t num">~20:45</span>
+              <span class="tx">Trient → Vallorcine bus (15 min, every 30). Arrive ~21:00.</span>
               <a class="nav nav--sm" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.0324%2C6.93196" title="CP13 Vallorcine (km 158.4)">📍 CP13 Vallorcine (km 158.4)</a>
             </div>
           </div>
@@ -807,12 +803,12 @@ b,strong{ font-weight:800; }
       <div class="steps" style="margin-top:1.4mm">
         <div class="step eta">
           <div class="eta__row">
-            <span class="eta__t">22:35</span>
-            <span class="eta__x"><b>SUHA</b> at CP13 Vallorcine — window 22:15–22:55. He eats 30 g, hand over 190 g carbs. Last leg: 4h to the finish. Cutoff SUN 11:15.</span>
+            <span class="eta__t">00:35</span>
+            <span class="eta__x"><b>SUHA</b> at CP13 Vallorcine — window 00:15–00:55. He eats 30&nbsp;g, hand over 190 g carbs. Last leg: 4h to the finish. Cutoff SUN 13:15 (if shifted, unverified).</span>
             <a class="nav nav--dark" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.0324%2C6.93196" title="CP13 Vallorcine (km 158.4)">📍 CP13 Vallorcine (km 158.4)</a>
           </div>
           <div class="eta__b">
-            <span><i>Eats here</i><b>30 g</b></span>
+            <span><i>Eats here</i><b>30&nbsp;g</b></span>
             <span><i>Hand over</i><b>190 g carbs</b></span>
             <span><i>Next leg</i><b>4h04 to finish</b></span>
           </div>
@@ -824,25 +820,25 @@ b,strong{ font-weight:800; }
     <article class="leg leg--fr">
       <div class="leg__h">
         <span class="leg__day">SUN 30</span>
-        <h2 class="leg__t">Finish · Chamonix — runner ~02:39</h2>
+        <h2 class="leg__t">Finish · Chamonix — runner ~04:39</h2>
         <span class="leg__c">France</span>
       </div>
       <div class="steps">
 
         <div class="step">
-          <span class="t num">~23:15</span>
-          <span class="tx">Bus Vallorcine → Chamonix (30 min, every 30, runs until 12:30 Sun). Arrive ~23:45.</span>
+          <span class="t num">~01:15</span>
+          <span class="tx">Bus Vallorcine → Chamonix (30 min, every 30, runs until 12:30 Sun). Arrive ~01:45.</span>
         </div>
 
         <div class="step">
-          <span class="t t--w num">00:00–02:30</span>
+          <span class="t t--w num">02:00–04:15</span>
           <span class="tx">Wait / nap in the car (Grépon).</span>
         </div>
 
         <div class="step eta">
           <div class="eta__row">
-            <span class="eta__t">02:39</span>
-            <span class="eta__x"><b>SUHA FINISHES</b> — Chamonix centre. Be at the finish line by 02:15.</span>
+            <span class="eta__t">04:39</span>
+            <span class="eta__x"><b>SUHA FINISHES</b> — Chamonix centre. Be at the finish line by 04:15.</span>
             <a class="nav nav--dark" href="https://www.google.com/maps/dir/?api=1&amp;destination=45.9236%2C6.86912" title="Finish — Chamonix centre">📍 Finish — Chamonix centre</a>
           </div>
         </div>
@@ -862,16 +858,17 @@ b,strong{ font-weight:800; }
   <div class="foot">
 
     <!-- ---------------------------------------------------- rules ---- -->
-    <div class="sec__t">Ground rules — check all four</div>
+    <div class="sec__t">Ground rules — check all five</div>
     <div class="rules">
       <div class="rule"><span class="rule__b"></span><span>All shuttles need the pre-booked follower pass (France/Italy/Switzerland zones). Passes are bought.</span></div>
+      <div class="rule"><span class="rule__b"></span><span>Bus times are the <b>PUBLISHED</b> clock times — with the 2 h delayed start, <b>ASK at the first stop</b> whether shuttles run +2h late, and re-time every leg if so.</span></div>
       <div class="rule"><span class="rule__b"></span><span>Roads/parking CLOSED to private cars at Les Contamines, Courmayeur, Champex, Trient, Vallorcine — the bus is the only way in.</span></div>
       <div class="rule"><span class="rule__b"></span><span>No UTMB shuttle ever runs Chamonix → Les Houches. The car in Chamonix is the only night ride home.</span></div>
       <div class="rule"><span class="rule__b"></span><span>Phones: offline maps of the valley downloaded; power banks charged; this PDF saved to phone.</span></div>
     </div>
 
     <div class="fine">
-      <b>Accuracy:</b> All bus times from the official UTMB follower timetable (French poster, transcribed &amp; verified). Corrected vs our earlier infographic: NDG→Chamonix ride is 55 min (not 20).
+      <b>Accuracy:</b> All bus times from the official UTMB follower timetable (French poster, transcribed &amp; verified) — published clock times, <b>NOT adjusted for the 2 h start delay</b>. Cutoffs shown assume UTMB shifted them +2h with the start (standard practice, unverified). Corrected vs our earlier infographic: NDG→Chamonix ride is 55 min (not 20).
     </div>
   </div>
 

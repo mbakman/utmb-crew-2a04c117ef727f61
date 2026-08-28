@@ -121,7 +121,7 @@
           "time": "19:55",
           "text": "Go straight to the Grépon bus stop — do NOT drive back to Les Houches.",
           "link": "grepon",
-          "warn": "He passes Les Houches ~20:30–21:15, but the LAST published bus to Contamines leaves Grépon 20:30. You cannot do both. Default: skip Les Houches, take the 20:15 bus. ONLY if a driver confirms shuttles are shifted +2h tonight: watch Les Houches, then take the (new) ~22:30 last bus."
+          "warn": "He passes Les Houches ~20:30–21:15, but the LAST published bus to Contamines leaves Grépon 20:30. You cannot do both. Default: skip Les Houches, take the 20:15 bus. ONLY if a driver confirms shuttles are shifted +2h tonight: watch Les Houches (water point only — NO assistance allowed there), then take the (new) ~22:30 last bus."
         }
       ]
     },
@@ -182,7 +182,7 @@
         },
         {
           "time": "09:32",
-          "text": "SUHA — window 09:12–09:52. He eats 80 g here, hand over 400 g carbs. Cutoff 15:15 (if shifted, unverified).",
+          "text": "SUHA — window 09:12–09:52. He eats 80 g here, hand over 400 g carbs. Cutoff SAT 15:15 (if shifted, unverified).",
           "link": null,
           "eta": true
         },
@@ -365,6 +365,7 @@
     "All shuttles need the pre-booked follower pass (France/Italy/Switzerland zones). Passes are bought.",
     "Bus times are the PUBLISHED clock times — with the 2 h delayed start, ASK at the first stop whether shuttles run +2h late, and re-time every leg if so.",
     "Roads/parking CLOSED to private cars at Les Contamines, Courmayeur, Champex, Trient, Vallorcine — the bus is the only way in.",
-    "No UTMB shuttle ever runs Chamonix → Les Houches. The car in Chamonix is the only night ride home."
+    "No UTMB shuttle ever runs Chamonix → Les Houches. The car in Chamonix is the only night ride home.",
+    "Phones: offline maps of the valley downloaded; power banks charged; this PDF saved to phone."
   ]
 }
