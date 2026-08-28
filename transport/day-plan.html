@@ -69,33 +69,37 @@ body{
 .page:last-of-type{ page-break-after:auto; break-after:auto; }
 
 /* Page 1 has room to spare once the bus table lands there; spend it on
-   breathing space rather than leaving a dead band at the foot. */
-.page--one .stack{ gap:3.1mm; }
-.page--one .leg{ padding-top:2.4mm; padding-bottom:2.4mm; }
-.page--one .step{ padding:4.2px 0; }
-.page--one .leg__h{ margin-bottom:1.7mm; }
+   breathing space rather than leaving a dead band at the foot. Dropping the
+   reminder box and the three Friday warn strips freed roughly 45 mm here, so
+   the gutters are opened up rather than left as one dead band at the foot. */
+.page--one .stack{ gap:6.2mm; }
+.page--one .leg{ padding-top:4.2mm; padding-bottom:4.2mm; }
+.page--one .step{ padding:7.4px 0; }
+.page--one .leg__h{ margin-bottom:2.6mm; }
+.page--one .live{ margin-bottom:4.4mm; }
+.page--one .ov{ margin-bottom:4.6mm; }
+.page--one .foot{ margin-top:5.2mm; }
+.page--one .ref td{ padding:1.7mm .7mm; }
 
-/* Page 2 carries four legs plus the footer checklist: same type sizes,
-   tighter gutters. Every type size on both pages is >= 10.8px (8.1pt),
-   so the room for that floor is bought here, in the gutters.
-   The 19:45 re-time lengthened three warn strips, both cutoff sentences
-   and the accuracy footnote; the ~14 mm that costs is reclaimed from the
-   gutters below — never from the type scale. */
-.page--two{ padding-top:5mm; padding-bottom:4mm; }
-.page--two .leg{ padding-top:.6mm; padding-bottom:.6mm; }
-.page--two .step{ padding:.4px 0; }
-.page--two .plan .step{ padding:.4px 0; }
-.page--two .leg__h{ margin-bottom:.6mm; }
-.page--two .foot{ margin-top:.9mm; }
-.page--two .stack--tight{ gap:.85mm; }
-.page--two .step.eta{ padding:.9mm 1.7mm; margin:.35mm 0 .3mm; }
-.page--two .eta__b{ margin-top:.45mm; }
-.page--two .warn{ margin:.8mm 0 .35mm; padding:.9mm 1.6mm; }
-.page--two .step.eta .warn{ margin:1mm 0 0; }
-.page--two .pick{ margin:.1mm 0 .5mm; }
-.page--two .plan{ padding:1mm 1.6mm .8mm; }
-.page--two .rules{ gap:.6mm 3mm; }
-.page--two .fine{ margin-top:.9mm; padding-top:.8mm; }
+/* Page 2 carries four legs plus the footer checklist. With the cutoff
+   qualifiers, the fifth ground rule and the long accuracy footnote gone, the
+   gutters no longer have to be squeezed: they sit at or near the page-1
+   values. Every type size on both pages is >= 10.8px (8.1pt). */
+.page--two{ padding-top:5.5mm; padding-bottom:4.2mm; }
+.page--two .leg{ padding-top:1.05mm; padding-bottom:1.05mm; }
+.page--two .step{ padding:1.15px 0; }
+.page--two .plan .step{ padding:1px 0; }
+.page--two .leg__h{ margin-bottom:1.1mm; }
+.page--two .foot{ margin-top:1.3mm; }
+.page--two .stack--tight{ gap:1.25mm; }
+.page--two .step.eta{ padding:1.05mm 1.8mm; margin:.45mm 0 .35mm; }
+.page--two .eta__b{ margin-top:.55mm; }
+.page--two .warn{ margin:1mm 0 .45mm; padding:1.05mm 1.7mm; }
+.page--two .step.eta .warn{ margin:1.15mm 0 0; }
+.page--two .pick{ margin:.25mm 0 .65mm; }
+.page--two .plan{ padding:1.15mm 1.7mm .9mm; }
+.page--two .rules{ gap:.85mm 3mm; }
+.page--two .fine{ margin-top:1.1mm; padding-top:1mm; }
 
 @media screen{
   body{ display:flex; flex-direction:column; align-items:center; gap:6mm; padding:6mm 0; }
@@ -159,19 +163,8 @@ b,strong{ font-weight:800; }
 .live--slim .live__l{ font-size:10.8px; line-height:1.05; }
 .live--slim .live__go{ font-size:11px; }
 
-/* ------------------------------------------------------- eta note ----- */
-.note{
-  flex:0 0 auto;
-  display:flex; gap:2.4mm; align-items:flex-start;
-  background:rgba(255,255,255,.045);
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:2.1mm 2.8mm;
-  font-size:10.8px; line-height:1.30; color:var(--ink70);
-  margin-bottom:2.5mm;
-}
-.note__i{ flex:0 0 auto; font-size:11px; }
-.note b{ color:var(--ink); }
+/* day-plan-data.json meta.etaNote is empty — the reminder box it used to
+   render is gone, and so are its styles. */
 
 /* --------------------------------------------------- eta overview ----- */
 .ov{ flex:0 0 auto; margin-bottom:3mm; }
@@ -394,7 +387,8 @@ b,strong{ font-weight:800; }
   font-size:10.8px; color:var(--ink70); line-height:1.2;
   font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;
 }
-.ref .d b{ color:var(--ch); font-weight:800; }
+/* No bold in the bus details any more: every row is plain
+   "from · every · ride", verbatim from busReference[].detail. */
 
 /* -------------------------------------------------------- rules ------- */
 .rules{ display:grid; grid-template-columns:1fr 1fr; gap:.8mm 3mm; }
@@ -425,7 +419,7 @@ b,strong{ font-weight:800; }
     <div>
       <div class="mast__kick">Friday 28 → Sunday 30 August 2026</div>
       <h1 class="mast__title">UTMB 2026 — <em>Crew Day Plan</em></h1>
-      <div class="mast__sub">Suha's crew · Les Houches base · Fri 28 – Sun 30 Aug 2026 · <b>START DELAYED TO 19:45</b></div>
+      <div class="mast__sub">Suha's crew · Les Houches base · Fri 28 – Sun 30 Aug 2026</div>
     </div>
     <div class="mast__pg">
       <div class="mast__pgn">1<span style="opacity:.35">/2</span></div>
@@ -441,11 +435,6 @@ b,strong{ font-weight:800; }
     </span>
     <span class="live__go">Open ↗</span>
   </a>
-
-  <div class="note">
-    <span class="note__i">⏱</span>
-    <span><b>START DELAYED +2h → 19:45.</b> All runner times below are already shifted +2h. Shuttle CLOCK times are the published ones — UTMB may or may not shift them: <b>CONFIRM AT THE FIRST BUS STOP TONIGHT.</b> If he is +N min late at the last timing point, shift your departure by N. Keep ≥1 h buffer.</span>
-  </div>
 
   <section class="ov">
     <div class="ov__h">
@@ -489,7 +478,7 @@ b,strong{ font-weight:800; }
     <article class="leg leg--fr">
       <div class="leg__h">
         <span class="leg__day">FRI 28</span>
-        <h2 class="leg__t">Start (delayed 19:45) + the Les Houches decision</h2>
+        <h2 class="leg__t">Start + Les Houches pass</h2>
         <span class="leg__c">France</span>
       </div>
       <div class="steps">
@@ -511,10 +500,14 @@ b,strong{ font-weight:800; }
         </div>
 
         <div class="step">
-          <span class="t num">19:55</span>
-          <span class="tx">Go straight to the Grépon bus stop — do NOT drive back to Les Houches.</span>
-          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon, Chamonix">📍 Parking du Grépon, Chamonix</a>
-          <div class="warn"><span class="warn__i">⚠</span><span>He passes Les Houches ~20:30–21:15, but the <b>LAST published bus to Contamines leaves Grépon 20:30</b>. You cannot do both. <b>Default: skip Les Houches, take the 20:15 bus.</b> ONLY if a driver confirms shuttles are shifted +2h tonight: watch Les Houches (water point only — NO assistance allowed there), then take the (new) ~22:30 last bus.</span></div>
+          <span class="t num">~20:05</span>
+          <span class="tx">Drive back to base, Les Houches (15 min).</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — 100 Rte de la Gare, Les Houches">📍 Base — 100 Rte de la Gare, Les Houches</a>
+        </div>
+
+        <div class="step">
+          <span class="t t--w num">20:30–21:15</span>
+          <span class="tx">Suha passes Les Houches (km 9.1). Water point.</span>
         </div>
 
       </div>
@@ -530,38 +523,37 @@ b,strong{ font-weight:800; }
       <div class="steps">
 
         <div class="step">
-          <span class="t num">20:00</span>
-          <span class="tx">Be AT the Grépon bus stop. Aim for the 20:15 bus.</span>
-          <div class="warn"><span class="warn__i">⚠</span><span>20:30 is the <b>LAST published bus</b> on this line — treat it as gone. Do not cut it close.</span></div>
+          <span class="t num">~21:20</span>
+          <span class="tx">Drive base → Chamonix, park at Parking du Grépon.</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon, Chamonix">📍 Parking du Grépon, Chamonix</a>
         </div>
 
         <div class="step">
-          <span class="t num">20:15</span>
+          <span class="t num">~21:45</span>
           <span class="tx">Bus Chamonix → Les Contamines (~50 min, every 15 min).</span>
         </div>
 
         <div class="step">
-          <span class="t num">~21:05</span>
-          <span class="tx">At CP3 Les Contamines — long wait (~3.5 h). Set up: he eats 30&nbsp;g here, hand over 440&nbsp;g carbs for the 9-hour leg to Courmayeur.</span>
+          <span class="t num">~22:35</span>
+          <span class="tx">At CP3 Les Contamines. Set up: he eats 30&nbsp;g here, hand over 440&nbsp;g carbs for the 9-hour leg to Courmayeur.</span>
           <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=45.82254%2C6.72586" title="CP3 Les Contamines (km 32.5)">📍 CP3 Les Contamines (km 32.5)</a>
         </div>
 
         <div class="step eta">
           <div class="eta__row">
             <span class="eta__t">00:31</span>
-            <span class="eta__x"><b>SUHA</b> — window 00:11–00:51. Cutoff SAT 02:00 (if shifted, unverified).</span>
+            <span class="eta__x"><b>SUHA</b> — window 00:11–00:51. Cutoff SAT 02:00.</span>
           </div>
           <div class="eta__b">
             <span><i>Eats here</i><b>30&nbsp;g</b></span>
             <span><i>Hand over</i><b>440&nbsp;g&nbsp;carbs</b></span>
             <span><i>Next leg</i><b>9h01 to Courmayeur</b></span>
           </div>
-          <div class="warn"><span class="warn__i">⚠</span><span><b>RETURN PINCH:</b> his window overlaps the last verified bus out (00:30 from NDG; the printed 01:00 is unverified). <b>ASK A DRIVER TONIGHT</b> whether shuttles run +2h late. If NOT shifted, decide by 00:15: leave on the last bus without seeing him, or stay and be stranded (no listed service after ~01:00 — taxi only).</span></div>
         </div>
 
         <div class="step">
-          <span class="t num">~00:45</span>
-          <span class="tx">If buses shifted +2h: relaxed — buses to ~02:30. If not: you are on the 00:30/01:00 bus, Chamonix ~01:25–01:55 → car → base ~02:15. Sleep fast.</span>
+          <span class="t num">~01:00</span>
+          <span class="tx">Return bus Contamines → Chamonix (every 30 min, ride 55 min) → car at Grépon → base. Sleep fast.</span>
           <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — 100 Rte de la Gare, Les Houches">📍 Base — 100 Rte de la Gare, Les Houches</a>
         </div>
 
@@ -577,42 +569,42 @@ b,strong{ font-weight:800; }
         <tr>
           <td class="c-w w">FRI</td>
           <td class="c-r r">Chamonix (Grépon) → Les Contamines</td>
-          <td class="d">17:30 first · every 15 min · <b>LAST 20:30</b> · ride ~50 min</td>
+          <td class="d">from 17:30 · every 15 min · ride ~50 min</td>
         </tr>
         <tr>
           <td class="c-w w">FRI night</td>
           <td class="c-r r">Contamines/NDG → Chamonix</td>
-          <td class="d">20:30 first · every 30 min · <b>plan on 00:30 last</b> (01:00 unverified) · ride 55 min</td>
+          <td class="d">from 20:30 · every 30 min · ride 55 min</td>
         </tr>
         <tr>
           <td class="c-w w">SAT</td>
           <td class="c-r r">Chamonix (M. Nordique) ↔ Courmayeur</td>
-          <td class="d">from 00:30 · every 30 min on :00/:30 · until 20:30 · ride 45 min</td>
+          <td class="d">from 00:30 · every 30 min on :00/:30 · ride 45 min</td>
         </tr>
         <tr>
           <td class="c-w w">SAT</td>
           <td class="c-r r">Chamonix (M. Nordique) → Orsières</td>
-          <td class="d">from 05:30 · every 45 min · until SUN 03:00 · ride 80 min · Swiss pass</td>
+          <td class="d">from 05:30 · every 45 min · ride 80 min · Swiss pass</td>
         </tr>
         <tr>
           <td class="c-w w">SAT</td>
           <td class="c-r r">Orsières ↔ Champex-Lac</td>
-          <td class="d">from 07:00 · every 30 min · until SUN 04:00 · ride 25 min</td>
+          <td class="d">from 07:00 · every 30 min · ride 25 min</td>
         </tr>
         <tr>
           <td class="c-w w">SAT</td>
           <td class="c-r r">Orsières → Trient</td>
-          <td class="d">from 08:45 · every 30 min · until SUN 04:00 · ride 45 min</td>
+          <td class="d">from 08:45 · every 30 min · ride 45 min</td>
         </tr>
         <tr>
           <td class="c-w w">SAT</td>
           <td class="c-r r">Trient → Vallorcine</td>
-          <td class="d">from 09:00 · every 30 min · until SUN 09:00 · ride 15 min</td>
+          <td class="d">from 09:00 · every 30 min · ride 15 min</td>
         </tr>
         <tr>
           <td class="c-w w">SAT</td>
           <td class="c-r r">Chamonix (M. Nordique) ↔ Vallorcine</td>
-          <td class="d">from 05:00 · every 30 min on :00/:30 · until SUN 12:30 · ride 30 min</td>
+          <td class="d">from 05:00 · every 30 min on :00/:30 · ride 30 min</td>
         </tr>
       </table>
     </div>
@@ -673,7 +665,7 @@ b,strong{ font-weight:800; }
         <div class="step eta">
           <div class="eta__row">
             <span class="eta__t">09:32</span>
-            <span class="eta__x"><b>SUHA</b> — window 09:12–09:52. He eats 80&nbsp;g here, hand over 400&nbsp;g carbs. Cutoff SAT 15:15 (if shifted, unverified).</span>
+            <span class="eta__x"><b>SUHA</b> — window 09:12–09:52. He eats 80&nbsp;g here, hand over 400&nbsp;g carbs. Cutoff SAT 15:15.</span>
           </div>
           <div class="eta__b">
             <span><i>Eats here</i><b>80&nbsp;g</b></span>
@@ -726,14 +718,14 @@ b,strong{ font-weight:800; }
         <div class="step eta">
           <div class="eta__row">
             <span class="eta__t">18:37</span>
-            <span class="eta__x"><b>SUHA</b> — window 18:17–18:57. He eats 80&nbsp;g here, hand over 260&nbsp;g carbs. Cutoff SUN 04:30 (if shifted, unverified).</span>
+            <span class="eta__x"><b>SUHA</b> — window 18:17–18:57. He eats 80&nbsp;g here, hand over 260&nbsp;g carbs. Cutoff SUN 04:30.</span>
           </div>
           <div class="eta__b">
             <span><i>Eats here</i><b>80&nbsp;g</b></span>
             <span><i>Hand over</i><b>260&nbsp;g&nbsp;carbs</b></span>
             <span><i>Next leg</i><b>5h58 to Vallorcine</b></span>
           </div>
-          <div class="warn"><span class="warn__i">⚠</span><span>Watch live tracking from ~14:00. If he is +N min at Courmayeur/Grand Col Ferret, leave N min later — never shrink the buffer below 1 h.</span></div>
+          <div class="warn"><span class="warn__i">⚠</span><span>Watch live tracking from ~14:00. If he is +N min at Courmayeur/Grand Col Ferret, leave N min later — never shrink the buffer below 1 h.</span></div>
         </div>
 
       </div>
@@ -804,7 +796,7 @@ b,strong{ font-weight:800; }
         <div class="step eta">
           <div class="eta__row">
             <span class="eta__t">00:35</span>
-            <span class="eta__x"><b>SUHA</b> at CP13 Vallorcine — window 00:15–00:55. He eats 30&nbsp;g, hand over 190 g carbs. Last leg: 4h to the finish. Cutoff SUN 13:15 (if shifted, unverified).</span>
+            <span class="eta__x"><b>SUHA</b> at CP13 Vallorcine — window 00:15–00:55. He eats 30&nbsp;g, hand over 190 g carbs. Last leg: 4h to the finish. Cutoff SUN 13:15.</span>
             <a class="nav nav--dark" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.0324%2C6.93196" title="CP13 Vallorcine (km 158.4)">📍 CP13 Vallorcine (km 158.4)</a>
           </div>
           <div class="eta__b">
@@ -858,17 +850,16 @@ b,strong{ font-weight:800; }
   <div class="foot">
 
     <!-- ---------------------------------------------------- rules ---- -->
-    <div class="sec__t">Ground rules — check all five</div>
+    <div class="sec__t">Ground rules — check all four</div>
     <div class="rules">
       <div class="rule"><span class="rule__b"></span><span>All shuttles need the pre-booked follower pass (France/Italy/Switzerland zones). Passes are bought.</span></div>
-      <div class="rule"><span class="rule__b"></span><span>Bus times are the <b>PUBLISHED</b> clock times — with the 2 h delayed start, <b>ASK at the first stop</b> whether shuttles run +2h late, and re-time every leg if so.</span></div>
       <div class="rule"><span class="rule__b"></span><span>Roads/parking CLOSED to private cars at Les Contamines, Courmayeur, Champex, Trient, Vallorcine — the bus is the only way in.</span></div>
-      <div class="rule"><span class="rule__b"></span><span>No UTMB shuttle ever runs Chamonix → Les Houches. The car in Chamonix is the only night ride home.</span></div>
+      <div class="rule"><span class="rule__b"></span><span>No UTMB shuttle runs Chamonix → Les Houches. The car in Chamonix is the night ride home.</span></div>
       <div class="rule"><span class="rule__b"></span><span>Phones: offline maps of the valley downloaded; power banks charged; this PDF saved to phone.</span></div>
     </div>
 
     <div class="fine">
-      <b>Accuracy:</b> All bus times from the official UTMB follower timetable (French poster, transcribed &amp; verified) — published clock times, <b>NOT adjusted for the 2 h start delay</b>. Cutoffs shown assume UTMB shifted them +2h with the start (standard practice, unverified). Corrected vs our earlier infographic: NDG→Chamonix ride is 55 min (not 20).
+      <b>Accuracy:</b> All bus times from the official UTMB follower timetable.
     </div>
   </div>
 
