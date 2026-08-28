@@ -62,32 +62,32 @@
       "eta": "FRI 22:31",
       "window": "22:11–22:51",
       "cutoff": "SAT 00:00",
-      "eatHere": "30 g",
-      "handOver": "440 g carbs",
+      "eatHere": "30 g",
+      "handOver": "440 g carbs",
       "nextLeg": "9h01 to Courmayeur"
     },
     "cp7": {
       "eta": "SAT 07:32",
       "window": "07:12–07:52",
       "cutoff": "SAT 13:15",
-      "eatHere": "80 g",
-      "handOver": "400 g carbs",
+      "eatHere": "80 g",
+      "handOver": "400 g carbs",
       "nextLeg": "9h05 to Champex-Lac"
     },
     "cp11": {
       "eta": "SAT 16:37",
       "window": "16:17–16:57",
       "cutoff": "SUN 02:30",
-      "eatHere": "80 g",
-      "handOver": "260 g carbs",
+      "eatHere": "80 g",
+      "handOver": "260 g carbs",
       "nextLeg": "5h58 to Vallorcine"
     },
     "cp13": {
       "eta": "SAT 22:35",
       "window": "22:15–22:55",
       "cutoff": "SUN 11:15",
-      "eatHere": "30 g",
-      "handOver": "190 g carbs",
+      "eatHere": "30 g",
+      "handOver": "190 g carbs",
       "nextLeg": "4h04 to finish"
     },
     "finish": {
@@ -152,7 +152,7 @@
         },
         {
           "time": "~21:05",
-          "text": "At CP3 Les Contamines. Set up: he eats 30 g here, hand over 440 g carbs for the 9-hour leg to Courmayeur.",
+          "text": "At CP3 Les Contamines. Set up: he eats 30 g here, hand over 440 g carbs for the 9-hour leg to Courmayeur.",
           "link": "cp3"
         },
         {
@@ -196,7 +196,7 @@
         },
         {
           "time": "07:32",
-          "text": "SUHA — window 07:12–07:52. He eats 80 g here, hand over 400 g carbs. Cutoff 13:15.",
+          "text": "SUHA — window 07:12–07:52. He eats 80 g here, hand over 400 g carbs. Cutoff SAT 13:15.",
           "link": null,
           "eta": true
         },
@@ -234,7 +234,7 @@
         },
         {
           "time": "16:37",
-          "text": "SUHA — window 16:17–16:57. He eats 80 g here, hand over 260 g carbs. Cutoff SUN 02:30.",
+          "text": "SUHA — window 16:17–16:57. He eats 80 g here, hand over 260 g carbs. Cutoff SUN 02:30.",
           "link": null,
           "eta": true,
           "warn": "Watch live tracking from noon. If he is +N min at Courmayeur/Grand Col Ferret, leave N min later — never shrink the buffer below 1 h."
@@ -298,7 +298,7 @@
       "steps": [
         {
           "time": "22:35",
-          "text": "SUHA at CP13 Vallorcine — window 22:15–22:55. He eats 30 g, hand over 190 g carbs. Last leg: 4h to the finish. Cutoff SUN 11:15.",
+          "text": "SUHA at CP13 Vallorcine — window 22:15–22:55. He eats 30 g, hand over 190 g carbs. Last leg: 4h to the finish. Cutoff SUN 11:15.",
           "link": "cp13",
           "eta": true
         }
@@ -352,22 +352,22 @@
     {
       "route": "Chamonix (M. Nordique) → Orsières",
       "when": "SAT",
-      "detail": "from 05:30 · every 45 min · until 03:00 · ride 80 min · Swiss pass"
+      "detail": "from 05:30 · every 45 min · until SUN 03:00 · ride 80 min · Swiss pass"
     },
     {
       "route": "Orsières ↔ Champex-Lac",
       "when": "SAT",
-      "detail": "from 07:00 · every 30 min · until 04:00 · ride 25 min"
+      "detail": "from 07:00 · every 30 min · until SUN 04:00 · ride 25 min"
     },
     {
       "route": "Orsières → Trient",
       "when": "SAT",
-      "detail": "every 30 min · until 04:00 · ride 45 min"
+      "detail": "from 08:45 · every 30 min · until SUN 04:00 · ride 45 min"
     },
     {
       "route": "Trient → Vallorcine",
       "when": "SAT",
-      "detail": "every 30 min · until SUN 09:00 · ride 15 min"
+      "detail": "from 09:00 · every 30 min · until SUN 09:00 · ride 15 min"
     },
     {
       "route": "Chamonix (M. Nordique) ↔ Vallorcine",

@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UTMB 2026 — Crew Day Plan</title>
+<style>
+/* ============================================================
+   UTMB 2026 — CREW DAY PLAN
+   2 pages, A4 PORTRAIT. Self-contained: no external assets,
+   no webfonts, no network, no JavaScript.
+   Every time / ETA / warning / link URL is copied verbatim from
+   transport/day-plan-data.json. Nothing here is recomputed.
+   Accents: France #2dd4bf · Italy #38bdf8 · Switzerland #f5b52e
+   ============================================================ */
+
+@page { size: A4 portrait; margin: 0; }
+
+:root{
+  --bg:#0d1230;
+  --bg2:#0a0e26;
+  --card:#151b3d;
+  --card2:#1a2149;
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(255,255,255,.16);
+  --ink:#f4f6ff;
+  --ink70:rgba(244,246,255,.72);
+  --ink55:rgba(244,246,255,.56);
+  --ink40:rgba(244,246,255,.40);
+
+  --fr:#2dd4bf;   /* France      */
+  --it:#38bdf8;   /* Italy       */
+  --ch:#f5b52e;   /* Switzerland */
+  --warn:#fb923c;
+  --warnbg:rgba(251,146,60,.13);
+  --warnink:#ffd7b0;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+html{ background:#05081a; }
+
+body{
+  font-family:-apple-system,"Avenir Next","Helvetica Neue",sans-serif;
+  color:var(--ink);
+  font-size:11.5px;
+  line-height:1.33;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
+}
+
+.page{
+  width:210mm;
+  height:297mm;
+  background:
+    radial-gradient(120% 55% at 82% -8%, rgba(45,212,191,.11) 0%, rgba(45,212,191,0) 60%),
+    radial-gradient(90% 45% at 8% 104%, rgba(56,189,248,.09) 0%, rgba(56,189,248,0) 60%),
+    var(--bg);
+  padding:8mm 6.5mm 5mm;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  overflow:hidden;
+  page-break-after:always;
+  break-after:page;
+}
+.page:last-of-type{ page-break-after:auto; break-after:auto; }
+
+/* Page 1 has room to spare once the bus table lands there; spend it on
+   breathing space rather than leaving a dead band at the foot. */
+.page--one .stack{ gap:3.1mm; }
+.page--one .leg{ padding-top:2.4mm; padding-bottom:2.4mm; }
+.page--one .step{ padding:4.2px 0; }
+.page--one .leg__h{ margin-bottom:1.7mm; }
+
+/* Page 2 carries four legs plus the footer checklist: same type sizes,
+   tighter gutters. Every type size on both pages is >= 10.8px (8.1pt),
+   so the room for that floor is bought here, in the gutters. */
+.page--two{ padding-top:6mm; }
+.page--two .leg{ padding-top:.9mm; padding-bottom:.9mm; }
+.page--two .step{ padding:1px 0; }
+.page--two .plan .step{ padding:.8px 0; }
+.page--two .leg__h{ margin-bottom:.9mm; }
+.page--two .foot{ margin-top:1.2mm; }
+.page--two .stack--tight{ gap:1.1mm; }
+
+@media screen{
+  body{ display:flex; flex-direction:column; align-items:center; gap:6mm; padding:6mm 0; }
+  .page{ box-shadow:0 10px 40px rgba(0,0,0,.6); }
+}
+
+/* ---------------------------------------------------- type helpers ---- */
+.tt{ text-transform:uppercase; letter-spacing:.13em; font-weight:800; }
+.num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+b,strong{ font-weight:800; }
+
+/* ---------------------------------------------------------- header ---- */
+.mast{
+  flex:0 0 auto;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:6mm;
+  padding-bottom:3.2mm;
+  border-bottom:1.5px solid var(--line2);
+  margin-bottom:3.2mm;
+}
+.mast__kick{ font-size:10.8px; letter-spacing:.22em; font-weight:800; text-transform:uppercase; color:var(--fr); margin-bottom:1.2mm; }
+.mast__title{ font-size:25px; line-height:.98; font-weight:800; letter-spacing:-.018em; }
+.mast__title em{ font-style:normal; color:var(--fr); }
+.mast__sub{ font-size:11px; color:var(--ink70); margin-top:1.2mm; font-weight:600; }
+.mast__pg{
+  flex:0 0 auto; text-align:right;
+  border:1.5px solid var(--line2); border-radius:12px;
+  padding:1.8mm 2.6mm; background:rgba(255,255,255,.04);
+}
+.mast__pgn{ font-size:19px; font-weight:800; line-height:1; }
+.mast__pgl{ font-size:10.8px; letter-spacing:.10em; font-weight:800; text-transform:uppercase; color:var(--ink55); margin-top:.8mm; }
+
+/* page-2 slim header */
+.mast--slim{ padding-bottom:1.1mm; margin-bottom:1.2mm; align-items:center; gap:3mm; }
+.mast--slim .mast__title{ font-size:17.5px; }
+.mast--slim .mast__sub{ font-size:10.8px; margin-top:.7mm; }
+.mast--slim .mast__pg{ padding:1.3mm 2mm; }
+.mast--slim .mast__pgn{ font-size:16px; }
+
+/* ------------------------------------------------ live tracking cta ---- */
+.live{
+  flex:0 0 auto;
+  display:flex; align-items:center; gap:2.6mm;
+  text-decoration:none; color:#06231f;
+  background:linear-gradient(96deg,#2dd4bf 0%,#5eead4 58%,#38bdf8 100%);
+  border-radius:14px;
+  padding:2.9mm 3.4mm;
+  margin-bottom:2.6mm;
+  box-shadow:0 2px 0 rgba(255,255,255,.22) inset;
+}
+.live__dot{
+  width:9px; height:9px; border-radius:50%; background:#b91c1c;
+  box-shadow:0 0 0 3.5px rgba(185,28,28,.28); flex:0 0 auto;
+}
+.live__t{ flex:1 1 auto; }
+.live__l{ font-size:13.5px; font-weight:800; letter-spacing:.02em; line-height:1.1; }
+.live__u{ font-size:10.8px; font-weight:700; opacity:.78; margin-top:.6mm; letter-spacing:.01em; }
+.live__go{ font-size:12px; font-weight:800; letter-spacing:.10em; text-transform:uppercase; white-space:nowrap; }
+
+.live--slim{ flex:0 0 auto; padding:1.5mm 2.2mm; margin-bottom:0; border-radius:10px; gap:1.6mm; }
+.live--slim .live__dot{ width:7.5px; height:7.5px; box-shadow:0 0 0 2.8px rgba(185,28,28,.28); }
+.live--slim .live__l{ font-size:10.8px; line-height:1.05; }
+.live--slim .live__go{ font-size:11px; }
+
+/* ------------------------------------------------------- eta note ----- */
+.note{
+  flex:0 0 auto;
+  display:flex; gap:2.4mm; align-items:flex-start;
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:2.1mm 2.8mm;
+  font-size:10.8px; line-height:1.30; color:var(--ink70);
+  margin-bottom:2.5mm;
+}
+.note__i{ flex:0 0 auto; font-size:11px; }
+.note b{ color:var(--ink); }
+
+/* --------------------------------------------------- eta overview ----- */
+.ov{ flex:0 0 auto; margin-bottom:3mm; }
+.ov__h{
+  display:flex; align-items:baseline; justify-content:space-between; gap:4mm;
+  margin-bottom:1.8mm;
+}
+.ov__t{ font-size:10.8px; letter-spacing:.16em; font-weight:800; text-transform:uppercase; color:var(--ink55); }
+.legend{ display:flex; gap:2.8mm; font-size:10.8px; letter-spacing:.07em; font-weight:800; text-transform:uppercase; color:var(--ink55); }
+.legend i{ font-style:normal; display:inline-flex; align-items:center; gap:1.1mm; }
+.legend i::before{ content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
+.legend .l-fr{ color:var(--fr); } .legend .l-it{ color:var(--it); } .legend .l-ch{ color:var(--ch); }
+
+.ov__grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:2mm; }
+.chip{
+  border:1.5px solid var(--acc,var(--line2));
+  border-radius:13px;
+  background:rgba(255,255,255,.04);
+  padding:1.9mm 1.6mm 2.1mm;
+  text-align:center;
+}
+.chip__k{ font-size:10.8px; letter-spacing:.09em; font-weight:800; text-transform:uppercase; color:var(--acc); }
+.chip__v{ font-size:14.5px; font-weight:800; line-height:1.05; margin-top:.9mm; letter-spacing:-.01em; }
+.chip__w{ font-size:10.8px; color:var(--ink55); margin-top:.8mm; font-weight:700; }
+.chip--fin{ background:var(--acc); border-color:var(--acc); }
+.chip--fin .chip__k{ color:rgba(6,35,31,.72); }
+.chip--fin .chip__v{ color:#06231f; }
+.chip--fin .chip__w{ color:rgba(6,35,31,.72); }
+
+/* ------------------------------------------------------- leg cards ---- */
+.stack{ display:flex; flex-direction:column; gap:2.6mm; }
+.stack--tight{ gap:1.5mm; }
+
+.leg{
+  --acc:var(--fr);
+  background:linear-gradient(180deg,var(--card2) 0%,var(--card) 100%);
+  border:1px solid var(--line);
+  border-left:4px solid var(--acc);
+  border-radius:16px;
+  padding:1.8mm 3mm 1.8mm 2.6mm;
+}
+.leg--fr{ --acc:var(--fr); }
+.leg--it{ --acc:var(--it); }
+.leg--ch{ --acc:var(--ch); }
+
+.leg__h{ display:flex; align-items:center; gap:2.4mm; margin-bottom:1.5mm; }
+.leg__day{
+  flex:0 0 auto;
+  font-size:10.8px; letter-spacing:.09em; font-weight:800; text-transform:uppercase;
+  color:#0a0e26; background:var(--acc); border-radius:7px; padding:.9mm 1.6mm;
+}
+.leg__t{ flex:1 1 auto; font-size:14.5px; font-weight:800; letter-spacing:-.012em; line-height:1.12; }
+.leg__c{
+  flex:0 0 auto; font-size:10.8px; letter-spacing:.09em; font-weight:800; text-transform:uppercase;
+  color:var(--acc); border:1.2px solid var(--acc); border-radius:7px; padding:.5mm 1.4mm; opacity:.92;
+  white-space:nowrap;
+}
+
+/* ---------------------------------------------------------- steps ----- */
+.steps{ position:relative; padding-left:15px; display:flex; flex-direction:column; }
+.steps::before{
+  content:""; position:absolute; left:4px; top:10px; bottom:10px;
+  border-left:1.5px dotted rgba(255,255,255,.24);
+}
+.step{
+  position:relative;
+  display:grid; grid-template-columns:84px 1fr auto;
+  gap:0 9px; align-items:start;
+  padding:1.3px 0;
+}
+.step::before{
+  content:""; position:absolute; left:-14.5px; top:8px;
+  width:6px; height:6px; border-radius:50%;
+  background:var(--bg); border:1.5px solid var(--acc);
+}
+.t{
+  justify-self:start;
+  font-size:11.6px; font-weight:800; line-height:1.18;
+  font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;
+  color:var(--acc);
+  background:color-mix(in srgb, var(--acc) 14%, transparent);
+  border:1px solid color-mix(in srgb, var(--acc) 38%, transparent);
+  border-radius:7px; padding:1.5px 5px;
+  white-space:nowrap;
+}
+.t--w{ font-size:10.8px; padding:1.9px 4px; letter-spacing:-.012em; }
+.tx{ font-size:11.5px; line-height:1.24; padding-top:1.5px; }
+.tx b{ color:#fff; }
+
+/* navigate pill — carries the link's own label, verbatim from
+   day-plan-data.json links.*.label, so two pills are never identical. */
+.nav{
+  justify-self:end; align-self:start; margin-top:.5px;
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:10.8px; font-weight:800; letter-spacing:.01em;
+  text-decoration:none; white-space:nowrap;
+  color:var(--acc);
+  background:color-mix(in srgb, var(--acc) 13%, transparent);
+  border:1.2px solid color-mix(in srgb, var(--acc) 45%, transparent);
+  border-radius:999px; padding:1.6px 6px 2px;
+}
+.nav--sm{ font-size:10.8px; padding:1.4px 5.5px 1.8px; }
+.nav--dark{
+  color:#06231f; background:rgba(6,35,31,.13); border-color:rgba(6,35,31,.40);
+}
+
+/* ------------------------------------------------------ warn strip ---- */
+.warn{
+  grid-column:1 / -1;
+  display:flex; gap:2mm; align-items:flex-start;
+  margin:1.1mm 0 .5mm;
+  background:var(--warnbg);
+  border:1px solid rgba(251,146,60,.42);
+  border-left:3.5px solid var(--warn);
+  border-radius:9px;
+  padding:1.1mm 1.8mm;
+  font-size:10.8px; line-height:1.24; color:var(--warnink);
+}
+.warn__i{ flex:0 0 auto; color:var(--warn); font-weight:800; font-size:11px; line-height:1.2; }
+.warn b{ color:#fff; }
+
+/* ------------------------------------------------------- eta band ----- */
+.step.eta{
+  display:block;
+  background:var(--acc);
+  border-radius:12px;
+  padding:1.1mm 1.9mm;
+  margin:.5mm 0 .4mm;
+  color:#06231f;
+}
+.step.eta::before{
+  width:9px; height:9px; background:var(--acc); border-color:var(--acc);
+  left:-16px; top:11px;
+}
+.eta__row{ display:flex; align-items:flex-start; gap:2.4mm; }
+.eta__t{
+  flex:0 0 auto; font-size:16px; font-weight:800; line-height:1.05;
+  font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;
+  letter-spacing:-.02em; padding-top:.2mm;
+}
+.eta__x{ flex:1 1 auto; font-size:11.6px; line-height:1.26; font-weight:600; padding-top:.4mm; }
+.eta__x b{ font-size:13.5px; font-weight:800; letter-spacing:.06em; }
+.eta__b{ display:flex; flex-wrap:wrap; gap:1.2mm; margin-top:.6mm; }
+.eta__b span{
+  font-size:10.8px; font-weight:800; letter-spacing:.01em;
+  background:rgba(6,35,31,.14); border:1px solid rgba(6,35,31,.22);
+  border-radius:7px; padding:.5mm 1.4mm; color:#06231f;
+}
+.eta__b i{
+  font-style:normal; font-size:10.8px; font-weight:800; letter-spacing:.05em;
+  text-transform:uppercase; color:rgba(6,35,31,.78); margin-right:1mm;
+}
+.step.eta .warn{
+  margin:1.4mm 0 0;
+  background:rgba(6,35,31,.13);
+  border:1px solid rgba(6,35,31,.24);
+  border-left:3.5px solid #7c2d12;
+  color:#06231f;
+}
+.step.eta .warn__i{ color:#7c2d12; }
+.step.eta .warn b{ color:#06231f; }
+
+/* --------------------------------------------------------- sub-plans -- */
+.pick{
+  display:flex; align-items:center; gap:2mm;
+  font-size:10.8px; letter-spacing:.14em; font-weight:800; text-transform:uppercase;
+  color:var(--acc); margin:.2mm 0 .7mm;
+}
+.pick::after{ content:""; flex:1 1 auto; height:1px; background:color-mix(in srgb, var(--acc) 34%, transparent); }
+.plans{ display:grid; grid-template-columns:1fr 1fr; gap:2.4mm; }
+.plan{
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:1.2mm 1.8mm 1mm;
+}
+.plan__h{ font-size:10.8px; font-weight:800; line-height:1.2; margin-bottom:1mm; color:#fff; }
+.plan .steps{ padding-left:13px; }
+.plan .steps::before{ left:3px; }
+.plan .step{ grid-template-columns:58px 1fr; gap:0 6px; padding:1.2px 0; }
+.plan .step::before{ left:-12.5px; }
+.plan .t{ font-size:10.8px; padding:1.2px 4px; }
+.plan .t--w{ font-size:10.8px; }
+.plan .tx{ font-size:10.8px; line-height:1.22; }
+/* In the narrow Plan A / Plan B columns the pill is given a row of its own
+   under the step text instead of sitting beside the first text line, so a
+   sentence is never read as "… every [pill] / 30)". */
+.plan .nav{
+  grid-column:1 / -1;
+  justify-self:start; align-self:start;
+  margin:.6px 0 0 58px; padding:1.2px 5.5px 1.6px;
+}
+
+/* --------------------------------------------------- bus reference ---- */
+.foot{ flex:0 0 auto; margin-top:2mm; }
+.sec__t{
+  font-size:10.8px; letter-spacing:.16em; font-weight:800; text-transform:uppercase;
+  color:var(--ink55); margin-bottom:1.2mm;
+  display:flex; align-items:center; gap:2mm;
+}
+.sec__t::after{ content:""; flex:1 1 auto; height:1px; background:var(--line); }
+
+.ref{
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:1.6mm 2.4mm;
+}
+.ref table{ width:100%; border-collapse:collapse; }
+.ref td{ padding:1mm .7mm; border-bottom:1px solid rgba(255,255,255,.075); vertical-align:middle; }
+.ref tr:last-child td{ border-bottom:0; }
+.ref .c-w{ width:17mm; }
+.ref .c-r{ width:62mm; }
+.ref .w{
+  font-size:10.8px; letter-spacing:.02em; font-weight:800;
+  color:var(--ink55); white-space:nowrap;
+}
+.ref .r{ font-size:10.8px; font-weight:800; color:#fff; line-height:1.18; }
+.ref .d{
+  font-size:10.8px; color:var(--ink70); line-height:1.2;
+  font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;
+}
+.ref .d b{ color:var(--ch); font-weight:800; }
+
+/* -------------------------------------------------------- rules ------- */
+.rules{ display:grid; grid-template-columns:1fr 1fr; gap:.8mm 3mm; }
+.rule{ display:flex; gap:1.7mm; align-items:flex-start; font-size:10.8px; line-height:1.24; color:var(--ink70); }
+.rule__b{
+  flex:0 0 auto; width:9px; height:9px; margin-top:2px;
+  border:1.5px solid var(--fr); border-radius:3px;
+}
+.rule b{ color:#fff; }
+
+/* --ink40 composites to ~3.6:1 on --bg, below the 4.5:1 AA floor for body
+   text; --ink55 measures ~6.0:1 on the same ground. */
+.fine{
+  margin-top:1.2mm; padding-top:1mm; border-top:1px solid var(--line);
+  font-size:10.8px; line-height:1.26; color:var(--ink55);
+}
+.fine b{ color:var(--ink); font-weight:800; }
+</style>
+</head>
+<body>
+
+<!-- ================================================================== -->
+<!-- PAGE 1 — header · live tracking · ETA overview · FRI legs          -->
+<!-- ================================================================== -->
+<section class="page page--one">
+
+  <header class="mast">
+    <div>
+      <div class="mast__kick">Friday 28 → Sunday 30 August 2026</div>
+      <h1 class="mast__title">UTMB 2026 — <em>Crew Day Plan</em></h1>
+      <div class="mast__sub">Suha's crew · Les Houches base · Fri 28 – Sun 30 Aug 2026</div>
+    </div>
+    <div class="mast__pg">
+      <div class="mast__pgn">1<span style="opacity:.35">/2</span></div>
+      <div class="mast__pgl">Fri 28</div>
+    </div>
+  </header>
+
+  <a class="live" href="https://live.utmb.world/utmb/2026/runners/1056" title="TRACK SUHA LIVE — bib 1056">
+    <span class="live__dot"></span>
+    <span class="live__t">
+      <span class="live__l">TRACK SUHA LIVE — bib 1056</span>
+      <span class="live__u">live.utmb.world/utmb/2026/runners/1056</span>
+    </span>
+    <span class="live__go">Open ↗</span>
+  </a>
+
+  <div class="note">
+    <span class="note__i">⏱</span>
+    <span>Runner ETAs from pace plan, ±20 min windows. If he is +N min late at the last timing point, shift your departure by N. Always keep ≥1 h buffer.</span>
+  </div>
+
+  <section class="ov">
+    <div class="ov__h">
+      <div class="ov__t">Runner ETA overview</div>
+      <div class="legend">
+        <i class="l-fr">France</i><i class="l-it">Italy</i><i class="l-ch">Switzerland</i>
+      </div>
+    </div>
+    <div class="ov__grid">
+      <div class="chip" style="--acc:var(--fr)">
+        <div class="chip__k">CP3</div>
+        <div class="chip__v num">FRI 22:31</div>
+        <div class="chip__w num">22:11–22:51</div>
+      </div>
+      <div class="chip" style="--acc:var(--it)">
+        <div class="chip__k">CP7</div>
+        <div class="chip__v num">SAT 07:32</div>
+        <div class="chip__w num">07:12–07:52</div>
+      </div>
+      <div class="chip" style="--acc:var(--ch)">
+        <div class="chip__k">CP11</div>
+        <div class="chip__v num">SAT 16:37</div>
+        <div class="chip__w num">16:17–16:57</div>
+      </div>
+      <div class="chip" style="--acc:var(--fr)">
+        <div class="chip__k">CP13</div>
+        <div class="chip__v num">SAT 22:35</div>
+        <div class="chip__w num">22:15–22:55</div>
+      </div>
+      <div class="chip chip--fin" style="--acc:var(--fr)">
+        <div class="chip__k">Finish</div>
+        <div class="chip__v num">SUN ~02:39</div>
+        <div class="chip__w">Chamonix</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stack">
+
+    <!-- ---------------------------------------------- fri-prerace ---- -->
+    <article class="leg leg--fr">
+      <div class="leg__h">
+        <span class="leg__day">FRI 28</span>
+        <h2 class="leg__t">Start + Les Houches pass</h2>
+        <span class="leg__c">France</span>
+      </div>
+      <div class="steps">
+
+        <div class="step">
+          <span class="t num">16:00</span>
+          <span class="tx">Drop Suha at the start, Chamonix.</span>
+        </div>
+
+        <div class="step">
+          <span class="t num">16:10</span>
+          <span class="tx">Park + charge the car at Réseau eborn charging station.</span>
+          <a class="nav" href="https://maps.app.goo.gl/DRy7772zP2xyWsrr6" title="Réseau eborn charger (park+charge)">📍 Réseau eborn charger (park+charge)</a>
+        </div>
+
+        <div class="step">
+          <span class="t num">17:45</span>
+          <span class="tx">Watch the start.</span>
+        </div>
+
+        <div class="step">
+          <span class="t num">18:00</span>
+          <span class="tx">Drive back to base, Les Houches (15 min).</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — 100 Rte de la Gare, Les Houches">📍 Base — 100 Rte de la Gare, Les Houches</a>
+        </div>
+
+        <div class="step">
+          <span class="t t--w num">18:30–19:15</span>
+          <span class="tx">Suha passes Les Houches (km 9.1). Water point only — no assistance allowed.</span>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- ------------------------------------------------- fri-cp3 ----- -->
+    <article class="leg leg--fr">
+      <div class="leg__h">
+        <span class="leg__day">FRI 28</span>
+        <h2 class="leg__t">CP3 · Les Contamines — runner 22:31 ±20</h2>
+        <span class="leg__c">France</span>
+      </div>
+      <div class="steps">
+
+        <div class="step">
+          <span class="t num">19:30</span>
+          <span class="tx">Drive base → Chamonix, park at Parking du Grépon.</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon, Chamonix">📍 Parking du Grépon, Chamonix</a>
+        </div>
+
+        <div class="step">
+          <span class="t num">20:00</span>
+          <span class="tx">Be AT the Grépon bus stop. Aim for the 20:15 bus.</span>
+          <div class="warn"><span class="warn__i">⚠</span><span>20:30 is the LAST bus of the day on this line — treat it as gone. Do not cut it close.</span></div>
+        </div>
+
+        <div class="step">
+          <span class="t num">20:15</span>
+          <span class="tx">Bus Chamonix → Les Contamines (~50 min, every 15 min).</span>
+        </div>
+
+        <div class="step">
+          <span class="t num">~21:05</span>
+          <span class="tx">At CP3 Les Contamines. Set up: he eats 30 g here, hand over 440 g carbs for the 9-hour leg to Courmayeur.</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=45.82254%2C6.72586" title="CP3 Les Contamines (km 32.5)">📍 CP3 Les Contamines (km 32.5)</a>
+        </div>
+
+        <div class="step eta">
+          <div class="eta__row">
+            <span class="eta__t">22:31</span>
+            <span class="eta__x"><b>SUHA</b> — window 22:11–22:51. Cutoff SAT 00:00.</span>
+          </div>
+          <div class="eta__b">
+            <span><i>Eats here</i><b>30 g</b></span>
+            <span><i>Hand over</i><b>440 g carbs</b></span>
+            <span><i>Next leg</i><b>9h01 to Courmayeur</b></span>
+          </div>
+        </div>
+
+        <div class="step">
+          <span class="t num">~23:00</span>
+          <span class="tx">Return bus Contamines/NDG → Chamonix (every 30 min, ride 55 min). Buses ~23:00 / 23:30 / 00:00 / 00:30.</span>
+          <div class="warn"><span class="warn__i">⚠</span><span>Plan for the 00:30 bus as the LAST one out. The printed 01:00 is unverified as a departure — ask a driver.</span></div>
+        </div>
+
+        <div class="step">
+          <span class="t num">~00:00</span>
+          <span class="tx">Chamonix ~23:55–00:25 → car at Grépon → base ~00:15–00:45. Sleep fast.</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — 100 Rte de la Gare, Les Houches">📍 Base — 100 Rte de la Gare, Les Houches</a>
+        </div>
+
+      </div>
+    </article>
+
+  </div>
+
+  <div class="foot">
+    <div class="sec__t">Bus reference</div>
+    <div class="ref">
+      <table>
+        <tr>
+          <td class="c-w w">FRI</td>
+          <td class="c-r r">Chamonix (Grépon) → Les Contamines</td>
+          <td class="d">17:30 first · every 15 min · <b>LAST 20:30</b> · ride ~50 min</td>
+        </tr>
+        <tr>
+          <td class="c-w w">FRI night</td>
+          <td class="c-r r">Contamines/NDG → Chamonix</td>
+          <td class="d">20:30 first · every 30 min · <b>plan on 00:30 last</b> (01:00 unverified) · ride 55 min</td>
+        </tr>
+        <tr>
+          <td class="c-w w">SAT</td>
+          <td class="c-r r">Chamonix (M. Nordique) ↔ Courmayeur</td>
+          <td class="d">from 00:30 · every 30 min on :00/:30 · until 20:30 · ride 45 min</td>
+        </tr>
+        <tr>
+          <td class="c-w w">SAT</td>
+          <td class="c-r r">Chamonix (M. Nordique) → Orsières</td>
+          <td class="d">from 05:30 · every 45 min · until SUN 03:00 · ride 80 min · Swiss pass</td>
+        </tr>
+        <tr>
+          <td class="c-w w">SAT</td>
+          <td class="c-r r">Orsières ↔ Champex-Lac</td>
+          <td class="d">from 07:00 · every 30 min · until SUN 04:00 · ride 25 min</td>
+        </tr>
+        <tr>
+          <td class="c-w w">SAT</td>
+          <td class="c-r r">Orsières → Trient</td>
+          <td class="d">from 08:45 · every 30 min · until SUN 04:00 · ride 45 min</td>
+        </tr>
+        <tr>
+          <td class="c-w w">SAT</td>
+          <td class="c-r r">Trient → Vallorcine</td>
+          <td class="d">from 09:00 · every 30 min · until SUN 09:00 · ride 15 min</td>
+        </tr>
+        <tr>
+          <td class="c-w w">SAT</td>
+          <td class="c-r r">Chamonix (M. Nordique) ↔ Vallorcine</td>
+          <td class="d">from 05:00 · every 30 min on :00/:30 · until SUN 12:30 · ride 30 min</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<!-- ================================================================== -->
+<!-- PAGE 2 — SAT legs · finish · ground rules                          -->
+<!-- ================================================================== -->
+<section class="page page--two">
+
+  <header class="mast mast--slim">
+    <div>
+      <h1 class="mast__title">UTMB 2026 — <em>Crew Day Plan</em></h1>
+      <div class="mast__sub">Saturday 29 → Sunday 30 August · CP7 · CP11 · CP13 · Finish</div>
+    </div>
+    <a class="live live--slim" href="https://live.utmb.world/utmb/2026/runners/1056" title="TRACK SUHA LIVE — bib 1056">
+      <span class="live__dot"></span>
+      <span class="live__t"><span class="live__l">TRACK SUHA LIVE — bib 1056</span></span>
+      <span class="live__go">↗</span>
+    </a>
+    <div class="mast__pg">
+      <div class="mast__pgn">2<span style="opacity:.35">/2</span></div>
+      <div class="mast__pgl">Sat 29 – Sun 30</div>
+    </div>
+  </header>
+
+  <div class="stack stack--tight">
+
+    <!-- ------------------------------------------------- sat-cp7 ----- -->
+    <article class="leg leg--it">
+      <div class="leg__h">
+        <span class="leg__day">SAT 29</span>
+        <h2 class="leg__t">CP7 · Courmayeur — runner 07:32 ±20</h2>
+        <span class="leg__c">Italy</span>
+      </div>
+      <div class="steps">
+
+        <div class="step">
+          <span class="t num">05:00</span>
+          <span class="tx">Drive base → Chamonix, park (Grépon).</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon, Chamonix">📍 Parking du Grépon, Chamonix</a>
+        </div>
+
+        <div class="step">
+          <span class="t num">05:30</span>
+          <span class="tx">Bus Maison Nordique → Courmayeur (45 min, every 30 min on :00/:30).</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=La+Maison+Nordique%2C+Chamonix" title="Maison Nordique bus stop, Chamonix">📍 Maison Nordique bus stop, Chamonix</a>
+        </div>
+
+        <div class="step">
+          <span class="t num">06:15</span>
+          <span class="tx">At CP7 Courmayeur Sport Center — 1h17 buffer. (06:00 bus → 06:45 also works.)</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=45.79492%2C6.96442" title="CP7 Courmayeur Sport Center (km 83.4)">📍 CP7 Courmayeur Sport Center (km 83.4)</a>
+        </div>
+
+        <div class="step eta">
+          <div class="eta__row">
+            <span class="eta__t">07:32</span>
+            <span class="eta__x"><b>SUHA</b> — window 07:12–07:52. He eats 80 g here, hand over 400 g carbs. Cutoff SAT 13:15.</span>
+          </div>
+          <div class="eta__b">
+            <span><i>Eats here</i><b>80 g</b></span>
+            <span><i>Hand over</i><b>400 g carbs</b></span>
+            <span><i>Next leg</i><b>9h05 to Champex-Lac</b></span>
+          </div>
+        </div>
+
+        <div class="step">
+          <span class="t num">~08:30</span>
+          <span class="tx">Return bus Courmayeur → Chamonix (every 30 min) → Chamonix ~09:15 → car → base. REST.</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — 100 Rte de la Gare, Les Houches">📍 Base — 100 Rte de la Gare, Les Houches</a>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- ------------------------------------------------ sat-cp11 ----- -->
+    <article class="leg leg--ch">
+      <div class="leg__h">
+        <span class="leg__day">SAT 29</span>
+        <h2 class="leg__t">CP11 · Champex-Lac — runner 16:37 ±20 · HARDEST LEG</h2>
+        <span class="leg__c">Switzerland</span>
+      </div>
+      <div class="steps">
+
+        <div class="step">
+          <span class="t num">12:30</span>
+          <span class="tx">Drive base → Chamonix, park. (Recommended — earlier than the 13:00 you planned.)</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon, Chamonix">📍 Parking du Grépon, Chamonix</a>
+        </div>
+
+        <div class="step">
+          <span class="t num">13:00</span>
+          <span class="tx">Bus Maison Nordique → Orsières (80 min, every 45 min: 12:15 / 13:00 / 13:45). Swiss pass needed.</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=La+Maison+Nordique%2C+Chamonix" title="Maison Nordique bus stop, Chamonix">📍 Maison Nordique bus stop, Chamonix</a>
+        </div>
+
+        <div class="step">
+          <span class="t num">14:20</span>
+          <span class="tx">Orsières — connect to Champex-Lac bus (~14:30, every 30 min, 25 min ride).</span>
+        </div>
+
+        <div class="step">
+          <span class="t num">14:55</span>
+          <span class="tx">At CP11 Champex-Lac — 1h42 buffer. (Your 13:45-bus plan lands 15:55 = only 42 min buffer.)</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.02608%2C7.12109" title="CP11 Champex-Lac (km 130.5)">📍 CP11 Champex-Lac (km 130.5)</a>
+        </div>
+
+        <div class="step eta">
+          <div class="eta__row">
+            <span class="eta__t">16:37</span>
+            <span class="eta__x"><b>SUHA</b> — window 16:17–16:57. He eats 80 g here, hand over 260 g carbs. Cutoff SUN 02:30.</span>
+          </div>
+          <div class="eta__b">
+            <span><i>Eats here</i><b>80 g</b></span>
+            <span><i>Hand over</i><b>260 g carbs</b></span>
+            <span><i>Next leg</i><b>5h58 to Vallorcine</b></span>
+          </div>
+          <div class="warn"><span class="warn__i">⚠</span><span>Watch live tracking from noon. If he is +N min at Courmayeur/Grand Col Ferret, leave N min later — never shrink the buffer below 1 h.</span></div>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- ------------------------------------------------ sat-cp13 ----- -->
+    <article class="leg leg--fr">
+      <div class="leg__h">
+        <span class="leg__day">SAT 29</span>
+        <h2 class="leg__t">CP11 → CP13 · Vallorcine — runner 22:35 ±20 · pick ONE</h2>
+        <span class="leg__c">CH → France</span>
+      </div>
+
+      <div class="pick">Pick ONE — A or B</div>
+      <div class="plans">
+
+        <div class="plan">
+          <div class="plan__h">Plan A — via home (tight: ~1h20 at base)</div>
+          <div class="steps">
+            <div class="step">
+              <span class="t num">~17:15</span>
+              <span class="tx">Champex → Orsières bus (25 min, every 30).</span>
+            </div>
+            <div class="step">
+              <span class="t num">~17:45</span>
+              <span class="tx">Orsières → Chamonix bus (80 min, every 45).</span>
+            </div>
+            <div class="step">
+              <span class="t num">~19:10</span>
+              <span class="tx">Chamonix → car → base. Eat, repack.</span>
+              <a class="nav nav--sm" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — 100 Rte de la Gare, Les Houches">📍 Base — 100 Rte de la Gare, Les Houches</a>
+            </div>
+            <div class="step">
+              <span class="t num">20:45</span>
+              <span class="tx">Drive back to Chamonix, park.</span>
+              <a class="nav nav--sm" href="https://www.google.com/maps/dir/?api=1&amp;destination=Parking+du+Gr%C3%A9pon%2C+Chamonix" title="Parking du Grépon, Chamonix">📍 Parking du Grépon, Chamonix</a>
+            </div>
+            <div class="step">
+              <span class="t num">21:00</span>
+              <span class="tx">Bus Maison Nordique → Vallorcine (30 min, every 30). Arrive 21:30.</span>
+              <a class="nav nav--sm" href="https://www.google.com/maps/dir/?api=1&amp;destination=La+Maison+Nordique%2C+Chamonix" title="Maison Nordique bus stop, Chamonix">📍 Maison Nordique bus stop, Chamonix</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="plan">
+          <div class="plan__h">Plan B — direct, skip Chamonix (relaxed; dinner in Vallorcine; car stays in Chamonix)</div>
+          <div class="steps">
+            <div class="step">
+              <span class="t num">~17:15</span>
+              <span class="tx">Champex → Orsières bus (25 min).</span>
+            </div>
+            <div class="step">
+              <span class="t num">~17:45</span>
+              <span class="tx">Orsières → Trient bus (45 min, every 30).</span>
+            </div>
+            <div class="step">
+              <span class="t num">~18:45</span>
+              <span class="tx">Trient → Vallorcine bus (15 min, every 30). Arrive ~19:00.</span>
+              <a class="nav nav--sm" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.0324%2C6.93196" title="CP13 Vallorcine (km 158.4)">📍 CP13 Vallorcine (km 158.4)</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="steps" style="margin-top:1.4mm">
+        <div class="step eta">
+          <div class="eta__row">
+            <span class="eta__t">22:35</span>
+            <span class="eta__x"><b>SUHA</b> at CP13 Vallorcine — window 22:15–22:55. He eats 30 g, hand over 190 g carbs. Last leg: 4h to the finish. Cutoff SUN 11:15.</span>
+            <a class="nav nav--dark" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.0324%2C6.93196" title="CP13 Vallorcine (km 158.4)">📍 CP13 Vallorcine (km 158.4)</a>
+          </div>
+          <div class="eta__b">
+            <span><i>Eats here</i><b>30 g</b></span>
+            <span><i>Hand over</i><b>190 g carbs</b></span>
+            <span><i>Next leg</i><b>4h04 to finish</b></span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ----------------------------------------------- sun-finish ---- -->
+    <article class="leg leg--fr">
+      <div class="leg__h">
+        <span class="leg__day">SUN 30</span>
+        <h2 class="leg__t">Finish · Chamonix — runner ~02:39</h2>
+        <span class="leg__c">France</span>
+      </div>
+      <div class="steps">
+
+        <div class="step">
+          <span class="t num">~23:15</span>
+          <span class="tx">Bus Vallorcine → Chamonix (30 min, every 30, runs until 12:30 Sun). Arrive ~23:45.</span>
+        </div>
+
+        <div class="step">
+          <span class="t t--w num">00:00–02:30</span>
+          <span class="tx">Wait / nap in the car (Grépon).</span>
+        </div>
+
+        <div class="step eta">
+          <div class="eta__row">
+            <span class="eta__t">02:39</span>
+            <span class="eta__x"><b>SUHA FINISHES</b> — Chamonix centre. Be at the finish line by 02:15.</span>
+            <a class="nav nav--dark" href="https://www.google.com/maps/dir/?api=1&amp;destination=45.9236%2C6.86912" title="Finish — Chamonix centre">📍 Finish — Chamonix centre</a>
+          </div>
+        </div>
+
+        <div class="step">
+          <span class="t">after</span>
+          <span class="tx">Drive home to base.</span>
+          <a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=100+Route+de+la+Gare%2C+Les+Houches" title="Base — 100 Rte de la Gare, Les Houches">📍 Base — 100 Rte de la Gare, Les Houches</a>
+        </div>
+
+      </div>
+    </article>
+
+  </div>
+
+  <!-- ------------------------------------------- bus reference ------- -->
+  <div class="foot">
+
+    <!-- ---------------------------------------------------- rules ---- -->
+    <div class="sec__t">Ground rules — check all four</div>
+    <div class="rules">
+      <div class="rule"><span class="rule__b"></span><span>All shuttles need the pre-booked follower pass (France/Italy/Switzerland zones). Passes are bought.</span></div>
+      <div class="rule"><span class="rule__b"></span><span>Roads/parking CLOSED to private cars at Les Contamines, Courmayeur, Champex, Trient, Vallorcine — the bus is the only way in.</span></div>
+      <div class="rule"><span class="rule__b"></span><span>No UTMB shuttle ever runs Chamonix → Les Houches. The car in Chamonix is the only night ride home.</span></div>
+      <div class="rule"><span class="rule__b"></span><span>Phones: offline maps of the valley downloaded; power banks charged; this PDF saved to phone.</span></div>
+    </div>
+
+    <div class="fine">
+      <b>Accuracy:</b> All bus times from the official UTMB follower timetable (French poster, transcribed &amp; verified). Corrected vs our earlier infographic: NDG→Chamonix ride is 55 min (not 20).
+    </div>
+  </div>
+
+</section>
+
+</body>
+</html>
