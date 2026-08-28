@@ -1,14 +1,14 @@
 {
   "meta": {
     "title": "UTMB 2026 — Crew Day Plan",
-    "subtitle": "Suha's crew · Les Houches base · Fri 28 – Sun 30 Aug 2026",
+    "subtitle": "Suha's crew · Les Houches base · Fri 28 – Sun 30 Aug 2026 · START DELAYED TO 19:45",
     "language": "en",
-    "etaNote": "Runner ETAs from pace plan, ±20 min windows. If he is +N min late at the last timing point, shift your departure by N. Always keep ≥1 h buffer.",
+    "etaNote": "START DELAYED +2h → 19:45. All runner times below are already shifted +2h. Shuttle CLOCK times are the published ones — UTMB may or may not shift them: CONFIRM AT THE FIRST BUS STOP TONIGHT. If he is +N min late at the last timing point, shift your departure by N. Keep ≥1 h buffer.",
     "liveTracking": {
       "label": "TRACK SUHA LIVE — bib 1056",
       "url": "https://live.utmb.world/utmb/2026/runners/1056"
     },
-    "accuracyNote": "All bus times from the official UTMB follower timetable (French poster, transcribed & verified). Corrected vs our earlier infographic: NDG→Chamonix ride is 55 min (not 20)."
+    "accuracyNote": "All bus times from the official UTMB follower timetable (French poster, transcribed & verified) — published clock times, NOT adjusted for the 2 h start delay. Cutoffs shown assume UTMB shifted them +2h with the start (standard practice, unverified). Corrected vs our earlier infographic: NDG→Chamonix ride is 55 min (not 20)."
   },
   "links": {
     "eborn": {
@@ -50,48 +50,48 @@
   },
   "runner": {
     "start": {
-      "when": "FRI 17:45",
+      "when": "FRI 19:45",
       "where": "Chamonix"
     },
     "lesHouches": {
-      "when": "FRI ~18:30–19:15",
+      "when": "FRI ~20:30–21:15",
       "where": "Les Houches km 9.1",
-      "note": "water point — no assistance allowed"
+      "note": "water point — no assistance allowed. CONFLICTS with the last 20:30 bus to Contamines — see CP3 leg."
     },
     "cp3": {
-      "eta": "FRI 22:31",
-      "window": "22:11–22:51",
-      "cutoff": "SAT 00:00",
+      "eta": "SAT 00:31",
+      "window": "00:11–00:51",
+      "cutoff": "SAT 02:00 (if shifted, unverified)",
       "eatHere": "30 g",
       "handOver": "440 g carbs",
       "nextLeg": "9h01 to Courmayeur"
     },
     "cp7": {
-      "eta": "SAT 07:32",
-      "window": "07:12–07:52",
-      "cutoff": "SAT 13:15",
+      "eta": "SAT 09:32",
+      "window": "09:12–09:52",
+      "cutoff": "SAT 15:15 (if shifted, unverified)",
       "eatHere": "80 g",
       "handOver": "400 g carbs",
       "nextLeg": "9h05 to Champex-Lac"
     },
     "cp11": {
-      "eta": "SAT 16:37",
-      "window": "16:17–16:57",
-      "cutoff": "SUN 02:30",
+      "eta": "SAT 18:37",
+      "window": "18:17–18:57",
+      "cutoff": "SUN 04:30 (if shifted, unverified)",
       "eatHere": "80 g",
       "handOver": "260 g carbs",
       "nextLeg": "5h58 to Vallorcine"
     },
     "cp13": {
-      "eta": "SAT 22:35",
-      "window": "22:15–22:55",
-      "cutoff": "SUN 11:15",
+      "eta": "SUN 00:35",
+      "window": "00:15–00:55",
+      "cutoff": "SUN 13:15 (if shifted, unverified)",
       "eatHere": "30 g",
       "handOver": "190 g carbs",
       "nextLeg": "4h04 to finish"
     },
     "finish": {
-      "eta": "SUN ~02:39",
+      "eta": "SUN ~04:39",
       "where": "Chamonix"
     },
     "bib": "1056"
@@ -100,50 +100,41 @@
     {
       "id": "fri-prerace",
       "day": "FRI 28",
-      "title": "Start + Les Houches pass",
+      "title": "Start (delayed 19:45) + the Les Houches decision",
       "steps": [
         {
-          "time": "16:00",
+          "time": "18:00",
           "text": "Drop Suha at the start, Chamonix.",
           "link": null
         },
         {
-          "time": "16:10",
+          "time": "18:10",
           "text": "Park + charge the car at Réseau eborn charging station.",
           "link": "eborn"
         },
         {
-          "time": "17:45",
+          "time": "19:45",
           "text": "Watch the start.",
           "link": null
         },
         {
-          "time": "18:00",
-          "text": "Drive back to base, Les Houches (15 min).",
-          "link": "base"
-        },
-        {
-          "time": "18:30–19:15",
-          "text": "Suha passes Les Houches (km 9.1). Water point only — no assistance allowed.",
-          "link": null
+          "time": "19:55",
+          "text": "Go straight to the Grépon bus stop — do NOT drive back to Les Houches.",
+          "link": "grepon",
+          "warn": "He passes Les Houches ~20:30–21:15, but the LAST published bus to Contamines leaves Grépon 20:30. You cannot do both. Default: skip Les Houches, take the 20:15 bus. ONLY if a driver confirms shuttles are shifted +2h tonight: watch Les Houches, then take the (new) ~22:30 last bus."
         }
       ]
     },
     {
       "id": "fri-cp3",
-      "day": "FRI 28",
-      "title": "CP3 · Les Contamines — runner 22:31 ±20",
+      "day": "FRI 28 → SAT",
+      "title": "CP3 · Les Contamines — runner SAT 00:31 ±20",
       "steps": [
-        {
-          "time": "19:30",
-          "text": "Drive base → Chamonix, park at Parking du Grépon.",
-          "link": "grepon"
-        },
         {
           "time": "20:00",
           "text": "Be AT the Grépon bus stop. Aim for the 20:15 bus.",
           "link": null,
-          "warn": "20:30 is the LAST bus of the day on this line — treat it as gone. Do not cut it close."
+          "warn": "20:30 is the LAST published bus on this line — treat it as gone. Do not cut it close."
         },
         {
           "time": "20:15",
@@ -152,24 +143,19 @@
         },
         {
           "time": "~21:05",
-          "text": "At CP3 Les Contamines. Set up: he eats 30 g here, hand over 440 g carbs for the 9-hour leg to Courmayeur.",
+          "text": "At CP3 Les Contamines — long wait (~3.5 h). Set up: he eats 30 g here, hand over 440 g carbs for the 9-hour leg to Courmayeur.",
           "link": "cp3"
         },
         {
-          "time": "22:31",
-          "text": "SUHA — window 22:11–22:51. Cutoff SAT 00:00.",
+          "time": "00:31",
+          "text": "SUHA — window 00:11–00:51. Cutoff SAT 02:00 (if shifted, unverified).",
           "link": null,
-          "eta": true
+          "eta": true,
+          "warn": "RETURN PINCH: his window overlaps the last verified bus out (00:30 from NDG; the printed 01:00 is unverified). ASK A DRIVER TONIGHT whether shuttles run +2h late. If NOT shifted, decide by 00:15: leave on the last bus without seeing him, or stay and be stranded (no listed service after ~01:00 — taxi only)."
         },
         {
-          "time": "~23:00",
-          "text": "Return bus Contamines/NDG → Chamonix (every 30 min, ride 55 min). Buses ~23:00 / 23:30 / 00:00 / 00:30.",
-          "link": null,
-          "warn": "Plan for the 00:30 bus as the LAST one out. The printed 01:00 is unverified as a departure — ask a driver."
-        },
-        {
-          "time": "~00:00",
-          "text": "Chamonix ~23:55–00:25 → car at Grépon → base ~00:15–00:45. Sleep fast.",
+          "time": "~00:45",
+          "text": "If buses shifted +2h: relaxed — buses to ~02:30. If not: you are on the 00:30/01:00 bus, Chamonix ~01:25–01:55 → car → base ~02:15. Sleep fast.",
           "link": "base"
         }
       ]
@@ -177,32 +163,32 @@
     {
       "id": "sat-cp7",
       "day": "SAT 29",
-      "title": "CP7 · Courmayeur — runner 07:32 ±20",
+      "title": "CP7 · Courmayeur — runner 09:32 ±20",
       "steps": [
         {
-          "time": "05:00",
+          "time": "07:00",
           "text": "Drive base → Chamonix, park (Grépon).",
           "link": "grepon"
         },
         {
-          "time": "05:30",
+          "time": "07:30",
           "text": "Bus Maison Nordique → Courmayeur (45 min, every 30 min on :00/:30).",
           "link": "maisonNordique"
         },
         {
-          "time": "06:15",
-          "text": "At CP7 Courmayeur Sport Center — 1h17 buffer. (06:00 bus → 06:45 also works.)",
+          "time": "08:15",
+          "text": "At CP7 Courmayeur Sport Center — 1h17 buffer. (08:00 bus → 08:45 also works.)",
           "link": "cp7"
         },
         {
-          "time": "07:32",
-          "text": "SUHA — window 07:12–07:52. He eats 80 g here, hand over 400 g carbs. Cutoff SAT 13:15.",
+          "time": "09:32",
+          "text": "SUHA — window 09:12–09:52. He eats 80 g here, hand over 400 g carbs. Cutoff 15:15 (if shifted, unverified).",
           "link": null,
           "eta": true
         },
         {
-          "time": "~08:30",
-          "text": "Return bus Courmayeur → Chamonix (every 30 min) → Chamonix ~09:15 → car → base. REST.",
+          "time": "~10:30",
+          "text": "Return bus Courmayeur → Chamonix (every 30 min) → Chamonix ~11:15 → car → base. REST.",
           "link": "base"
         }
       ]
@@ -210,67 +196,67 @@
     {
       "id": "sat-cp11",
       "day": "SAT 29",
-      "title": "CP11 · Champex-Lac — runner 16:37 ±20 · HARDEST LEG",
+      "title": "CP11 · Champex-Lac — runner 18:37 ±20 · HARDEST LEG",
       "steps": [
         {
-          "time": "12:30",
-          "text": "Drive base → Chamonix, park. (Recommended — earlier than the 13:00 you planned.)",
+          "time": "14:45",
+          "text": "Drive base → Chamonix, park.",
           "link": "grepon"
         },
         {
-          "time": "13:00",
-          "text": "Bus Maison Nordique → Orsières (80 min, every 45 min: 12:15 / 13:00 / 13:45). Swiss pass needed.",
+          "time": "15:15",
+          "text": "Bus Maison Nordique → Orsières (80 min, published grid every 45 min: 14:30 / 15:15 / 16:00). Swiss pass needed.",
           "link": "maisonNordique"
         },
         {
-          "time": "14:20",
-          "text": "Orsières — connect to Champex-Lac bus (~14:30, every 30 min, 25 min ride).",
+          "time": "16:35",
+          "text": "Orsières — connect to Champex-Lac bus (~17:00, every 30 min, 25 min ride).",
           "link": null
         },
         {
-          "time": "14:55",
-          "text": "At CP11 Champex-Lac — 1h42 buffer. (Your 13:45-bus plan lands 15:55 = only 42 min buffer.)",
+          "time": "17:25",
+          "text": "At CP11 Champex-Lac — 1h12 buffer. (Earlier 14:30 bus → arrive 16:25 = 2h12 buffer if you want slack.)",
           "link": "cp11"
         },
         {
-          "time": "16:37",
-          "text": "SUHA — window 16:17–16:57. He eats 80 g here, hand over 260 g carbs. Cutoff SUN 02:30.",
+          "time": "18:37",
+          "text": "SUHA — window 18:17–18:57. He eats 80 g here, hand over 260 g carbs. Cutoff SUN 04:30 (if shifted, unverified).",
           "link": null,
           "eta": true,
-          "warn": "Watch live tracking from noon. If he is +N min at Courmayeur/Grand Col Ferret, leave N min later — never shrink the buffer below 1 h."
+          "warn": "Watch live tracking from ~14:00. If he is +N min at Courmayeur/Grand Col Ferret, leave N min later — never shrink the buffer below 1 h."
         }
       ]
     },
     {
       "id": "sat-cp13",
-      "day": "SAT 29",
-      "title": "CP11 → CP13 · Vallorcine — runner 22:35 ±20 · pick ONE",
+      "day": "SAT 29 → SUN",
+      "title": "CP11 → CP13 · Vallorcine — runner SUN 00:35 ±20 · pick ONE",
       "planA": {
         "label": "Plan A — via home (tight: ~1h20 at base)",
         "steps": [
           {
-            "time": "~17:15",
+            "time": "~19:15",
             "text": "Champex → Orsières bus (25 min, every 30).",
             "link": null
           },
           {
-            "time": "~17:45",
+            "time": "~19:45",
             "text": "Orsières → Chamonix bus (80 min, every 45).",
             "link": null
           },
           {
-            "time": "~19:10",
+            "time": "~21:10",
             "text": "Chamonix → car → base. Eat, repack.",
             "link": "base"
           },
           {
-            "time": "20:45",
+            "time": "22:45",
             "text": "Drive back to Chamonix, park.",
             "link": "grepon"
           },
           {
-            "time": "21:00",
-            "text": "Bus Maison Nordique → Vallorcine (30 min, every 30). Arrive 21:30.",
+            "time": "23:00",
+            "text": "Bus Maison Nordique → Vallorcine (30 min, every 30). Arrive 23:30.",
             "link": "maisonNordique"
           }
         ]
@@ -279,26 +265,26 @@
         "label": "Plan B — direct, skip Chamonix (relaxed; dinner in Vallorcine; car stays in Chamonix)",
         "steps": [
           {
-            "time": "~17:15",
+            "time": "~19:15",
             "text": "Champex → Orsières bus (25 min).",
             "link": null
           },
           {
-            "time": "~17:45",
+            "time": "~19:45",
             "text": "Orsières → Trient bus (45 min, every 30).",
             "link": null
           },
           {
-            "time": "~18:45",
-            "text": "Trient → Vallorcine bus (15 min, every 30). Arrive ~19:00.",
+            "time": "~20:45",
+            "text": "Trient → Vallorcine bus (15 min, every 30). Arrive ~21:00.",
             "link": "cp13"
           }
         ]
       },
       "steps": [
         {
-          "time": "22:35",
-          "text": "SUHA at CP13 Vallorcine — window 22:15–22:55. He eats 30 g, hand over 190 g carbs. Last leg: 4h to the finish. Cutoff SUN 11:15.",
+          "time": "00:35",
+          "text": "SUHA at CP13 Vallorcine — window 00:15–00:55. He eats 30 g, hand over 190 g carbs. Last leg: 4h to the finish. Cutoff SUN 13:15 (if shifted, unverified).",
           "link": "cp13",
           "eta": true
         }
@@ -307,21 +293,21 @@
     {
       "id": "sun-finish",
       "day": "SUN 30",
-      "title": "Finish · Chamonix — runner ~02:39",
+      "title": "Finish · Chamonix — runner ~04:39",
       "steps": [
         {
-          "time": "~23:15",
-          "text": "Bus Vallorcine → Chamonix (30 min, every 30, runs until 12:30 Sun). Arrive ~23:45.",
+          "time": "~01:15",
+          "text": "Bus Vallorcine → Chamonix (30 min, every 30, runs until 12:30 Sun). Arrive ~01:45.",
           "link": null
         },
         {
-          "time": "00:00–02:30",
+          "time": "02:00–04:15",
           "text": "Wait / nap in the car (Grépon).",
           "link": null
         },
         {
-          "time": "02:39",
-          "text": "SUHA FINISHES — Chamonix centre. Be at the finish line by 02:15.",
+          "time": "04:39",
+          "text": "SUHA FINISHES — Chamonix centre. Be at the finish line by 04:15.",
           "link": "finish",
           "eta": true
         },
@@ -377,8 +363,8 @@
   ],
   "rules": [
     "All shuttles need the pre-booked follower pass (France/Italy/Switzerland zones). Passes are bought.",
+    "Bus times are the PUBLISHED clock times — with the 2 h delayed start, ASK at the first stop whether shuttles run +2h late, and re-time every leg if so.",
     "Roads/parking CLOSED to private cars at Les Contamines, Courmayeur, Champex, Trient, Vallorcine — the bus is the only way in.",
-    "No UTMB shuttle ever runs Chamonix → Les Houches. The car in Chamonix is the only night ride home.",
-    "Phones: offline maps of the valley downloaded; power banks charged; this PDF saved to phone."
+    "No UTMB shuttle ever runs Chamonix → Les Houches. The car in Chamonix is the only night ride home."
   ]
 }
