@@ -1,56 +1,49 @@
-# RESUME — where we stopped
+# RESUME — state as of 2026-08-28 ~12:50 (race day, start 17:45)
 
-Paused 2026-08-27 ~11:30 (internet disconnect). Race: **Fri 28 Aug 17:45**.
+## Shipped
 
-## State
+- **`~/Downloads/UTMB-2026-Crew-Sheet-Les-Houches.pdf`** — 2-page A4 day-plan
+  infographic (also `UTMB-2026-Day-Plan.pdf` + per-page PNGs). Verified: 42 clickable
+  link annotations (Google Maps dir links + bib-1056 tracker), ETAs 22:31/07:32/16:37/22:35
+  ±20, carb hand-overs, SUN qualifiers on Sunday service-ends, 00:30-vs-01:00 hedge.
+  Source: `transport/day-plan.html` + `build-dayplan.sh`, data `transport/day-plan-data.json`.
+- **Site v2 committed + pushed** (`f446910`): live shared checklist
+  (`docs/api/checklist.php`, token `crewsync-17fa94ab349f`, flock + atomic write,
+  version/409 contract) + `docs/js/sync.js` (15 s poll, 2 s debounced push, item-level
+  merge, never drops items, offline banner) + transport view rewritten to the 4 crew CPs
+  + Day Plan view from `docs/day-plan.json` + shared bib field re-aiming the tracker
+  button. sw CACHE_VERSION v4. All adversarially verified: offline ✓ two-client sync ✓
+  409 merge ✓ (7 agents, 2 fix rounds).
 
-Ultracode workflow ran phases 1–5. Phase 6 (adversarial verify) was mid-run and died
-with the connection. All phase 1–5 output is committed.
+## Deployed
 
-- `transport/dist/utmb-crew-sheet-EN.pdf` — 2pp A4 landscape. **Usable as-is.** If nothing
-  else happens, AirDrop this to the crew; it solves the transport problem on its own.
-- `docs/` — PWA, loads with zero console errors, SW precache validated 24/24.
-  NOT deployed. NOT fully verified.
+- **https://www.ozgebocegi.com/crew-suha-f792a9/** — currently serving site **v1**
+  (pre-sync version, deployed morning). v2 deploy is STAGED, blocked on SSH auth.
 
-## Resume the workflow
+## Deploy v2 (the only remaining step)
+
+Unlock 1Password (Touch ID), then in the `ozgebocegi` tmux session:
 
 ```
-Workflow({
-  scriptPath: "/Users/bakman/.claude/projects/-Users-bakman-LocalRepos-Personal-utmb-crew/2e1d840d-854b-4ed5-b47c-be8e15567125/workflows/scripts/utmb-crew-kit-wf_7c23157d-dd9.js",
-  resumeFromRunId: "wf_7c23157d-dd9"
-})
+ssh ozgebocegi.com
+cd ~/utmb-src && git pull && rsync -a docs/ ~/public_html/crew-suha-f792a9/
 ```
-Completed agents return cached results; only phase 6 re-runs. Check
-`<transcriptDir>/journal.jsonl` before assuming a cached result was non-empty.
 
-## Two known defects — fix before deploy
+Then verify live: GET https://www.ozgebocegi.com/crew-suha-f792a9/api/checklist.php
+(expect `{"version":0,...}`), POST round-trip, and sw.js shows v4.
 
-1. **Header reads `174 km`, should be `176.8`.** Source: `docs/course.json` `total_km`.
-2. **Horizontal overflow at 390px** clips the map and puts the zoom controls off-screen.
-   Pre-existing in the original file, NOT a split regression. Cause: `min-width:auto`.
-   ```css
-   .layout           { grid-template-columns: minmax(0, 1fr); }
-   .header-top > div { min-width: 0; }
-   .panel            { min-width: 0; }
-   ```
+Known LOWs (accepted): >256 KB payload fails silently (impossible with 31 items);
+pre-existing 30 px drawer-close button; deletions never propagate (by design — union merge).
 
-## Still to do
+## Facts that must survive
 
-- [ ] Fix the two defects above
-- [ ] Confirm the service worker registers over HTTP (a `file://` registration failure was
-      seen in an agent log — expected there, but unconfirmed over http)
-- [ ] Verify share round-trip end to end (84K of hand-rolled compression in `docs/js/share.js`)
-- [ ] Strip the street address from `docs/` (keep it on the PDF — user confirmed)
-- [ ] Add UTMB Live tracking panel + bib-number field (user has no splits; will track online)
-- [ ] Deploy: GitHub Pages, `main`/`docs`, **unguessable repo name** under `mbakman`.
-      Caveat: free accounts need a PUBLIC repo, which is listed on the profile and so
-      discoverable. Try private repo first; if GitHub rejects it, say so rather than
-      silently shipping something less private than asked for.
-
-## Decisions locked
-
-- Crew base Les Houches, 100 Rte de la Gare — address stays on the PDF, out of `docs/`.
-- Checklist items stay Turkish verbatim; UI chrome English.
-- Tick state per-device; checklist CONTENT is what gets shared.
-- Sharing via URL fragment (`#s=`), never sent to the server. No backend.
-- Use 176.8 km.
+- Crew base: 100 Rte de la Gare, Les Houches. Car parks at Grépon, Chamonix for every leg.
+- The 01:00 NDG closing figure is UNVERIFIED as a departure — plan on the 00:30 bus.
+- 20:30 Grépon→Contamines is the LAST bus Friday; crew aims for 20:15.
+- No UTMB shuttle ever runs Chamonix→Les Houches.
+- Bib 1056; tracker https://live.utmb.world/utmb/2026/runners/1056.
+- Server: cPanel, dozgeboc@s1196, PHP 8.2.31; repo clone at ~/utmb-src on the server;
+  deploy = git pull + server-local rsync. ALL server ops via the ozgebocegi tmux session
+  (user mandate); direct ssh only as emergency fallback.
+- GitHub Pages (mbakman.github.io/utmb-crew-2a04c117ef727f61) still serves the OLD site —
+  disable Pages once v2 is verified live, so two checklist versions don't coexist.
