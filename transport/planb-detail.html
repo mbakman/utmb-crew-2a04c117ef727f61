@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UTMB 2026 — Plan B Detail</title>
+<style>
+/* ============================================================
+   UTMB 2026 — PLAN B DETAIL
+   EXACTLY ONE page, A4 PORTRAIT. Self-contained: no external
+   assets, no webfonts, no network, no JavaScript.
+   Every leg / time / place / URL is copied verbatim from
+   transport/planb-detail-data.json. Nothing here is recomputed
+   — including the five altitudes, which are read straight out
+   of route.segments[].leg / .detail and plotted, not derived.
+   Design language matches transport/night-plan.html:
+     Switzerland amber #f5b52e · France teal #2dd4bf ·
+     mint #5eead4 · sky #38bdf8 on the same #0d1230 navy.
+   ============================================================ */
+
+@page { size: A4 portrait; margin: 0; }
+
+:root{
+  --bg:#0d1230;
+  --card:#151b3d;
+  --card2:#1a2149;
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(255,255,255,.17);
+  --ink:#f4f6ff;
+  --ink70:rgba(244,246,255,.72);
+  --ink55:rgba(244,246,255,.58);
+
+  --fr:#2dd4bf;    /* France      — CP13 / Vallorcine */
+  --ch:#f5b52e;    /* Switzerland — the road strip    */
+  --sky:#38bdf8;   /* variant B1                      */
+  --mint:#5eead4;  /* variant B2 + the cheer band     */
+  --dark:#06231f;  /* ink on mint + teal              */
+  --warn:#fb923c;
+  --warnbg:rgba(251,146,60,.13);
+  --warnink:#ffd7b0;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html{ background:#05081a; }
+
+body{
+  font-family:-apple-system,"Avenir Next","Helvetica Neue",sans-serif;
+  color:var(--ink);
+  font-size:11.5px;
+  line-height:1.3;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
+}
+
+/* The single sheet. overflow:hidden is the hard guarantee that nothing
+   spills onto a phantom second page. */
+.page{
+  width:210mm;
+  height:297mm;
+  background:
+    radial-gradient(112% 50% at 86% -8%, rgba(245,181,46,.12) 0%, rgba(245,181,46,0) 62%),
+    radial-gradient(96% 46% at 6% 106%, rgba(45,212,191,.11) 0%, rgba(45,212,191,0) 62%),
+    var(--bg);
+  padding:7mm 6.5mm 5.5mm;
+  display:flex;
+  flex-direction:column;
+  gap:3.3mm;
+  position:relative;
+  overflow:hidden;
+}
+
+@media screen{
+  body{ display:flex; flex-direction:column; align-items:center; padding:6mm 0; }
+  .page{ box-shadow:0 10px 40px rgba(0,0,0,.6); }
+}
+
+.num{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+b,strong{ font-weight:800; }
+
+/* ---------------------------------------------------------- header ---- */
+.mast{
+  flex:0 0 auto;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:5mm;
+  padding-bottom:2.6mm;
+  border-bottom:1.5px solid var(--line2);
+}
+/* min-width:0 lets the title block absorb the squeeze instead of shoving the
+   live pill past the 6.5 mm right margin, where .page overflow:hidden would
+   silently guillotine it. */
+.mast__l{ min-width:0; flex:1 1 auto; }
+.mast__kick{
+  font-size:10.8px; letter-spacing:.24em; font-weight:800;
+  text-transform:uppercase; color:var(--ch); margin-bottom:1.4mm;
+}
+.mast__title{ font-size:26px; line-height:.98; font-weight:800; letter-spacing:-.018em; }
+.mast__title em{ font-style:normal; color:var(--ch); }
+.mast__sub{ font-size:11.8px; color:var(--ink70); margin-top:1.5mm; font-weight:600; }
+
+/* live tracking cta — real link, opens the runner page */
+.live{
+  flex:0 0 auto;
+  display:flex; align-items:center; gap:2.2mm;
+  text-decoration:none; color:var(--dark);
+  background:linear-gradient(96deg,#2dd4bf 0%,#5eead4 58%,#38bdf8 100%);
+  border-radius:13px;
+  padding:2.4mm 3mm;
+  box-shadow:0 2px 0 rgba(255,255,255,.22) inset;
+}
+.live__dot{
+  width:9px; height:9px; border-radius:50%; background:#b91c1c;
+  box-shadow:0 0 0 3.5px rgba(185,28,28,.28); flex:0 0 auto;
+}
+.live__t{ flex:1 1 auto; min-width:0; }
+.live__l{ display:block; font-size:12.5px; font-weight:800; line-height:1.1; letter-spacing:.01em; white-space:nowrap; }
+.live__l i{ font-style:normal; letter-spacing:0; }
+.live__u{ display:block; font-size:10.8px; font-weight:700; opacity:.78; margin-top:.6mm; white-space:nowrap; }
+
+/* -------------------------------------------------- section headers --- */
+.sec{ flex:0 0 auto; }
+.sec__h{ display:flex; align-items:center; gap:2.6mm; margin-bottom:1.7mm; }
+.sec__t{ flex:0 0 auto; font-size:13.4px; font-weight:800; letter-spacing:-.008em; line-height:1.16; color:#fff; }
+.sec__h::after{ content:""; order:2; flex:1 1 auto; height:1px; background:var(--line2); }
+.sec__h .nav{ order:3; }
+
+/* navigate pill — label verbatim from links.*.label */
+.nav{
+  flex:0 0 auto;
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:10.9px; font-weight:800; letter-spacing:.01em;
+  text-decoration:none; white-space:nowrap;
+  color:var(--acc,var(--fr));
+  background:color-mix(in srgb, var(--acc,var(--fr)) 14%, transparent);
+  border:1.2px solid color-mix(in srgb, var(--acc,var(--fr)) 48%, transparent);
+  border-radius:999px; padding:1.5px 7px 2px;
+}
+
+/* ====================================================== 2 · the road ===
+   The elevation ribbon IS the map. The SVG carries only the profile line
+   and its fill; every label is HTML on top of it, so the type keeps its
+   px size and never inherits the viewBox scale. preserveAspectRatio="none"
+   lets the profile stretch to whatever width/height the box ends up with;
+   vector-effect="non-scaling-stroke" keeps the stroke from stretching
+   with it.
+   viewBox is 1000 x 150. Plot band: y=40 is 1600 m, y=130 is 850 m, so
+   y(alt) = 130 - (alt - 850) * 0.12. Every node below is that formula
+   applied to the metre figure printed in the JSON — nothing is invented.
+     Champex-Lac      1470 m -> x  60  y  55.6
+     Orsières          900 m -> x 250  y 124.0
+     Col de la Forclaz1526 m -> x 560  y  48.9
+     Trient           1300 m -> x 700  y  76.0
+     Vallorcine       1260 m -> x 940  y  80.8
+   The Châtelard border gets a gate line, not a node: the JSON names it
+   but gives it no altitude, so none is drawn.
+   ======================================================================= */
+.road{ --acc:var(--ch); }
+.road .sec__t{ color:var(--ch); }
+.road .sec__h::after{ background:rgba(245,181,46,.30); }
+
+.ribbon{
+  position:relative;
+  height:28mm;
+  background:rgba(245,181,46,.055);
+  border:1px solid rgba(245,181,46,.26);
+  border-radius:14px;
+  overflow:hidden;
+}
+.ribbon svg{ display:block; width:100%; height:100%; }
+
+/* node dots are HTML, not SVG circles: preserveAspectRatio="none" would
+   squash an SVG circle into an ellipse. */
+.rb__dot{
+  position:absolute; width:7px; height:7px; border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:var(--bg); border:1.6px solid var(--ch);
+}
+.rb__dot--fr{ border-color:var(--fr); }
+
+/* altitude tags sit on an opaque plate so a crossing profile line reads
+   as behind them rather than through them. */
+.rb__tag{
+  position:absolute; transform:translate(-50%,-50%);
+  white-space:nowrap; text-align:center;
+  background:rgba(13,18,48,.90);
+  border:1px solid rgba(245,181,46,.42);
+  border-radius:8px;
+  padding:1px 5px 2px;
+}
+.rb__tag--fr{ border-color:rgba(45,212,191,.46); }
+.rb__n{ display:block; font-size:10.8px; font-weight:800; color:#fff; line-height:1.14; }
+.rb__a{
+  display:block; font-size:10.8px; font-weight:800; line-height:1.14;
+  color:var(--ch); font-variant-numeric:tabular-nums;
+}
+.rb__tag--fr .rb__a{ color:var(--fr); }
+
+/* the Châtelard gate — a border crossing, not an altitude */
+.rb__gate{
+  position:absolute; top:0; bottom:0; width:0;
+  border-left:1.6px dashed rgba(45,212,191,.72);
+}
+.rb__gatelabel{
+  position:absolute; transform:translate(-50%,-50%);
+  white-space:nowrap;
+  font-size:10.8px; font-weight:800; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--fr);
+  background:rgba(13,18,48,.90);
+  border:1px solid rgba(45,212,191,.46);
+  border-radius:999px;
+  padding:1px 6px 2px;
+}
+
+/* the four legs, read left to right like the ribbon above them */
+.legs{ display:grid; grid-template-columns:repeat(4,1fr); gap:2.6mm; margin-top:2mm; }
+.leg{
+  position:relative;
+  display:flex; flex-direction:column;
+  background:linear-gradient(180deg,var(--card2) 0%,var(--card) 100%);
+  border:1px solid var(--line);
+  border-top:3px solid var(--ch);
+  border-radius:13px;
+  padding:1.8mm 1.9mm 1.9mm;
+}
+/* chevrons between the cards make the row read as one journey */
+.leg + .leg::before{
+  content:"›";
+  position:absolute; left:-2.6mm; top:50%;
+  transform:translate(-50%,-50%);
+  font-size:15px; font-weight:800; line-height:1;
+  color:rgba(245,181,46,.55);
+}
+.leg__n{
+  font-size:10.8px; font-weight:800; letter-spacing:.10em;
+  text-transform:uppercase; color:var(--ch); margin-bottom:1.1mm;
+}
+.leg__l{ font-size:11.8px; font-weight:800; line-height:1.2; color:#fff; }
+.leg__d{ font-size:11px; line-height:1.26; color:var(--ink70); margin-top:1.2mm; }
+.leg__d b{ color:#fff; }
+.leg .nav{ align-self:flex-start; margin-top:auto; padding-top:0; }
+.leg__pad{ margin-top:1.6mm; }
+
+/* ==================================================== 3 · B1 vs B2 ===== */
+.vars{ display:grid; grid-template-columns:repeat(2,1fr); gap:2.6mm; align-items:stretch; }
+/* B1 and B2 carry identical chrome — same border weight, same fill, same
+   radius. Only the accent hue differs, so neither reads as the default. */
+.var{
+  display:flex; flex-direction:column;
+  background:linear-gradient(180deg,var(--card2) 0%,var(--card) 100%);
+  border:1.4px solid color-mix(in srgb, var(--acc) 34%, var(--line));
+  border-top:3.5px solid var(--acc);
+  border-radius:14px;
+  padding:2.2mm 2.4mm 2.2mm;
+}
+.var--b1{ --acc:var(--sky); }
+.var--b2{ --acc:var(--mint); }
+.var__h{ display:flex; align-items:center; gap:2mm; }
+.var__id{
+  flex:0 0 auto; width:7.4mm; height:7.4mm; border-radius:9px;
+  background:var(--acc); color:var(--dark);
+  font-size:13px; font-weight:800; line-height:7.4mm; text-align:center;
+  letter-spacing:-.02em;
+}
+.var__l{ flex:1 1 auto; font-size:12.8px; font-weight:800; line-height:1.14; color:#fff; }
+.var__tag{
+  flex:0 0 auto;
+  font-size:10.8px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--acc);
+  background:color-mix(in srgb, var(--acc) 15%, transparent);
+  border:1.2px solid color-mix(in srgb, var(--acc) 46%, transparent);
+  border-radius:999px; padding:1.5px 7px 2px;
+  white-space:nowrap;
+}
+.var__rule{ height:1px; background:var(--line2); margin:2mm 0 1.6mm; }
+
+/* ---------------------------------------------------------- steps ----- */
+.steps{ position:relative; padding-left:11.5px; display:flex; flex-direction:column; }
+.steps::before{
+  content:""; position:absolute; left:3px; top:10px; bottom:10px;
+  border-left:1.5px dotted rgba(255,255,255,.26);
+}
+.step{
+  position:relative;
+  display:grid; grid-template-columns:24mm 1fr;
+  gap:0 2mm; align-items:start;
+  padding:1.05mm 0;
+}
+.step::before{
+  content:""; position:absolute; left:-11.5px; top:8.5px;
+  width:6px; height:6px; border-radius:50%;
+  background:var(--bg); border:1.5px solid var(--acc);
+}
+.t{
+  justify-self:stretch; text-align:center;
+  font-size:11px; font-weight:800; line-height:1.16;
+  font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;
+  color:var(--acc);
+  background:color-mix(in srgb, var(--acc) 15%, transparent);
+  border:1px solid color-mix(in srgb, var(--acc) 42%, transparent);
+  border-radius:7px; padding:1.7px 3px;
+  white-space:nowrap;
+}
+.tx{ font-size:11.3px; line-height:1.27; padding-top:1.6px; }
+.tx b{ color:#fff; }
+.nb{ white-space:nowrap; }
+
+/* the one step this whole variant exists for — CHEER SUHA at CP12 */
+.step--cheer{
+  background:rgba(94,234,212,.15);
+  border:1.2px solid rgba(94,234,212,.52);
+  border-radius:10px;
+  padding:1.4mm 2mm 1.5mm 1.6mm;
+  margin:.7mm 0 .7mm -1.6mm;
+  box-shadow:0 0 0 2.4px rgba(94,234,212,.10);
+}
+.step--cheer::before{ left:-13.1px; background:var(--mint); border-color:var(--mint); }
+.step--cheer .tx{ color:#c9fff4; }
+.step--cheer .tx b{ color:#fff; letter-spacing:.02em; }
+
+/* the closing note on each variant, pinned so both cards align */
+.vnote{
+  margin-top:auto;
+  display:flex; gap:1.7mm; align-items:flex-start;
+  background:color-mix(in srgb, var(--acc) 11%, transparent);
+  border:1px solid color-mix(in srgb, var(--acc) 34%, transparent);
+  border-left:3.5px solid var(--acc);
+  border-radius:9px;
+  padding:1.6mm 2mm;
+  font-size:11.1px; line-height:1.28; color:var(--ink70);
+}
+.vnote__i{ flex:0 0 auto; font-weight:800; font-size:11px; line-height:1.26; color:var(--acc); }
+.vnote b{ color:#fff; }
+.var .steps{ margin-bottom:2.2mm; }
+
+/* ===================================================== 4 · eat table === */
+.eat{ --acc:var(--fr); }
+.eat .sec__t{ color:var(--fr); }
+.eat .sec__h::after{ background:rgba(45,212,191,.30); }
+.tbl{
+  background:rgba(255,255,255,.045);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:1.6mm 2.6mm 1.8mm;
+}
+.tbl table{ width:100%; border-collapse:collapse; }
+.tbl th{
+  text-align:left; font-size:11px; letter-spacing:.085em; font-weight:800;
+  text-transform:uppercase; color:var(--fr);
+  padding:1mm .8mm 1.3mm; border-bottom:1.4px solid rgba(45,212,191,.42);
+  line-height:1.16; vertical-align:bottom;
+}
+.tbl td{
+  padding:1.3mm .8mm; border-bottom:1px solid rgba(255,255,255,.085);
+  font-size:11.4px; line-height:1.25; color:var(--ink70);
+  vertical-align:top;
+}
+.tbl tr:last-child td{ border-bottom:0; }
+.tbl .w{ width:17mm; font-size:10.9px; font-weight:800; letter-spacing:.05em;
+         text-transform:uppercase; color:var(--ch); padding-top:1.9mm; }
+.tbl .n{ width:38mm; font-size:12.2px; font-weight:800; color:#fff; padding-top:1.7mm; }
+.tbl .g{ width:41mm; text-align:right; padding-top:1.7mm; }
+.tbl .d b{ color:#fff; font-weight:800; }
+
+/* the buvette line is the one row nobody has confirmed — it must not read
+   like the five rows that were checked against published hours. */
+.row--unv .w,
+.row--unv .n,
+.row--unv .d{ color:var(--ink55); font-style:italic; }
+.row--unv .n{ font-weight:700; }
+.row--unv .d u{ text-decoration:none; font-style:normal; font-weight:800;
+                letter-spacing:.07em; color:var(--warnink);
+                background:var(--warnbg); border:1px solid rgba(251,146,60,.40);
+                border-radius:5px; padding:0 4px 1px; }
+
+/* ---------------------------------------------------------- footer ---- */
+.foot{
+  flex:0 0 auto; margin-top:auto;
+  display:flex; gap:2mm; align-items:flex-start;
+  border-top:1px solid var(--line2);
+  padding-top:2.6mm;
+  font-size:11.6px; line-height:1.3; color:var(--ink70);
+}
+.foot__i{ flex:0 0 auto; color:var(--ch); font-weight:800; }
+.foot b{ color:#fff; }
+</style>
+</head>
+<body>
+
+<section class="page">
+
+  <!-- ================================================== 1 · header === -->
+  <header class="mast">
+    <div class="mast__l">
+      <div class="mast__kick">Plan B — the play</div>
+      <h1 class="mast__title">UTMB 2026 — <em>Plan B Detail</em></h1>
+      <div class="mast__sub">Champex → Orsières → Trient → Vallorcine · Sat 29 Aug night · Swiss pass + IDs for the border</div>
+    </div>
+    <a class="live" href="https://live.utmb.world/utmb/2026/runners/1056" title="TRACK SUHA — bib 1056">
+      <span class="live__dot"></span>
+      <span class="live__t">
+        <span class="live__l">TRACK SUHA — bib 1056<i> ↗</i></span>
+        <span class="live__u">live.utmb.world/utmb/2026/runners/1056</span>
+      </span>
+    </a>
+  </header>
+
+  <!-- ================================================= 2 · the road === -->
+  <section class="sec road">
+    <div class="sec__h">
+      <h2 class="sec__t">The road — two buses, one col, one border</h2>
+    </div>
+
+    <!-- elevation ribbon: the profile line only; all type is HTML above it -->
+    <div class="ribbon">
+      <svg viewBox="0 0 1000 150" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="rbfill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#f5b52e" stop-opacity=".34"/>
+            <stop offset="100%" stop-color="#f5b52e" stop-opacity=".03"/>
+          </linearGradient>
+        </defs>
+        <path d="M60,55.6 L250,124 L560,48.9 L700,76 L940,80.8 L940,150 L60,150 Z"
+              fill="url(#rbfill)"/>
+        <path d="M60,55.6 L250,124 L560,48.9 L700,76 L940,80.8"
+              fill="none" stroke="#f5b52e" stroke-width="2.2"
+              stroke-linejoin="round" stroke-linecap="round"
+              vector-effect="non-scaling-stroke"/>
+        <path d="M700,76 L940,80.8"
+              fill="none" stroke="#2dd4bf" stroke-width="2.2"
+              stroke-linejoin="round" stroke-linecap="round"
+              vector-effect="non-scaling-stroke"/>
+      </svg>
+
+      <!-- Châtelard: named in the data, no altitude given, so no node -->
+      <span class="rb__gate" style="left:81.2%"></span>
+      <span class="rb__gatelabel" style="left:81.2%; top:22%">Châtelard border</span>
+
+      <span class="rb__dot" style="left:6%;  top:37.1%"></span>
+      <span class="rb__dot" style="left:25%; top:82.7%"></span>
+      <span class="rb__dot" style="left:56%; top:32.6%"></span>
+      <span class="rb__dot" style="left:70%; top:50.7%"></span>
+      <span class="rb__dot rb__dot--fr" style="left:94%; top:53.9%"></span>
+
+      <span class="rb__tag" style="left:6%;  top:17%"><span class="rb__n">Champex-Lac</span><span class="rb__a">1,470 m</span></span>
+      <span class="rb__tag" style="left:25%; top:57%"><span class="rb__n">Orsières</span><span class="rb__a">900 m</span></span>
+      <span class="rb__tag" style="left:56%; top:16%"><span class="rb__n">Col de la Forclaz</span><span class="rb__a">1,526 m</span></span>
+      <span class="rb__tag" style="left:70%; top:79%"><span class="rb__n">Trient</span><span class="rb__a">1,300 m</span></span>
+      <span class="rb__tag rb__tag--fr" style="left:94%; top:79%"><span class="rb__n">Vallorcine</span><span class="rb__a">1,260 m</span></span>
+    </div>
+
+    <!-- the four legs, in the order the crew rides them -->
+    <div class="legs">
+      <article class="leg">
+        <div class="leg__n">Leg 1</div>
+        <div class="leg__l">Champex-Lac <span class="nb">1,470 m</span> → Orsières <span class="nb">900 m</span></div>
+        <div class="leg__d">25 min · every 30 min · downhill out of the lake bowl</div>
+        <a class="nav leg__pad" style="--acc:var(--ch)" href="https://www.google.com/maps/dir/?api=1&amp;destination=Orsi%C3%A8res+gare" title="Orsières gare">📍 Orsières gare</a>
+      </article>
+
+      <article class="leg">
+        <div class="leg__n">Leg 2 — the col</div>
+        <div class="leg__l">Orsières → Trient <span class="nb">1,300 m</span></div>
+        <div class="leg__d">45 min · every 30 min on :15/:45 · runs until <b>SUN 04:00</b> · via Sembrancher and Martigny, then the Col de la Forclaz hairpins (1,526 m)</div>
+        <a class="nav leg__pad" style="--acc:var(--ch)" href="https://www.google.com/maps/dir/?api=1&amp;destination=Trient+Suisse" title="Trient village">📍 Trient village</a>
+      </article>
+
+      <article class="leg">
+        <div class="leg__n">Leg 3 — the border</div>
+        <div class="leg__l">Trient → Vallorcine <span class="nb">1,260 m</span></div>
+        <div class="leg__d">15 min · every 30 min on :00/:30 · runs until <b>SUN 09:00</b> · crosses the Châtelard border back into France — <b>bring IDs</b></div>
+      </article>
+
+      <article class="leg">
+        <div class="leg__n">Leg 4 — on foot</div>
+        <div class="leg__l">Vallorcine gare → CP13</div>
+        <div class="leg__d">3-min walk from the station to the checkpoint zone</div>
+        <a class="nav leg__pad" href="https://www.google.com/maps/dir/?api=1&amp;destination=46.0324%2C6.93196" title="CP13 Vallorcine">📍 CP13 Vallorcine</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- ================================================== 3 · B1 / B2 === -->
+  <section class="sec">
+    <div class="sec__h">
+      <h2 class="sec__t">B1 or B2 — same buses to Trient, decide at Orsières</h2>
+    </div>
+
+    <div class="vars">
+
+      <!-- ---- B1 ---- -->
+      <article class="var var--b1">
+        <div class="var__h">
+          <span class="var__id">B1</span>
+          <span class="var__l">B1 — straight through</span>
+          <span class="var__tag">dinner priority</span>
+        </div>
+        <div class="var__rule"></div>
+        <div class="steps">
+          <div class="step"><span class="t num">~19:15</span><span class="tx">Champex → Orsières bus <span class="nb">(25 min)</span></span></div>
+          <div class="step"><span class="t num">19:45</span><span class="tx">Orsières → Trient bus <span class="nb">(45 min)</span></span></div>
+          <div class="step"><span class="t num">21:00</span><span class="tx">Trient → Vallorcine bus <span class="nb">(15 min)</span> — a same-minute 20:30 meet may work, ask the driver</span></div>
+          <div class="step"><span class="t num">21:15</span><span class="tx">Vallorcine — ~3h20 early. Dinner at Le Café Comptoir.</span></div>
+        </div>
+        <div class="vnote">
+          <span class="vnote__i">★</span>
+          <span>The certain meal. Kitchen window is yours until <b>~22:00–23:00</b>.</span>
+        </div>
+      </article>
+
+      <!-- ---- B2 ---- -->
+      <article class="var var--b2">
+        <div class="var__h">
+          <span class="var__id">B2</span>
+          <span class="var__l">B2 — linger in Trient, see him twice</span>
+          <span class="var__tag">morale priority</span>
+        </div>
+        <div class="var__rule"></div>
+        <div class="steps">
+          <div class="step"><span class="t num">20:30</span><span class="tx">Arrive Trient. Bar food / coffee at Auberge du Mont-Blanc (to ~22:00)</span></div>
+          <div class="step step--cheer"><span class="t num">~22:10–22:40</span><span class="tx"><b>CHEER SUHA</b> through CP12 Trient — <b>no assistance allowed</b>, cheering only</span></div>
+          <div class="step"><span class="t num">23:00 / 23:30</span><span class="tx">Bus → Vallorcine, arrive 23:15/23:45 — still 50+ min before him</span></div>
+          <div class="step"><span class="t num">00:35</span><span class="tx">SUHA at CP13 — window 00:15–00:55, hand over <b>190 g carbs</b></span></div>
+        </div>
+        <div class="vnote">
+          <span class="vnote__i">★</span>
+          <span>Decide at Orsières — <b>both variants ride the same buses until Trient</b>.</span>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================================================ 4 · eat table === -->
+  <section class="sec eat">
+    <div class="sec__h">
+      <h2 class="sec__t">Where to eat — published season hours, CALL to confirm race night</h2>
+    </div>
+
+    <div class="tbl">
+      <table>
+        <thead>
+          <tr>
+            <th class="w">Where</th>
+            <th class="n">Place</th>
+            <th class="d">Detail</th>
+            <th class="g"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="w">Vallorcine</td>
+            <td class="n">Le Café Comptoir</td>
+            <td class="d">69 route de la Forêt, short walk from the gare · <b>Sat 09:00–23:00</b> · the only certain Saturday dinner</td>
+            <td class="g"><a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Le+Caf%C3%A9+Comptoir+Vallorcine" title="Le Café Comptoir">📍 Le Café Comptoir</a></td>
+          </tr>
+          <tr>
+            <td class="w">Vallorcine</td>
+            <td class="n">L'Arrêt Bougnête</td>
+            <td class="d">Savoyard, on the station platform · evening hours unlisted — check on arrival</td>
+            <td class="g"></td>
+          </tr>
+          <tr>
+            <td class="w">Vallorcine</td>
+            <td class="n"><span class="nb">Restaurant-bar</span> du Buet</td>
+            <td class="d">at Le Buet, one stop away · dinner 19:30–21:00, <b>reservation before 18:00 only</b></td>
+            <td class="g"></td>
+          </tr>
+          <tr>
+            <td class="w">Trient</td>
+            <td class="n">Auberge du <span class="nb">Mont-Blanc</span></td>
+            <td class="d">village entrance, bar + restaurant · dinner sittings early; bar plates/coffee to <b>~22:00</b></td>
+            <td class="g"><a class="nav" href="https://www.google.com/maps/dir/?api=1&amp;destination=Auberge+du+Mont-Blanc+Trient" title="Auberge du Mont-Blanc, Trient">📍 Auberge du Mont-Blanc, Trient</a></td>
+          </tr>
+          <tr>
+            <td class="w">Trient</td>
+            <td class="n">Auberge la Grande Ourse</td>
+            <td class="d">dinner sitting 18:45 (missed) · bar to 22:00</td>
+            <td class="g"></td>
+          </tr>
+          <tr class="row--unv">
+            <td class="w">Both</td>
+            <td class="n">UTMB checkpoint buvettes</td>
+            <td class="d">village food stands usually run on race night at Trient and Vallorcine — <u>UNVERIFIED</u>, treat as bonus not plan</td>
+            <td class="g"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ==================================================== 5 · footer = -->
+  <div class="foot">
+    <span class="foot__i">i</span>
+    <span>Buses run until <b>SUN 04:00</b> (Orsières→Trient) and <b>SUN 09:00</b> (Trient→Vallorcine) — a slip never strands you; it only closes kitchens. <b>Swiss pass</b> covers all three bus legs; <b>IDs</b> for the Châtelard border.</span>
+  </div>
+
+</section>
+
+</body>
+</html>

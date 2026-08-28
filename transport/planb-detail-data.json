@@ -1,0 +1,145 @@
+{
+  "meta": {
+    "title": "UTMB 2026 — Plan B Detail",
+    "subtitle": "Champex → Orsières → Trient → Vallorcine · Sat 29 Aug night · Swiss pass + IDs for the border",
+    "liveTracking": {
+      "label": "TRACK SUHA — bib 1056",
+      "url": "https://live.utmb.world/utmb/2026/runners/1056"
+    }
+  },
+  "route": {
+    "title": "The road — two buses, one col, one border",
+    "segments": [
+      {
+        "leg": "Champex-Lac 1,470 m → Orsières 900 m",
+        "detail": "25 min · every 30 min · downhill out of the lake bowl"
+      },
+      {
+        "leg": "Orsières → Trient 1,300 m",
+        "detail": "45 min · every 30 min on :15/:45 · runs until SUN 04:00 · via Sembrancher and Martigny, then the Col de la Forclaz hairpins (1,526 m)"
+      },
+      {
+        "leg": "Trient → Vallorcine 1,260 m",
+        "detail": "15 min · every 30 min on :00/:30 · runs until SUN 09:00 · crosses the Châtelard border back into France — bring IDs"
+      },
+      {
+        "leg": "Vallorcine gare → CP13",
+        "detail": "3-min walk from the station to the checkpoint zone"
+      }
+    ]
+  },
+  "links": {
+    "orsieres": {
+      "label": "Orsières gare",
+      "url": "https://www.google.com/maps/dir/?api=1&destination=Orsi%C3%A8res+gare"
+    },
+    "trient": {
+      "label": "Trient village",
+      "url": "https://www.google.com/maps/dir/?api=1&destination=Trient+Suisse"
+    },
+    "cp13": {
+      "label": "CP13 Vallorcine",
+      "url": "https://www.google.com/maps/dir/?api=1&destination=46.0324%2C6.93196"
+    },
+    "comptoir": {
+      "label": "Le Café Comptoir",
+      "url": "https://www.google.com/maps/dir/?api=1&destination=Le+Caf%C3%A9+Comptoir+Vallorcine"
+    },
+    "aubergemb": {
+      "label": "Auberge du Mont-Blanc, Trient",
+      "url": "https://www.google.com/maps/dir/?api=1&destination=Auberge+du+Mont-Blanc+Trient"
+    }
+  },
+  "variants": [
+    {
+      "id": "B1",
+      "label": "B1 — straight through",
+      "tag": "dinner priority",
+      "steps": [
+        [
+          "~19:15",
+          "Champex → Orsières bus (25 min)"
+        ],
+        [
+          "19:45",
+          "Orsières → Trient bus (45 min)"
+        ],
+        [
+          "21:00",
+          "Trient → Vallorcine bus (15 min) — a same-minute 20:30 meet may work, ask the driver"
+        ],
+        [
+          "21:15",
+          "Vallorcine — ~3h20 early. Dinner at Le Café Comptoir."
+        ]
+      ],
+      "note": "The certain meal. Kitchen window is yours until ~22:00–23:00."
+    },
+    {
+      "id": "B2",
+      "label": "B2 — linger in Trient, see him twice",
+      "tag": "morale priority",
+      "steps": [
+        [
+          "20:30",
+          "Arrive Trient. Bar food / coffee at Auberge du Mont-Blanc (to ~22:00)"
+        ],
+        [
+          "~22:10–22:40",
+          "CHEER SUHA through CP12 Trient — no assistance allowed, cheering only"
+        ],
+        [
+          "23:00 / 23:30",
+          "Bus → Vallorcine, arrive 23:15/23:45 — still 50+ min before him"
+        ],
+        [
+          "00:35",
+          "SUHA at CP13 — window 00:15–00:55, hand over 190 g carbs"
+        ]
+      ],
+      "note": "Decide at Orsières — both variants ride the same buses until Trient."
+    }
+  ],
+  "eat": {
+    "title": "Where to eat — published season hours, CALL to confirm race night",
+    "places": [
+      {
+        "where": "Vallorcine",
+        "name": "Le Café Comptoir",
+        "detail": "69 route de la Forêt, short walk from the gare · Sat 09:00–23:00 · the only certain Saturday dinner",
+        "link": "comptoir"
+      },
+      {
+        "where": "Vallorcine",
+        "name": "L'Arrêt Bougnête",
+        "detail": "Savoyard, on the station platform · evening hours unlisted — check on arrival",
+        "link": null
+      },
+      {
+        "where": "Vallorcine",
+        "name": "Restaurant-bar du Buet",
+        "detail": "at Le Buet, one stop away · dinner 19:30–21:00, reservation before 18:00 only",
+        "link": null
+      },
+      {
+        "where": "Trient",
+        "name": "Auberge du Mont-Blanc",
+        "detail": "village entrance, bar + restaurant · dinner sittings early; bar plates/coffee to ~22:00",
+        "link": "aubergemb"
+      },
+      {
+        "where": "Trient",
+        "name": "Auberge la Grande Ourse",
+        "detail": "dinner sitting 18:45 (missed) · bar to 22:00",
+        "link": null
+      },
+      {
+        "where": "Both",
+        "name": "UTMB checkpoint buvettes",
+        "detail": "village food stands usually run on race night at Trient and Vallorcine — UNVERIFIED, treat as bonus not plan",
+        "link": null
+      }
+    ]
+  },
+  "footer": "Buses run until SUN 04:00 (Orsières→Trient) and SUN 09:00 (Trient→Vallorcine) — a slip never strands you; it only closes kitchens. Swiss pass covers all three bus legs; IDs for the Châtelard border."
+}
