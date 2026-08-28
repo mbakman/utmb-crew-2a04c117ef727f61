@@ -12,13 +12,12 @@
   version/409 contract) + `docs/js/sync.js` (15 s poll, 2 s debounced push, item-level
   merge, never drops items, offline banner) + transport view rewritten to the 4 crew CPs
   + Day Plan view from `docs/day-plan.json` + shared bib field re-aiming the tracker
-  button. sw CACHE_VERSION v4. All adversarially verified: offline ✓ two-client sync ✓
+  button. sw CACHE_VERSION v5. All adversarially verified: offline ✓ two-client sync ✓
   409 merge ✓ (7 agents, 2 fix rounds).
 
 ## Deployed
 
-- **https://www.ozgebocegi.com/crew-suha-f792a9/** — currently serving site **v1**
-  (pre-sync version, deployed morning). v2 deploy is STAGED, blocked on SSH auth.
+- **https://www.ozgebocegi.com/crew-suha-f792a9/** — serving **v3**: live sync + tombstone deletes + cleaned 19:45 day plan. DEPLOYED and live-verified.
 
 ## Deploy v2 (the only remaining step)
 
@@ -30,10 +29,10 @@ cd ~/utmb-src && git pull && rsync -a docs/ ~/public_html/crew-suha-f792a9/
 ```
 
 Then verify live: GET https://www.ozgebocegi.com/crew-suha-f792a9/api/checklist.php
-(expect `{"version":0,...}`), POST round-trip, and sw.js shows v4.
+(expect `{"version":0,...}`), POST round-trip, and sw.js shows v5.
 
 Known LOWs (accepted): >256 KB payload fails silently (impossible with 31 items);
-pre-existing 30 px drawer-close button; deletions never propagate (by design — union merge).
+pre-existing 30 px drawer-close button; deletions propagate via tombstones (sw v5).
 
 ## Facts that must survive
 
